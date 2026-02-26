@@ -4,25 +4,33 @@ from src.schemas.base import (
     BaseIdSchema,
     BaseTimestampSchema,
 )
+
 from src.schemas.users import (
     UserSchema,
     UserCreateSchema,
     UserResponseSchema,
 )
+
 from src.schemas.categories import (
     CategoryBaseSchema,
     CategoryCreateSchema,
     CategoryUpdateSchema,
     CategoryResponseSchema,
 )
+
 from src.schemas.locations import (
     LocationBaseSchema,
     LocationCreateSchema,
     LocationUpdateSchema,
     LocationResponseSchema,
 )
-
-_all__ = [
+from src.schemas.posts import (
+    PostBaseSchema,
+    PostCreateSchema,
+    PostUpdateSchema,
+    PostResponseSchema,
+)
+__all__ = [
     "BasePublishedSchema",
     "BaseCreatedAtSchema",
     "BaseIdSchema",
@@ -41,5 +49,10 @@ _all__ = [
     "LocationCreateSchema",
     "LocationUpdateSchema",
     "LocationResponseSchema",
+    
+    "PostBaseSchema",
+    "PostCreateSchema",
+    "PostUpdateSchema",
+    "PostResponseSchema",
     
 ]

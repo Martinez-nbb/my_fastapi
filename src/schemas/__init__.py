@@ -1,39 +1,39 @@
 from src.schemas.base import (
-    BasePublishedSchema,
-    BaseCreatedAtSchema,
-    BaseIdSchema,
-    BaseTimestampSchema,
-)
+    BasePublishedSchema,   
+    BaseCreatedAtSchema,   
+    BaseIdSchema,          
+    BaseTimestampSchema,  
 from src.schemas.users import (
-    UserSchema,
-    UserCreateSchema,
-    UserResponseSchema,
+    UserSchema,          
+    UserCreateSchema,    
+    UserResponseSchema,   
 )
-
 from src.schemas.categories import (
-    CategoryBaseSchema,
-    CategoryCreateSchema,
-    CategoryUpdateSchema,
-    CategoryResponseSchema,
+    CategoryBaseSchema,   
+    CategoryCreateSchema, 
+    CategoryUpdateSchema,  
+    CategoryResponseSchema, 
 )
 from src.schemas.locations import (
-    LocationBaseSchema,
-    LocationCreateSchema,
-    LocationUpdateSchema,
-    LocationResponseSchema,
+    LocationBaseSchema,  
+    LocationCreateSchema,  
+    LocationUpdateSchema,  
+    LocationResponseSchema, 
 )
 from src.schemas.posts import (
-    PostBaseSchema,
-    PostCreateSchema,
-    PostUpdateSchema,
-    PostResponseSchema,
+    PostBaseSchema,        
+    PostCreateSchema,      
+    PostUpdateSchema,     
+    PostResponseSchema,   
 )
 from src.schemas.comments import (
-    CommentBaseSchema,
-    CommentCreateSchema,
-    CommentUpdateSchema,
-    CommentResponseSchema,
+    CommentBaseSchema,   
+    CommentCreateSchema, 
+    CommentUpdateSchema,  
+    CommentResponseSchema, 
 )
+
+
 __all__ = [
     "BasePublishedSchema",
     "BaseCreatedAtSchema",
@@ -53,10 +53,12 @@ __all__ = [
     "LocationCreateSchema",
     "LocationUpdateSchema",
     "LocationResponseSchema",
+    
     "PostBaseSchema",
     "PostCreateSchema",
     "PostUpdateSchema",
     "PostResponseSchema",
+    
     "CommentBaseSchema",
     "CommentCreateSchema",
     "CommentUpdateSchema",

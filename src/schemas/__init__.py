@@ -15,7 +15,14 @@ from src.schemas.categories import (
     CategoryUpdateSchema,
     CategoryResponseSchema,
 )
-__all__ = [
+from src.schemas.locations import (
+    LocationBaseSchema,
+    LocationCreateSchema,
+    LocationUpdateSchema,
+    LocationResponseSchema,
+)
+
+_all__ = [
     "BasePublishedSchema",
     "BaseCreatedAtSchema",
     "BaseIdSchema",
@@ -29,5 +36,10 @@ __all__ = [
     "CategoryCreateSchema",
     "CategoryUpdateSchema",
     "CategoryResponseSchema",
+    
+    "LocationBaseSchema",
+    "LocationCreateSchema",
+    "LocationUpdateSchema",
+    "LocationResponseSchema",
     
 ]

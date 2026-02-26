@@ -1,16 +1,33 @@
-
 from src.schemas.base import (
-    BasePublishedSchema,    
-    BaseCreatedAtSchema,   
-    BaseIdSchema, 
-    BaseTimestampSchema, 
+    BasePublishedSchema,
+    BaseCreatedAtSchema,
+    BaseIdSchema,
+    BaseTimestampSchema,
 )
-
-# __all__ определяет, что импортируется при "from src.schemas import *"\
+from src.schemas.users import (
+    UserSchema,
+    UserCreateSchema,
+    UserResponseSchema,
+)
+from src.schemas.categories import (
+    CategoryBaseSchema,
+    CategoryCreateSchema,
+    CategoryUpdateSchema,
+    CategoryResponseSchema,
+)
 __all__ = [
-    "BasePublishedSchema",    
-    "BaseCreatedAtSchema",   
-    "BaseIdSchema",         
-    "BaseTimestampSchema",    
+    "BasePublishedSchema",
+    "BaseCreatedAtSchema",
+    "BaseIdSchema",
+    "BaseTimestampSchema",
+    
+    "UserSchema",
+    "UserCreateSchema",
+    "UserResponseSchema",
+    
+    "CategoryBaseSchema",
+    "CategoryCreateSchema",
+    "CategoryUpdateSchema",
+    "CategoryResponseSchema",
     
 ]

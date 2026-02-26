@@ -1,0 +1,20 @@
+[project]
+name = "my-fastapi"
+version = "0.1.0"
+description = "FastAPI блог-платформа, мигрированная с Django"
+readme = "README.md"
+
+requires-python = ">=3.12"  
+
+authors = [
+    { name = "martines", email = "makariy06@mail.ru" }
+]
+
+
+dependencies = [
+    "fastapi[standard]>=0.129.0",
+    
+    "pydantic>=2.12.5",
+    
+    "uvicorn>=0.41.0",
+]

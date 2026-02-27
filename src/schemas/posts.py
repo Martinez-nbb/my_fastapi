@@ -14,25 +14,27 @@ from src.schemas.locations import LocationResponseSchema
 from src.schemas.categories import CategoryResponseSchema
 
 class PostBaseSchema(BaseModel):
-    
     title: str = Field(
-        ..., 
+        ...,
         min_length=1,
         max_length=256,
         description="Заголовок публикации (1-256 символов)",
         title="Заголовок",
-    )text: str = Field(
-        ..., 
+    )
+    text: str = Field(
+        ...,
         min_length=1,
         max_length=100000,
         description="Текст публикации (содержимое статьи)",
         title="Текст публикации",
     )
     pub_date: datetime = Field(
-        ..., 
+        ...,
         description="Дата и время публикации (для отложенных публикаций можно указать будущее время)",
         title="Дата публикации",
     )
+
+
 class PostCreateSchema(PostBaseSchema, BasePublishedSchema):
     
     author_id: int = Field(
@@ -53,6 +55,7 @@ class PostCreateSchema(PostBaseSchema, BasePublishedSchema):
         
         title="ID категории",
     )
+
 
 class PostUpdateSchema(BaseModel):
     title: Optional[str] = Field(
@@ -86,9 +89,6 @@ class PostUpdateSchema(BaseModel):
     )
 
 
-# =============================================================================
-# СХЕМА 4: PostResponseSchema (Схема для ответа API)
-# =============================================================================
 class PostResponseSchema(PostBaseSchema, BaseIdSchema, BaseCreatedAtSchema):
     is_published: bool = Field(
         default=True,

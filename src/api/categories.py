@@ -1,10 +1,12 @@
 from fastapi import APIRouter, status, HTTPException
 
 from typing import List
+from datetime import datetime
+
 from src.schemas.categories import (
-    CategoryCreateSchema,    
-    CategoryUpdateSchema,   
-    CategoryResponseSchema, 
+    CategoryCreateSchema,
+    CategoryUpdateSchema,
+    CategoryResponseSchema,
 )
 # APIRouter группирует все endpoints, связанные с категориями
 # Префикс будет добавлен при подключении роутера в app.py
@@ -56,16 +58,16 @@ async def get_category(category_id: int) -> dict:
     response_description="Созданная категория",
 )
 async def create_category(category: CategoryCreateSchema) -> dict:
-    
     global _categories_counter
     _categories_counter += 1
     new_id = _categories_counter
-    # model_dump() конвертирует Pydantic модель в словарь
-    # Это аналог .dict() в Pydantic v1
     category_data = category.model_dump()
     category_data["id"] = new_id
+    category_data["created_at"] = datetime.now()
     categories_db.append(category_data)
     return category_data
+
+
 @router.put(
     "/update/{category_id}",
     response_model=CategoryResponseSchema,

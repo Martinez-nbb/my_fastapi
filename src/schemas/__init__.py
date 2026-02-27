@@ -1,8 +1,9 @@
 from src.schemas.base import (
-    BasePublishedSchema,   
-    BaseCreatedAtSchema,   
-    BaseIdSchema,          
-    BaseTimestampSchema,  
+    BasePublishedSchema,
+    BaseCreatedAtSchema,
+    BaseIdSchema,
+    BaseTimestampSchema,
+)
 from src.schemas.users import (
     UserSchema,          
     UserCreateSchema,    

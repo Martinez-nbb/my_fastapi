@@ -16,10 +16,14 @@ class LocationBaseSchema(BaseModel):
         description="Название места (город, регион, страна)",
         title="Название места",
     )
+
+
 class LocationCreateSchema(LocationBaseSchema, BasePublishedSchema):
     pass
 
-class LocationUpdateSchema(BaseModel):name: Optional[str] = Field(
+
+class LocationUpdateSchema(BaseModel):
+    name: Optional[str] = Field(
         None,  # default=None — не обязательное
         min_length=1,
         max_length=256,
@@ -30,6 +34,8 @@ class LocationUpdateSchema(BaseModel):name: Optional[str] = Field(
         description="Флаг публикации",
         examples=[True, False],
     )
+
+
 class LocationResponseSchema(LocationBaseSchema, BaseIdSchema, BaseCreatedAtSchema):
     is_published: bool = Field(
         default=True,

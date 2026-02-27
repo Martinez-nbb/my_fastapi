@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status, HTTPException
 
 from typing import List
+from datetime import datetime
 
 from src.schemas.locations import (
     LocationCreateSchema,
@@ -48,18 +49,16 @@ async def get_location(location_id: int) -> dict:
     description="Создаёт новое местоположение с указанными данными",
 )
 async def create_location(location: LocationCreateSchema) -> dict:
-    
     global _locations_counter
-    
     _locations_counter += 1
     new_id = _locations_counter
-    
     location_data = location.model_dump()
     location_data["id"] = new_id
-    
+    location_data["created_at"] = datetime.now()
     locations_db.append(location_data)
-    
     return location_data
+
+
 @router.put(
     "/update/{location_id}",
     response_model=LocationResponseSchema,

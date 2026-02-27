@@ -24,7 +24,6 @@ class UserSchema(BaseModel):
         from_attributes = True
 class UserCreateSchema(BaseModel):
     
-    # Поле username со строгой валидацией
     username: str = Field(
         ...,  # Обязательное поле
         min_length=3,

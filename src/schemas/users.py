@@ -20,12 +20,11 @@ class UserSchema(BaseModel):
         title="Email",
     )
     class Config:
-        # from_attributes=True позволяет создавать схему из ORM-объектов
         from_attributes = True
 class UserCreateSchema(BaseModel):
     
     username: str = Field(
-        ...,  # Обязательное поле
+        ...,  
         min_length=3,
         max_length=150,
         pattern=r'^[\w.@+-]+$',
@@ -40,7 +39,6 @@ class UserCreateSchema(BaseModel):
         title="Пароль",
     )
     
-    # Поле email с автоматической валидацией
     email: EmailStr = Field(
         ...,
         description="Email адрес",
@@ -48,7 +46,6 @@ class UserCreateSchema(BaseModel):
     )
 class UserResponseSchema(BaseModel):
     
-    # Поле id (первичный ключ)
     id: int = Field(
         ..., 
         description="Уникальный идентификатор пользователя",
@@ -74,5 +71,4 @@ class UserResponseSchema(BaseModel):
         title="Статус активности",
     )
     class Config:
-        # from_attributes=True для работы с ORM объектами
         from_attributes = True

@@ -10,11 +10,10 @@ from src.schemas.posts import (
     PostUpdateSchema,
     PostResponseSchema,
 )
+from src.api.locations import locations_db
 
 from src.schemas.users import UserSchema
 router = APIRouter(
-    # prefix="/posts"  # Добавляется при подключении в app.py
-    # tags=["Posts"]   # Добавляется при подключении в app.py
 )
 posts_db: List[dict] = []
 
@@ -24,12 +23,10 @@ TEST_AUTHOR = UserSchema(
     password="secret123",
     email="author@example.com",
 )
+
+
 def _get_post_with_relations(post_data: dict) -> dict:
-    
     post_data["author"] = TEST_AUTHOR
-    # Импортируем хранилище местоположений
-    # Импортируем здесь, чтобы избежать циклического импорта
-    from src.api.locations import locations_db
     
     location_id = post_data.get("location_id")
     
@@ -63,6 +60,8 @@ def _get_post_with_relations(post_data: dict) -> dict:
     post_data.pop("author_id", None)
     
     return post_data
+
+
 @router.get(
     "/list",
     response_model=List[PostResponseSchema],

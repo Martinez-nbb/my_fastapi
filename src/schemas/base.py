@@ -1,8 +1,9 @@
-from pydantic import BaseModel, Field
-
+from typing import Optional
 from datetime import datetime
 
-from typing import Optional
+from pydantic import BaseModel, Field
+
+
 class BasePublishedSchema(BaseModel):
     is_published: bool = Field(
         default=True,
@@ -12,7 +13,7 @@ class BasePublishedSchema(BaseModel):
 
 
 class BaseCreatedAtSchema(BaseModel):
-    created_at: Optional[datetime] = Field(
+    created_at: datetime | None = Field(
         None,
         description="Дата и время создания записи",
         title="Дата создания",

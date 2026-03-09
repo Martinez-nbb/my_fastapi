@@ -12,13 +12,9 @@ from src.schemas.comments import (
 
 from src.schemas.users import UserSchema
 router = APIRouter(
-    # prefix="/comments"  # Добавляется при подключении в app.py
-    # tags=["Comments"]   # Добавляется при подключении в app.py
 )
-# Список для хранения данных о комментариях
 comments_db: List[dict] = []
 
-# Счётчик для генерации уникальных ID комментариев
 _comments_counter = 0
 
 TEST_AUTHOR = UserSchema(
@@ -43,7 +39,6 @@ def _get_comment_with_relations(comment_data: dict) -> dict:
 )
 async def get_comments_list() -> List[dict]:
     
-    # Добавляем вложенные объекты ко всем комментариям
     return [_get_comment_with_relations(c.copy()) for c in comments_db]
 @router.get(
     "/list/by_post/{post_id}",
@@ -137,7 +132,6 @@ async def delete_comment(comment_id: int) -> dict:
     
     for idx, c in enumerate(comments_db):
         if c["id"] == comment_id:
-            # Найден — удаляем
             comments_db.pop(idx)
             return {"message": "Комментарий успешно удален"}
     

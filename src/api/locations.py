@@ -8,10 +8,7 @@ from src.schemas.locations import (
     LocationUpdateSchema,
     LocationResponseSchema,
 )
-router = APIRouter(
-    # prefix="/locations"  # Добавляется при подключении в app.py
-    # tags=["Locations"]   # Добавляется при подключении в app.py
-)
+router = APIRouter()
 locations_db: List[dict] = []
 
 _locations_counter = 0

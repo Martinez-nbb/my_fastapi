@@ -22,8 +22,6 @@ REST API для блога
         
         version="1.0.0",
         
-        # root_path — базовый путь для всех endpoints
-        # Все роуты будут иметь префикс /api/v1
         root_path="/api/v1",
     )
     app.add_middleware(
@@ -41,7 +39,7 @@ REST API для блога
     app.include_router(
         categories_router,
         prefix="/categories",
-        tags=["Categories"],  # Группа в Swagger UI
+        tags=["Categories"], 
     )
     
     app.include_router(

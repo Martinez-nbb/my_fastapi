@@ -8,12 +8,7 @@ from src.schemas.categories import (
     CategoryUpdateSchema,
     CategoryResponseSchema,
 )
-# APIRouter группирует все endpoints, связанные с категориями
-# Префикс будет добавлен при подключении роутера в app.py
-router = APIRouter(
-    # prefix="/categories"  # Префикс добавляется при подключении в app.py
-    # tags=["Categories"]   # Тег добавляется при подключении в app.py
-)
+router = APIRouter()
 
 categories_db: List[dict] = []
 

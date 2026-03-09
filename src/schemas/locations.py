@@ -24,7 +24,7 @@ class LocationCreateSchema(LocationBaseSchema, BasePublishedSchema):
 
 class LocationUpdateSchema(BaseModel):
     name: Optional[str] = Field(
-        None,  # default=None — не обязательное
+        None,  
         min_length=1,
         max_length=256,
         description="Название места",

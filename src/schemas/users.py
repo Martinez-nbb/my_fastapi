@@ -1,74 +1,90 @@
 from pydantic import BaseModel, Field, SecretStr, EmailStr
 
 from typing import Optional
-class UserSchema(BaseModel):
-    
+from datetime import datetime
+
+from src.schemas.base import BaseIdSchema, BaseCreatedAtSchema
+
+class UserBaseSchema(BaseModel):
     username: str = Field(
         min_length=3,
         max_length=150,
         description="Имя пользователя (уникальное, 3-150 символов)",
         title="Имя пользователя",
     )
-    password: SecretStr = Field(
-        min_length=8,
-        description="Пароль пользователя (минимум 8 символов)",
-        title="Пароль",
-    )
     email: Optional[str] = Field(
         None,
         description="Email адрес пользователя",
         title="Email",
     )
-    class Config:
-        from_attributes = True
-class UserCreateSchema(BaseModel):
-    
-    username: str = Field(
-        ...,  
-        min_length=3,
-        max_length=150,
-        pattern=r'^[\w.@+-]+$',
-        description="Имя пользователя (только буквы, цифры и @/+/-/_)",
-        title="Имя пользователя",
+    first_name: str = Field(
+        default='',
+        description="Имя пользователя",
+        title="Имя",
     )
+    last_name: str = Field(
+        default='',
+        description="Фамилия пользователя",
+        title="Фамилия",
+    )
+
+
+class UserCreateSchema(UserBaseSchema):
     password: str = Field(
-        ..., 
+        ...,
         min_length=8,
         description="Пароль (минимум 8 символов)",
         examples=["********"],
         title="Пароль",
     )
-    
-    email: EmailStr = Field(
-        ...,
-        description="Email адрес",
-        title="Email",
-    )
-class UserResponseSchema(BaseModel):
-    
-    id: int = Field(
-        ..., 
-        description="Уникальный идентификатор пользователя",
-        ge=1,
-        title="ID",
-    )
-    username: str = Field(
-        ...,
+
+
+class UserUpdateSchema(BaseModel):
+    username: Optional[str] = Field(
+        None,
         min_length=3,
         max_length=150,
         description="Имя пользователя",
-        title="Имя пользователя",
     )
-    
-    email: str = Field(
-        ...,  
+    email: Optional[str] = Field(
+        None,
         description="Email адрес",
-        title="Email",
     )
+    first_name: Optional[str] = Field(
+        None,
+        description="Имя",
+    )
+    last_name: Optional[str] = Field(
+        None,
+        description="Фамилия",
+    )
+    is_active: Optional[bool] = Field(
+        None,
+        description="Активен ли пользователь",
+    )
+
+
+class UserResponseSchema(UserBaseSchema, BaseIdSchema):
     is_active: bool = Field(
-        default=True, 
+        default=True,
         description="Активен ли пользователь",
         title="Статус активности",
     )
+    is_superuser: bool = Field(
+        default=False,
+        description="Является ли суперпользователем",
+        title="Суперпользователь",
+    )
+    is_staff: bool = Field(
+        default=False,
+        description="Является ли сотрудником",
+        title="Сотрудник",
+    )
+    date_joined: datetime = Field(
+        default=None,
+        description="Дата регистрации",
+        title="Дата регистрации",
+    )
+
     class Config:
         from_attributes = True

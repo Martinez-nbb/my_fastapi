@@ -4,12 +4,12 @@ from datetime import datetime
 from typing import Optional, List
 
 from src.schemas.base import (
-    BasePublishedSchema,   
-    BaseCreatedAtSchema,   
-    BaseIdSchema,       
+    BasePublishedSchema,
+    BaseCreatedAtSchema,
+    BaseIdSchema,
 )
 
-from src.schemas.users import UserSchema
+from src.schemas.users import UserResponseSchema
 from src.schemas.locations import LocationResponseSchema
 from src.schemas.categories import CategoryResponseSchema
 
@@ -36,23 +36,23 @@ class PostBaseSchema(BaseModel):
 
 
 class PostCreateSchema(PostBaseSchema, BasePublishedSchema):
-    
+
     author_id: int = Field(
-        ...,  
+        ...,
         description="ID автора публикации (существующий пользователь)",
         examples=[1, 2, 42],
         title="ID автора",
     )
     location_id: Optional[int] = Field(
-        None,  
+        None,
         description="ID местоположения (опционально)",
         title="ID местоположения",
     )
-    
+
     category_id: Optional[int] = Field(
-        None,  
+        None,
         description="ID категории (опционально)",
-        
+
         title="ID категории",
     )
 
@@ -95,11 +95,11 @@ class PostResponseSchema(PostBaseSchema, BaseIdSchema, BaseCreatedAtSchema):
         description="Опубликовано (True = видно на сайте)",
         examples=[True, False],
     )
-    author: UserSchema = Field(
-        ...,  
-        
+    author: UserResponseSchema = Field(
+        ...,
+
         description="Автор публикации (объект пользователя)",
-        
+
         title="Автор",
     )
     location: Optional[LocationResponseSchema] = Field(
@@ -118,9 +118,9 @@ class PostResponseSchema(PostBaseSchema, BaseIdSchema, BaseCreatedAtSchema):
         examples=[
             "/media/post_images/moscow.jpg",
             "/media/post_images/recipe.png",
-            None, 
+            None,
         ],
-        
+
         title="Изображение",
     )
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, extra='ignore')

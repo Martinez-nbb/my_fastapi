@@ -1,103 +1,77 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status
 
-from typing import List
-from datetime import datetime
-
-from src.schemas.categories import (
-    CategoryCreateSchema,
-    CategoryUpdateSchema,
-    CategoryResponseSchema,
+from src.domain.category.use_cases.get_category import (
+    GetCategoryUseCase,
+    GetCategoriesUseCase,
+    CreateCategoryUseCase,
+    UpdateCategoryUseCase,
+    DeleteCategoryUseCase,
 )
+from src.schemas.categories import CategoryCreateSchema, CategoryResponseSchema
+
 router = APIRouter()
 
-categories_db: List[dict] = []
 
-_categories_counter = 0
 @router.get(
-    "/list",
-    response_model=List[CategoryResponseSchema],
+    '/list',
+    response_model=list[CategoryResponseSchema],
     status_code=status.HTTP_200_OK,
     summary="Получить список всех категорий",
     description="Возвращает список всех категорий, включая неопубликованные",
     response_description="Список категорий",
 )
-async def get_categories_list() -> List[dict]:
-    
-    return categories_db
+async def get_categories_list() -> list[CategoryResponseSchema]:
+    use_case = GetCategoriesUseCase()
+    return await use_case.execute()
+
 
 @router.get(
-    "/get/{category_id}",
+    '/get/{category_id}',
     response_model=CategoryResponseSchema,
     status_code=status.HTTP_200_OK,
     summary="Получить категорию по ID",
     description="Возвращает категорию по уникальному идентификатору",
     response_description="Объект категории",
 )
-async def get_category(category_id: int) -> dict:
-    
-    for category in categories_db:
-        if category["id"] == category_id:
-            return category
-    
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Категория с id={category_id} не найдена",
-    )
+async def get_category(category_id: int) -> CategoryResponseSchema:
+    use_case = GetCategoryUseCase()
+    return await use_case.execute(category_id=category_id)
+
 
 @router.post(
-    "/create",
+    '/create',
     response_model=CategoryResponseSchema,
     status_code=status.HTTP_201_CREATED,
     summary="Создать новую категорию",
     description="Создаёт новую категорию с указанными данными",
     response_description="Созданная категория",
 )
-async def create_category(category: CategoryCreateSchema) -> dict:
-    global _categories_counter
-    _categories_counter += 1
-    new_id = _categories_counter
-    category_data = category.model_dump()
-    category_data["id"] = new_id
-    category_data["created_at"] = datetime.now()
-    categories_db.append(category_data)
-    return category_data
+async def create_category(category: CategoryCreateSchema) -> CategoryResponseSchema:
+    use_case = CreateCategoryUseCase()
+    return await use_case.execute(data=category)
 
 
 @router.put(
-    "/update/{category_id}",
+    '/update/{category_id}',
     response_model=CategoryResponseSchema,
     status_code=status.HTTP_200_OK,
     summary="Обновить категорию",
-    description="Обновляет существующую категорию (partial update)",
+    description="Обновляет существующую категорию",
     response_description="Обновлённая категория",
 )
-async def update_category(category_id: int, category: CategoryUpdateSchema) -> dict:
-    
-    for idx, cat in enumerate(categories_db):
-        if cat["id"] == category_id:
-            
-            update_data = category.model_dump(exclude_unset=True)
-            
-            categories_db[idx].update(update_data)
-            return categories_db[idx]
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Категория с id={category_id} не найдена",
-    )
+async def update_category(category_id: int, category: CategoryCreateSchema) -> CategoryResponseSchema:
+    use_case = UpdateCategoryUseCase()
+    return await use_case.execute(category_id=category_id, data=category)
+
+
 @router.delete(
-    "/delete/{category_id}",
+    '/delete/{category_id}',
     status_code=status.HTTP_200_OK,
     summary="Удалить категорию",
     description="Удаляет категорию по уникальному идентификатору",
     response_description="Сообщение об успешном удалении",
 )
 async def delete_category(category_id: int) -> dict:
-    
-    for idx, cat in enumerate(categories_db):
-        if cat["id"] == category_id:
-            categories_db.pop(idx)
-            return {"message": "Категория успешно удалена"}
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Категория с id={category_id} не найдена",
-    )
+    use_case = DeleteCategoryUseCase()
+    await use_case.execute(category_id=category_id)
+    return {'message': 'Категория успешно удалена'}

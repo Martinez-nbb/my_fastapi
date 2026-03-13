@@ -1,94 +1,72 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status
 
-from typing import List
-from datetime import datetime
-
-from src.schemas.locations import (
-    LocationCreateSchema,
-    LocationUpdateSchema,
-    LocationResponseSchema,
+from src.domain.location.use_cases.get_location import (
+    GetLocationUseCase,
+    GetLocationsUseCase,
+    CreateLocationUseCase,
+    UpdateLocationUseCase,
+    DeleteLocationUseCase,
 )
-router = APIRouter()
-locations_db: List[dict] = []
+from src.schemas.locations import LocationCreateSchema, LocationUpdateSchema, LocationResponseSchema
 
-_locations_counter = 0
+router = APIRouter()
+
+
 @router.get(
-    "/list",
-    response_model=List[LocationResponseSchema],
+    '/list',
+    response_model=list[LocationResponseSchema],
     status_code=status.HTTP_200_OK,
     summary="Получить список всех местоположений",
     description="Возвращает список всех местоположений",
 )
-async def get_locations_list() -> List[dict]:
-    
-    return locations_db
+async def get_locations_list() -> list[LocationResponseSchema]:
+    use_case = GetLocationsUseCase()
+    return await use_case.execute()
+
+
 @router.get(
-    "/get/{location_id}",
+    '/get/{location_id}',
     response_model=LocationResponseSchema,
     status_code=status.HTTP_200_OK,
     summary="Получить местоположение по ID",
     description="Возвращает местоположение по уникальному идентификатору",
 )
-async def get_location(location_id: int) -> dict:
-    for location in locations_db:
-        if location["id"] == location_id:
-            return location
-    
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Местоположение с id={location_id} не найдено",
-    )
+async def get_location(location_id: int) -> LocationResponseSchema:
+    use_case = GetLocationUseCase()
+    return await use_case.execute(location_id=location_id)
+
+
 @router.post(
-    "/create",
+    '/create',
     response_model=LocationResponseSchema,
     status_code=status.HTTP_201_CREATED,
     summary="Создать новое местоположение",
     description="Создаёт новое местоположение с указанными данными",
 )
-async def create_location(location: LocationCreateSchema) -> dict:
-    global _locations_counter
-    _locations_counter += 1
-    new_id = _locations_counter
-    location_data = location.model_dump()
-    location_data["id"] = new_id
-    location_data["created_at"] = datetime.now()
-    locations_db.append(location_data)
-    return location_data
+async def create_location(location: LocationCreateSchema) -> LocationResponseSchema:
+    use_case = CreateLocationUseCase()
+    return await use_case.execute(data=location)
 
 
 @router.put(
-    "/update/{location_id}",
+    '/update/{location_id}',
     response_model=LocationResponseSchema,
     status_code=status.HTTP_200_OK,
     summary="Обновить местоположение",
-    description="Обновляет существующее местоположение (partial update)",
+    description="Обновляет существующее местоположение",
 )
-async def update_location(location_id: int, location: LocationUpdateSchema) -> dict:
-    for idx, loc in enumerate(locations_db):
-        if loc["id"] == location_id:
-            update_data = location.model_dump(exclude_unset=True)
-            
-            locations_db[idx].update(update_data)
-            
-            return locations_db[idx]
-    
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Местоположение с id={location_id} не найдено",
-    )
+async def update_location(location_id: int, location: LocationUpdateSchema) -> LocationResponseSchema:
+    use_case = UpdateLocationUseCase()
+    return await use_case.execute(location_id=location_id, data=location)
+
+
 @router.delete(
-    "/delete/{location_id}",
+    '/delete/{location_id}',
     status_code=status.HTTP_200_OK,
     summary="Удалить местоположение",
     description="Удаляет местоположение по уникальному идентификатору",
 )
 async def delete_location(location_id: int) -> dict:
-    for idx, loc in enumerate(locations_db):
-        if loc["id"] == location_id:
-            locations_db.pop(idx)
-            return {"message": "Местоположение успешно удалено"}
-    
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Местоположение с id={location_id} не найдено",
-    )
+    use_case = DeleteLocationUseCase()
+    await use_case.execute(location_id=location_id)
+    return {'message': 'Местоположение успешно удалено'}

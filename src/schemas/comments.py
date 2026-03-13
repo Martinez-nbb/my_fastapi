@@ -5,15 +5,15 @@ from datetime import datetime
 from typing import Optional
 
 from src.schemas.base import (
-    BasePublishedSchema,   
-    BaseCreatedAtSchema,   
-    BaseIdSchema,       
+    BasePublishedSchema,
+    BaseCreatedAtSchema,
+    BaseIdSchema,
 )
-from src.schemas.users import UserSchema
+from src.schemas.users import UserResponseSchema
 
 class CommentBaseSchema(BaseModel):
     text: str = Field(
-        ..., 
+        ...,
         min_length=1,
         max_length=1000,
         description="Текст комментария (1-1000 символов)",
@@ -27,7 +27,7 @@ class CommentCreateSchema(CommentBaseSchema, BasePublishedSchema):
         title="ID публикации",
     )
     author_id: int = Field(
-        ..., 
+        ...,
         description="ID автора комментария",
         title="ID автора",
     )
@@ -49,15 +49,15 @@ class CommentResponseSchema(CommentBaseSchema, BaseIdSchema, BaseCreatedAtSchema
         default=True,
         description="Опубликовано",
     )
-    author: UserSchema = Field(
+    author: UserResponseSchema = Field(
         ...,
         description="Автор комментария",
         title="Автор",
     )
-    
+
     post_id: int = Field(
         ...,
         description="ID публикации, к которой относится комментарий",
         title="ID публикации",
     )
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, extra='ignore')

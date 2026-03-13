@@ -3,14 +3,14 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 
 from src.schemas.base import (
-    BasePublishedSchema,    
-    BaseCreatedAtSchema,    
-    BaseIdSchema,          
+    BasePublishedSchema,
+    BaseCreatedAtSchema,
+    BaseIdSchema,
 )
 class LocationBaseSchema(BaseModel):
-    
+
     name: str = Field(
-        ..., 
+        ...,
         min_length=1,
         max_length=256,
         description="Название места (город, регион, страна)",
@@ -24,7 +24,7 @@ class LocationCreateSchema(LocationBaseSchema, BasePublishedSchema):
 
 class LocationUpdateSchema(BaseModel):
     name: Optional[str] = Field(
-        None,  
+        None,
         min_length=1,
         max_length=256,
         description="Название места",

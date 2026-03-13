@@ -2,6 +2,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, ConfigDict
 
+from datetime import datetime
+
 from src.schemas.base import (
     BasePublishedSchema,
     BaseCreatedAtSchema,
@@ -28,7 +30,6 @@ class CategoryBaseSchema(BaseModel):
         min_length=1,
         max_length=50,
         pattern=r'^[a-zA-Z0-9_-]+$',
-        
        description="Идентификатор страницы для URL; разрешены символы латиницы, цифры, дефис и подчёркивание",
         title="Slug (URL-идентификатор)",
     )
@@ -41,10 +42,10 @@ class CategoryCreateSchema(CategoryBaseSchema, BasePublishedSchema):
 class CategoryUpdateSchema(BaseModel):
     title: Optional[str] = Field(
         None,
-        
+
         min_length=1,
         max_length=256,
-        
+
         description="Заголовок категории",
     )
     description: Optional[str] = Field(

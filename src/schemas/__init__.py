@@ -5,9 +5,10 @@ from src.schemas.base import (
     BaseTimestampSchema,
 )
 from src.schemas.users import (
-    UserSchema,          
-    UserCreateSchema,    
-    UserResponseSchema,   
+    UserBaseSchema,
+    UserCreateSchema,
+    UserUpdateSchema,
+    UserResponseSchema,
 )
 from src.schemas.categories import (
     CategoryBaseSchema,   
@@ -40,11 +41,12 @@ __all__ = [
     "BaseCreatedAtSchema",
     "BaseIdSchema",
     "BaseTimestampSchema",
-    
-    "UserSchema",
+
+    "UserBaseSchema",
     "UserCreateSchema",
+    "UserUpdateSchema",
     "UserResponseSchema",
-    
+
     "CategoryBaseSchema",
     "CategoryCreateSchema",
     "CategoryUpdateSchema",

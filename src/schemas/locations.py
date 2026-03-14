@@ -1,6 +1,10 @@
 from pydantic import BaseModel, Field, ConfigDict
 
-from src.schemas.base import BaseCreatedAtSchema, BaseIdSchema, BasePublishedSchema
+from src.schemas.base import (
+    BaseCreatedAtSchema,
+    BaseIdSchema,
+    BasePublishedSchema,
+)
 
 
 class LocationBaseSchema(BaseModel):
@@ -31,7 +35,11 @@ class LocationUpdateSchema(BaseModel):
     )
 
 
-class LocationResponseSchema(LocationBaseSchema, BaseIdSchema, BaseCreatedAtSchema):
+class LocationResponseSchema(
+    LocationBaseSchema,
+    BaseIdSchema,
+    BaseCreatedAtSchema,
+):
     is_published: bool = Field(
         default=True,
         description='Опубликовано',

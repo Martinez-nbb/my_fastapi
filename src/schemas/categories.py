@@ -1,6 +1,10 @@
 from pydantic import BaseModel, Field, ConfigDict
 
-from src.schemas.base import BaseCreatedAtSchema, BaseIdSchema, BasePublishedSchema
+from src.schemas.base import (
+    BaseCreatedAtSchema,
+    BaseIdSchema,
+    BasePublishedSchema,
+)
 
 
 class CategoryBaseSchema(BaseModel):
@@ -58,7 +62,11 @@ class CategoryUpdateSchema(BaseModel):
     )
 
 
-class CategoryResponseSchema(CategoryBaseSchema, BaseIdSchema, BaseCreatedAtSchema):
+class CategoryResponseSchema(
+    CategoryBaseSchema,
+    BaseIdSchema,
+    BaseCreatedAtSchema,
+):
     is_published: bool = Field(
         default=True,
         description='Опубликовано',

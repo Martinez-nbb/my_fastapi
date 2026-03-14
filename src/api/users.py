@@ -7,7 +7,11 @@ from src.domain.user.use_cases.get_user import (
     GetUsersUseCase,
     UpdateUserUseCase,
 )
-from src.schemas.users import UserCreateSchema, UserUpdateSchema, UserResponseSchema
+from src.schemas.users import (
+    UserCreateSchema,
+    UserUpdateSchema,
+    UserResponseSchema,
+)
 
 user_router = APIRouter()
 
@@ -31,9 +35,15 @@ async def create_user(data: UserCreateSchema) -> UserResponseSchema:
 
 
 @user_router.put('/{user_id}')
-async def update_user(user_id: int, data: UserUpdateSchema) -> UserResponseSchema:
+async def update_user(
+    user_id: int,
+    data: UserUpdateSchema,
+) -> UserResponseSchema:
     use_case = UpdateUserUseCase()
-    return await use_case.execute(user_id=user_id, data=data)
+    return await use_case.execute(
+        user_id=user_id,
+        data=data,
+    )
 
 
 @user_router.delete('/{user_id}')

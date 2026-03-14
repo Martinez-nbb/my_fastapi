@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.infrastructure.sqlite.metadata import Base
+from src.infrastructure.sqlite.database import Base
 
 if TYPE_CHECKING:
     from src.infrastructure.sqlite.models.post import Post

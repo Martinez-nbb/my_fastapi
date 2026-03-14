@@ -5,7 +5,11 @@ from fastapi import HTTPException
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.category import Category
 from src.infrastructure.sqlite.repositories.category import CategoryRepository
-from src.schemas.categories import CategoryCreateSchema, CategoryUpdateSchema, CategoryResponseSchema
+from src.schemas.categories import (
+    CategoryCreateSchema,
+    CategoryUpdateSchema,
+    CategoryResponseSchema,
+)
 
 
 class GetCategoryUseCase:
@@ -15,11 +19,15 @@ class GetCategoryUseCase:
 
     async def execute(self, category_id: int) -> CategoryResponseSchema:
         with self._database.session() as session:
-            category = self._repo.get(session=session, category_id=category_id)
+            category = self._repo.get(
+                session=session,
+                category_id=category_id,
+            )
 
             if category is None:
                 raise HTTPException(
-                    status_code=404, detail=f'Категория с id={category_id} не найдена'
+                    status_code=404,
+                    detail=f'Категория с id={category_id} не найдена',
                 )
 
             return CategoryResponseSchema.model_validate(obj=category)
@@ -33,10 +41,10 @@ class GetCategoriesUseCase:
     async def execute(self) -> list[CategoryResponseSchema]:
         with self._database.session() as session:
             categories = self._repo.get_all(session=session)
-            result = [
-                CategoryResponseSchema.model_validate(obj=cat) for cat in categories
+            return [
+                CategoryResponseSchema.model_validate(obj=cat)
+                for cat in categories
             ]
-            return result
 
 
 class CreateCategoryUseCase:
@@ -44,7 +52,10 @@ class CreateCategoryUseCase:
         self._database = database
         self._repo = CategoryRepository()
 
-    async def execute(self, data: CategoryCreateSchema) -> CategoryResponseSchema:
+    async def execute(
+        self,
+        data: CategoryCreateSchema,
+    ) -> CategoryResponseSchema:
         with self._database.session() as session:
             category = Category(
                 title=data.title,
@@ -64,17 +75,27 @@ class UpdateCategoryUseCase:
         self._repo = CategoryRepository()
 
     async def execute(
-        self, category_id: int, data: CategoryUpdateSchema
+        self,
+        category_id: int,
+        data: CategoryUpdateSchema,
     ) -> CategoryResponseSchema:
         with self._database.session() as session:
-            category = self._repo.get(session=session, category_id=category_id)
+            category = self._repo.get(
+                session=session,
+                category_id=category_id,
+            )
 
             if category is None:
                 raise HTTPException(
-                    status_code=404, detail=f'Категория с id={category_id} не найдена'
+                    status_code=404,
+                    detail=f'Категория с id={category_id} не найдена',
                 )
 
-            self._repo.update(session=session, category=category, data=data)
+            self._repo.update(
+                session=session,
+                category=category,
+                data=data,
+            )
 
             return CategoryResponseSchema.model_validate(obj=category)
 
@@ -86,11 +107,15 @@ class DeleteCategoryUseCase:
 
     async def execute(self, category_id: int):
         with self._database.session() as session:
-            category = self._repo.get(session=session, category_id=category_id)
+            category = self._repo.get(
+                session=session,
+                category_id=category_id,
+            )
 
             if category is None:
                 raise HTTPException(
-                    status_code=404, detail=f'Категория с id={category_id} не найдена'
+                    status_code=404,
+                    detail=f'Категория с id={category_id} не найдена',
                 )
 
             self._repo.delete(session=session, category=category)

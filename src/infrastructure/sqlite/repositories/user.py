@@ -14,7 +14,11 @@ class UserRepository:
         query = session.query(self._model).filter_by(id=user_id)
         return query.first()
 
-    def get_by_username(self, session: Session, username: str) -> User | None:
+    def get_by_username(
+        self,
+        session: Session,
+        username: str,
+    ) -> User | None:
         query = session.query(self._model).filter_by(username=username)
         return query.first()
 
@@ -27,7 +31,12 @@ class UserRepository:
         session.refresh(user)
         return user
 
-    def update(self, session: Session, user: User, data: UserUpdateSchema) -> User:
+    def update(
+        self,
+        session: Session,
+        user: User,
+        data: UserUpdateSchema,
+    ) -> User:
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(user, field, value)
         session.commit()

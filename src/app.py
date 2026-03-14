@@ -18,10 +18,30 @@ def create_app() -> FastAPI:
         allow_headers=['*'],
     )
 
-    app.include_router(user_router, prefix='/users', tags=['Users'])
-    app.include_router(categories_router, prefix='/categories', tags=['Categories'])
-    app.include_router(locations_router, prefix='/locations', tags=['Locations'])
-    app.include_router(posts_router, prefix='/posts', tags=['Posts'])
-    app.include_router(comments_router, prefix='/comments', tags=['Comments'])
+    app.include_router(
+        user_router,
+        prefix='/users',
+        tags=['Users'],
+    )
+    app.include_router(
+        categories_router,
+        prefix='/categories',
+        tags=['Categories'],
+    )
+    app.include_router(
+        locations_router,
+        prefix='/locations',
+        tags=['Locations'],
+    )
+    app.include_router(
+        posts_router,
+        prefix='/posts',
+        tags=['Posts'],
+    )
+    app.include_router(
+        comments_router,
+        prefix='/comments',
+        tags=['Comments'],
+    )
 
     return app

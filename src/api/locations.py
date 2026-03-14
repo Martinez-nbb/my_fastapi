@@ -7,7 +7,11 @@ from src.domain.location.use_cases.get_location import (
     GetLocationsUseCase,
     UpdateLocationUseCase,
 )
-from src.schemas.locations import LocationCreateSchema, LocationUpdateSchema, LocationResponseSchema
+from src.schemas.locations import (
+    LocationCreateSchema,
+    LocationUpdateSchema,
+    LocationResponseSchema,
+)
 
 router = APIRouter()
 
@@ -25,17 +29,23 @@ async def get_location(location_id: int) -> LocationResponseSchema:
 
 
 @router.post('/create')
-async def create_location(location: LocationCreateSchema) -> LocationResponseSchema:
+async def create_location(
+    location: LocationCreateSchema,
+) -> LocationResponseSchema:
     use_case = CreateLocationUseCase()
     return await use_case.execute(data=location)
 
 
 @router.put('/update/{location_id}')
 async def update_location(
-    location_id: int, location: LocationUpdateSchema
+    location_id: int,
+    location: LocationUpdateSchema,
 ) -> LocationResponseSchema:
     use_case = UpdateLocationUseCase()
-    return await use_case.execute(location_id=location_id, data=location)
+    return await use_case.execute(
+        location_id=location_id,
+        data=location,
+    )
 
 
 @router.delete('/delete/{location_id}')

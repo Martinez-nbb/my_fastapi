@@ -7,7 +7,11 @@ from src.domain.category.use_cases.get_category import (
     GetCategoriesUseCase,
     UpdateCategoryUseCase,
 )
-from src.schemas.categories import CategoryCreateSchema, CategoryUpdateSchema, CategoryResponseSchema
+from src.schemas.categories import (
+    CategoryCreateSchema,
+    CategoryUpdateSchema,
+    CategoryResponseSchema,
+)
 
 router = APIRouter()
 
@@ -25,17 +29,23 @@ async def get_category(category_id: int) -> CategoryResponseSchema:
 
 
 @router.post('/create')
-async def create_category(category: CategoryCreateSchema) -> CategoryResponseSchema:
+async def create_category(
+    category: CategoryCreateSchema,
+) -> CategoryResponseSchema:
     use_case = CreateCategoryUseCase()
     return await use_case.execute(data=category)
 
 
 @router.put('/update/{category_id}')
 async def update_category(
-    category_id: int, category: CategoryUpdateSchema
+    category_id: int,
+    category: CategoryUpdateSchema,
 ) -> CategoryResponseSchema:
     use_case = UpdateCategoryUseCase()
-    return await use_case.execute(category_id=category_id, data=category)
+    return await use_case.execute(
+        category_id=category_id,
+        data=category,
+    )
 
 
 @router.delete('/delete/{category_id}')

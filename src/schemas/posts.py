@@ -1,7 +1,12 @@
-from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
-from src.schemas.base import BaseCreatedAtSchema, BaseIdSchema, BasePublishedSchema
+from pydantic import BaseModel, Field, ConfigDict
+
+from src.schemas.base import (
+    BaseCreatedAtSchema,
+    BaseIdSchema,
+    BasePublishedSchema,
+)
 from src.schemas.categories import CategoryResponseSchema
 from src.schemas.locations import LocationResponseSchema
 from src.schemas.users import UserResponseSchema
@@ -80,7 +85,11 @@ class PostUpdateSchema(BaseModel):
     )
 
 
-class PostResponseSchema(PostBaseSchema, BaseIdSchema, BaseCreatedAtSchema):
+class PostResponseSchema(
+    PostBaseSchema,
+    BaseIdSchema,
+    BaseCreatedAtSchema,
+):
     is_published: bool = Field(
         default=True,
         description='Опубликовано (True = видно на сайте)',

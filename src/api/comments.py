@@ -8,7 +8,11 @@ from src.domain.comment.use_cases.get_comment import (
     GetCommentsUseCase,
     UpdateCommentUseCase,
 )
-from src.schemas.comments import CommentCreateSchema, CommentUpdateSchema, CommentResponseSchema
+from src.schemas.comments import (
+    CommentCreateSchema,
+    CommentUpdateSchema,
+    CommentResponseSchema,
+)
 
 router = APIRouter()
 
@@ -20,7 +24,9 @@ async def get_comments_list() -> list[CommentResponseSchema]:
 
 
 @router.get('/list/by_post/{post_id}')
-async def get_comments_by_post(post_id: int) -> list[CommentResponseSchema]:
+async def get_comments_by_post(
+    post_id: int,
+) -> list[CommentResponseSchema]:
     use_case = GetCommentsByPostUseCase()
     return await use_case.execute(post_id=post_id)
 
@@ -32,17 +38,23 @@ async def get_comment(comment_id: int) -> CommentResponseSchema:
 
 
 @router.post('/create')
-async def create_comment(comment: CommentCreateSchema) -> CommentResponseSchema:
+async def create_comment(
+    comment: CommentCreateSchema,
+) -> CommentResponseSchema:
     use_case = CreateCommentUseCase()
     return await use_case.execute(data=comment)
 
 
 @router.put('/update/{comment_id}')
 async def update_comment(
-    comment_id: int, comment: CommentUpdateSchema
+    comment_id: int,
+    comment: CommentUpdateSchema,
 ) -> CommentResponseSchema:
     use_case = UpdateCommentUseCase()
-    return await use_case.execute(comment_id=comment_id, data=comment)
+    return await use_case.execute(
+        comment_id=comment_id,
+        data=comment,
+    )
 
 
 @router.delete('/delete/{comment_id}')

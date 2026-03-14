@@ -7,7 +7,11 @@ from src.domain.post.use_cases.get_post import (
     GetPostsUseCase,
     UpdatePostUseCase,
 )
-from src.schemas.posts import PostCreateSchema, PostUpdateSchema, PostResponseSchema
+from src.schemas.posts import (
+    PostCreateSchema,
+    PostUpdateSchema,
+    PostResponseSchema,
+)
 
 router = APIRouter()
 
@@ -31,9 +35,15 @@ async def create_post(post: PostCreateSchema) -> PostResponseSchema:
 
 
 @router.put('/update/{post_id}')
-async def update_post(post_id: int, post: PostUpdateSchema) -> PostResponseSchema:
+async def update_post(
+    post_id: int,
+    post: PostUpdateSchema,
+) -> PostResponseSchema:
     use_case = UpdatePostUseCase()
-    return await use_case.execute(post_id=post_id, data=post)
+    return await use_case.execute(
+        post_id=post_id,
+        data=post,
+    )
 
 
 @router.delete('/delete/{post_id}')

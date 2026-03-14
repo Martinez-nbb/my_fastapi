@@ -6,7 +6,11 @@ from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.post import Post
 from src.infrastructure.sqlite.repositories.post import PostRepository
 from src.infrastructure.sqlite.repositories.user import UserRepository
-from src.schemas.posts import PostCreateSchema, PostUpdateSchema, PostResponseSchema
+from src.schemas.posts import (
+    PostCreateSchema,
+    PostUpdateSchema,
+    PostResponseSchema,
+)
 
 
 class GetPostUseCase:
@@ -16,11 +20,15 @@ class GetPostUseCase:
 
     async def execute(self, post_id: int) -> PostResponseSchema:
         with self._database.session() as session:
-            post = self._repo.get(session=session, post_id=post_id)
+            post = self._repo.get(
+                session=session,
+                post_id=post_id,
+            )
 
             if post is None:
                 raise HTTPException(
-                    status_code=404, detail=f'Публикация с id={post_id} не найдена'
+                    status_code=404,
+                    detail=f'Публикация с id={post_id} не найдена',
                 )
 
             return PostResponseSchema.model_validate(obj=post)
@@ -34,7 +42,10 @@ class GetPostsUseCase:
     async def execute(self) -> list[PostResponseSchema]:
         with self._database.session() as session:
             posts = self._repo.get_all(session=session)
-            return [PostResponseSchema.model_validate(obj=post) for post in posts]
+            return [
+                PostResponseSchema.model_validate(obj=post)
+                for post in posts
+            ]
 
 
 class CreatePostUseCase:
@@ -45,10 +56,14 @@ class CreatePostUseCase:
 
     async def execute(self, data: PostCreateSchema) -> PostResponseSchema:
         with self._database.session() as session:
-            author = self._user_repo.get(session=session, user_id=data.author_id)
+            author = self._user_repo.get(
+                session=session,
+                user_id=data.author_id,
+            )
             if author is None:
                 raise HTTPException(
-                    status_code=400, detail=f'Автор с id={data.author_id} не найден'
+                    status_code=400,
+                    detail=f'Автор с id={data.author_id} не найден',
                 )
 
             post = Post(
@@ -71,16 +86,28 @@ class UpdatePostUseCase:
         self._database = database
         self._repo = PostRepository()
 
-    async def execute(self, post_id: int, data: PostUpdateSchema) -> PostResponseSchema:
+    async def execute(
+        self,
+        post_id: int,
+        data: PostUpdateSchema,
+    ) -> PostResponseSchema:
         with self._database.session() as session:
-            post = self._repo.get(session=session, post_id=post_id)
+            post = self._repo.get(
+                session=session,
+                post_id=post_id,
+            )
 
             if post is None:
                 raise HTTPException(
-                    status_code=404, detail=f'Публикация с id={post_id} не найдена'
+                    status_code=404,
+                    detail=f'Публикация с id={post_id} не найдена',
                 )
 
-            self._repo.update(session=session, post=post, data=data)
+            self._repo.update(
+                session=session,
+                post=post,
+                data=data,
+            )
 
             return PostResponseSchema.model_validate(obj=post)
 
@@ -92,11 +119,15 @@ class DeletePostUseCase:
 
     async def execute(self, post_id: int):
         with self._database.session() as session:
-            post = self._repo.get(session=session, post_id=post_id)
+            post = self._repo.get(
+                session=session,
+                post_id=post_id,
+            )
 
             if post is None:
                 raise HTTPException(
-                    status_code=404, detail=f'Публикация с id={post_id} не найдена'
+                    status_code=404,
+                    detail=f'Публикация с id={post_id} не найдена',
                 )
 
             self._repo.delete(session=session, post=post)

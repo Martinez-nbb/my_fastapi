@@ -1,6 +1,10 @@
 from pydantic import BaseModel, Field, ConfigDict
 
-from src.schemas.base import BaseCreatedAtSchema, BaseIdSchema, BasePublishedSchema
+from src.schemas.base import (
+    BaseCreatedAtSchema,
+    BaseIdSchema,
+    BasePublishedSchema,
+)
 from src.schemas.users import UserResponseSchema
 
 
@@ -40,7 +44,11 @@ class CommentUpdateSchema(BaseModel):
     )
 
 
-class CommentResponseSchema(CommentBaseSchema, BaseIdSchema, BaseCreatedAtSchema):
+class CommentResponseSchema(
+    CommentBaseSchema,
+    BaseIdSchema,
+    BaseCreatedAtSchema,
+):
     is_published: bool = Field(
         default=True,
         description='Опубликовано',

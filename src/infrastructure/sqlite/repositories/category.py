@@ -14,6 +14,14 @@ class CategoryRepository:
         query = session.query(self._model).filter_by(id=category_id)
         return query.first()
 
+    def get_by_slug(
+        self,
+        session: Session,
+        slug: str,
+    ) -> Category | None:
+        query = session.query(self._model).filter_by(slug=slug)
+        return query.first()
+
     def get_all(self, session: Session) -> list[Category]:
         return session.query(self._model).all()
 
@@ -24,7 +32,10 @@ class CategoryRepository:
         return category
 
     def update(
-        self, session: Session, category: Category, data: CategoryUpdateSchema
+        self,
+        session: Session,
+        category: Category,
+        data: CategoryUpdateSchema,
     ) -> Category:
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(category, field, value)
@@ -32,6 +43,6 @@ class CategoryRepository:
         session.refresh(category)
         return category
 
-    def delete(self, session: Session, category: Category):
+    def delete(self, session: Session, category: Category) -> None:
         session.delete(category)
         session.commit()

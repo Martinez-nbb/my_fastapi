@@ -60,6 +60,6 @@ class PostRepository:
         session.refresh(post)
         return post
 
-    def delete(self, session: Session, post: Post):
+    def delete(self, session: Session, post: Post) -> None:
         session.delete(post)
         session.commit()

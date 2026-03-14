@@ -57,6 +57,16 @@ class CreateCategoryUseCase:
         data: CategoryCreateSchema,
     ) -> CategoryResponseSchema:
         with self._database.session() as session:
+            existing = self._repo.get_by_slug(
+                session=session,
+                slug=data.slug,
+            )
+            if existing:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f'Категория со slug "{data.slug}" уже существует',
+                )
+
             category = Category(
                 title=data.title,
                 description=data.description,
@@ -105,7 +115,7 @@ class DeleteCategoryUseCase:
         self._database = database
         self._repo = CategoryRepository()
 
-    async def execute(self, category_id: int):
+    async def execute(self, category_id: int) -> None:
         with self._database.session() as session:
             category = self._repo.get(
                 session=session,

@@ -117,7 +117,7 @@ class DeletePostUseCase:
         self._database = database
         self._repo = PostRepository()
 
-    async def execute(self, post_id: int):
+    async def execute(self, post_id: int) -> None:
         with self._database.session() as session:
             post = self._repo.get(
                 session=session,

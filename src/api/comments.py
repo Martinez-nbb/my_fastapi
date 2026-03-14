@@ -40,9 +40,13 @@ async def get_comment(comment_id: int) -> CommentResponseSchema:
 @router.post('/create')
 async def create_comment(
     comment: CommentCreateSchema,
+    author_id: int,
 ) -> CommentResponseSchema:
     use_case = CreateCommentUseCase()
-    return await use_case.execute(data=comment)
+    return await use_case.execute(
+        data=comment,
+        author_id=author_id,
+    )
 
 
 @router.put('/update/{comment_id}')

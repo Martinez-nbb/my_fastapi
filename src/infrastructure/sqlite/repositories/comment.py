@@ -17,10 +17,18 @@ class CommentRepository:
     def get_all(self, session: Session) -> list[Comment]:
         return session.query(self._model).all()
 
-    def get_by_post(self, session: Session, post_id: int) -> list[Comment]:
+    def get_by_post(
+        self,
+        session: Session,
+        post_id: int,
+    ) -> list[Comment]:
         return session.query(self._model).filter_by(post_id=post_id).all()
 
-    def get_by_author(self, session: Session, author_id: int) -> list[Comment]:
+    def get_by_author(
+        self,
+        session: Session,
+        author_id: int,
+    ) -> list[Comment]:
         return session.query(self._model).filter_by(author_id=author_id).all()
 
     def create(self, session: Session, comment: Comment) -> Comment:
@@ -30,7 +38,10 @@ class CommentRepository:
         return comment
 
     def update(
-        self, session: Session, comment: Comment, data: CommentUpdateSchema
+        self,
+        session: Session,
+        comment: Comment,
+        data: CommentUpdateSchema,
     ) -> Comment:
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(comment, field, value)
@@ -38,6 +49,6 @@ class CommentRepository:
         session.refresh(comment)
         return comment
 
-    def delete(self, session: Session, comment: Comment):
+    def delete(self, session: Session, comment: Comment) -> None:
         session.delete(comment)
         session.commit()

@@ -25,13 +25,19 @@ class Post(Base):
     text: Mapped[str] = mapped_column(nullable=False)
     pub_date: Mapped[datetime] = mapped_column(nullable=False)
     author_id: Mapped[int] = mapped_column(
-        ForeignKey('auth_user.id', ondelete='CASCADE'), nullable=False
+        ForeignKey('auth_user.id', ondelete='CASCADE'),
+        index=True,
+        nullable=False,
     )
     location_id: Mapped[int | None] = mapped_column(
-        ForeignKey('blog_location.id', ondelete='SET NULL'), nullable=True
+        ForeignKey('blog_location.id', ondelete='SET NULL'),
+        index=True,
+        nullable=True,
     )
     category_id: Mapped[int | None] = mapped_column(
-        ForeignKey('blog_category.id', ondelete='SET NULL'), nullable=True
+        ForeignKey('blog_category.id', ondelete='SET NULL'),
+        index=True,
+        nullable=True,
     )
     image: Mapped[str] = mapped_column(nullable=False, default='')
 

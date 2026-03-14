@@ -24,7 +24,10 @@ class LocationRepository:
         return location
 
     def update(
-        self, session: Session, location: Location, data: LocationUpdateSchema
+        self,
+        session: Session,
+        location: Location,
+        data: LocationUpdateSchema,
     ) -> Location:
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(location, field, value)
@@ -32,6 +35,6 @@ class LocationRepository:
         session.refresh(location)
         return location
 
-    def delete(self, session: Session, location: Location):
+    def delete(self, session: Session, location: Location) -> None:
         session.delete(location)
         session.commit()

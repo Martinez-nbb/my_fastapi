@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.schemas.base import (
     BaseCreatedAtSchema,
@@ -23,11 +23,6 @@ class CommentCreateSchema(CommentBaseSchema, BasePublishedSchema):
         ...,
         description='ID публикации, к которой относится комментарий',
         title='ID публикации',
-    )
-    author_id: int = Field(
-        ...,
-        description='ID автора комментария',
-        title='ID автора',
     )
 
 

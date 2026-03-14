@@ -1,3 +1,5 @@
+from passlib.context import CryptContext
+
 from fastapi import HTTPException
 
 from src.infrastructure.sqlite.database import database
@@ -9,6 +11,15 @@ from src.schemas.users import (
     UserResponseSchema,
 )
 
+pwd_context = CryptContext(
+    schemes=['bcrypt'],
+    deprecated='auto',
+)
+
+
+def hash_password(password: str) -> str:
+    return pwd_context.hash(password)
+
 
 class GetUserUseCase:
     def __init__(self):
@@ -17,10 +28,7 @@ class GetUserUseCase:
 
     async def execute(self, user_id: int) -> UserResponseSchema:
         with self._database.session() as session:
-            user = self._repo.get(
-                session=session,
-                user_id=user_id,
-            )
+            user = self._repo.get(session=session, user_id=user_id)
 
             if user is None:
                 raise HTTPException(
@@ -64,7 +72,7 @@ class CreateUserUseCase:
 
             user = User(
                 username=data.username,
-                password=data.password,
+                password=hash_password(data.password.get_secret_value()),
                 email=data.email or '',
                 first_name=data.first_name,
                 last_name=data.last_name,
@@ -111,7 +119,7 @@ class DeleteUserUseCase:
         self._database = database
         self._repo = UserRepository()
 
-    async def execute(self, user_id: int):
+    async def execute(self, user_id: int) -> None:
         with self._database.session() as session:
             user = self._repo.get(
                 session=session,

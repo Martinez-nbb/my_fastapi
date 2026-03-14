@@ -74,6 +74,7 @@ class CreateCommentUseCase:
     async def execute(
         self,
         data: CommentCreateSchema,
+        author_id: int,
     ) -> CommentResponseSchema:
         with self._database.session() as session:
             post = self._post_repo.get(
@@ -89,7 +90,7 @@ class CreateCommentUseCase:
             comment = Comment(
                 text=data.text,
                 post_id=data.post_id,
-                author_id=data.author_id,
+                author_id=author_id,
                 is_published=data.is_published,
                 created_at=datetime.now(),
             )
@@ -134,7 +135,7 @@ class DeleteCommentUseCase:
         self._database = database
         self._repo = CommentRepository()
 
-    async def execute(self, comment_id: int):
+    async def execute(self, comment_id: int) -> None:
         with self._database.session() as session:
             comment = self._repo.get(
                 session=session,

@@ -20,11 +20,15 @@ class Comment(Base):
     created_at: Mapped[datetime] = mapped_column(nullable=False)
     is_published: Mapped[bool] = mapped_column(nullable=False, default=True)
     post_id: Mapped[int] = mapped_column(
-        ForeignKey('blog_post.id', ondelete='CASCADE'), nullable=False
+        ForeignKey('blog_post.id', ondelete='CASCADE'),
+        index=True,
+        nullable=False,
     )
     text: Mapped[str] = mapped_column(nullable=False)
     author_id: Mapped[int] = mapped_column(
-        ForeignKey('auth_user.id', ondelete='CASCADE'), nullable=False
+        ForeignKey('auth_user.id', ondelete='CASCADE'),
+        index=True,
+        nullable=False,
     )
 
     post: Mapped['Post'] = relationship(

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.schemas.base import (
     BaseCreatedAtSchema,
@@ -23,6 +23,7 @@ class CategoryBaseSchema(BaseModel):
         title='Описание',
     )
     slug: str = Field(
+        ...,
         min_length=1,
         max_length=50,
         pattern=r'^[a-zA-Z0-9_-]+$',

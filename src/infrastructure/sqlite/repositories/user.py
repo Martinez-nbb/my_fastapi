@@ -43,6 +43,6 @@ class UserRepository:
         session.refresh(user)
         return user
 
-    def delete(self, session: Session, user: User):
+    def delete(self, session: Session, user: User) -> None:
         session.delete(user)
         session.commit()

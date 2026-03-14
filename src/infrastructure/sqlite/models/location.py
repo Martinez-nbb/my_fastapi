@@ -1,7 +1,12 @@
 from datetime import datetime
-from sqlalchemy.orm import Mapped, mapped_column
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infrastructure.sqlite.metadata import Base
+
+if TYPE_CHECKING:
+    from src.infrastructure.sqlite.models.post import Post
 
 
 class Location(Base):
@@ -13,3 +18,7 @@ class Location(Base):
     created_at: Mapped[datetime] = mapped_column(nullable=False)
     is_published: Mapped[bool] = mapped_column(nullable=False, default=True)
     name: Mapped[str] = mapped_column(nullable=False)
+
+    posts: Mapped[list['Post']] = relationship(
+        'Post', back_populates='location', foreign_keys='Post.location_id'
+    )

@@ -1,31 +1,27 @@
-from pydantic import BaseModel, Field, SecretStr, EmailStr
+from pydantic import BaseModel, Field
 
-from typing import Optional
-from datetime import datetime
-
-from src.schemas.base import BaseIdSchema, BaseCreatedAtSchema
 
 class UserBaseSchema(BaseModel):
     username: str = Field(
         min_length=3,
         max_length=150,
-        description="Имя пользователя (уникальное, 3-150 символов)",
-        title="Имя пользователя",
+        description='Имя пользователя (уникальное, 3-150 символов)',
+        title='Имя пользователя',
     )
-    email: Optional[str] = Field(
-        None,
-        description="Email адрес пользователя",
-        title="Email",
+    email: str | None = Field(
+        default=None,
+        description='Email адрес пользователя',
+        title='Email',
     )
     first_name: str = Field(
         default='',
-        description="Имя пользователя",
-        title="Имя",
+        description='Имя пользователя',
+        title='Имя',
     )
     last_name: str = Field(
         default='',
-        description="Фамилия пользователя",
-        title="Фамилия",
+        description='Фамилия пользователя',
+        title='Фамилия',
     )
 
 
@@ -33,58 +29,57 @@ class UserCreateSchema(UserBaseSchema):
     password: str = Field(
         ...,
         min_length=8,
-        description="Пароль (минимум 8 символов)",
-        examples=["********"],
-        title="Пароль",
+        description='Пароль (минимум 8 символов)',
+        examples=['********'],
+        title='Пароль',
     )
 
 
 class UserUpdateSchema(BaseModel):
-    username: Optional[str] = Field(
-        None,
+    username: str | None = Field(
+        default=None,
         min_length=3,
         max_length=150,
-        description="Имя пользователя",
+        description='Имя пользователя',
     )
-    email: Optional[str] = Field(
-        None,
-        description="Email адрес",
+    email: str | None = Field(
+        default=None,
+        description='Email адрес',
     )
-    first_name: Optional[str] = Field(
-        None,
-        description="Имя",
+    first_name: str | None = Field(
+        default=None,
+        description='Имя',
     )
-    last_name: Optional[str] = Field(
-        None,
-        description="Фамилия",
+    last_name: str | None = Field(
+        default=None,
+        description='Фамилия',
     )
-    is_active: Optional[bool] = Field(
-        None,
-        description="Активен ли пользователь",
+    is_active: bool | None = Field(
+        default=None,
+        description='Активен ли пользователь',
     )
 
 
-class UserResponseSchema(UserBaseSchema, BaseIdSchema):
+class UserResponseSchema(UserBaseSchema):
+    id: int = Field(
+        description='Уникальный идентификатор пользователя',
+        ge=1,
+        title='ID',
+    )
     is_active: bool = Field(
         default=True,
-        description="Активен ли пользователь",
-        title="Статус активности",
+        description='Активен ли пользователь',
+        title='Статус активности',
     )
     is_superuser: bool = Field(
         default=False,
-        description="Является ли суперпользователем",
-        title="Суперпользователь",
+        description='Является ли суперпользователем',
+        title='Суперпользователь',
     )
     is_staff: bool = Field(
         default=False,
-        description="Является ли сотрудником",
-        title="Сотрудник",
-    )
-    date_joined: datetime = Field(
-        default=None,
-        description="Дата регистрации",
-        title="Дата регистрации",
+        description='Является ли сотрудником',
+        title='Сотрудник',
     )
 
-    class Config:
-        from_attributes = True
+    model_config = {'from_attributes': True}

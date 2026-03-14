@@ -1,8 +1,9 @@
 from typing import Type
+
 from sqlalchemy.orm import Session
 
 from src.infrastructure.sqlite.models.comment import Comment
-from src.schemas.comments import CommentCreateSchema
+from src.schemas.comments import CommentUpdateSchema
 
 
 class CommentRepository:
@@ -28,7 +29,9 @@ class CommentRepository:
         session.refresh(comment)
         return comment
 
-    def update(self, session: Session, comment: Comment, data: CommentCreateSchema) -> Comment:
+    def update(
+        self, session: Session, comment: Comment, data: CommentUpdateSchema
+    ) -> Comment:
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(comment, field, value)
         session.commit()

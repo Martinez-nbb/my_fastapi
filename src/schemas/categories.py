@@ -1,14 +1,6 @@
-from typing import Optional
-
 from pydantic import BaseModel, Field, ConfigDict
 
-from datetime import datetime
-
-from src.schemas.base import (
-    BasePublishedSchema,
-    BaseCreatedAtSchema,
-    BaseIdSchema,
-)
+from src.schemas.base import BaseCreatedAtSchema, BaseIdSchema, BasePublishedSchema
 
 
 class CategoryBaseSchema(BaseModel):
@@ -16,22 +8,22 @@ class CategoryBaseSchema(BaseModel):
         ...,
         min_length=1,
         max_length=256,
-        description="Заголовок категории (1-256 символов)",
-        title="Заголовок",
+        description='Заголовок категории (1-256 символов)',
+        title='Заголовок',
     )
     description: str = Field(
         ...,
         min_length=1,
         max_length=10000,
-        description="Подробное описание категории",
-        title="Описание",
+        description='Подробное описание категории',
+        title='Описание',
     )
     slug: str = Field(
         min_length=1,
         max_length=50,
         pattern=r'^[a-zA-Z0-9_-]+$',
-       description="Идентификатор страницы для URL; разрешены символы латиницы, цифры, дефис и подчёркивание",
-        title="Slug (URL-идентификатор)",
+        description='Идентификатор страницы для URL',
+        title='Slug (URL-идентификатор)',
     )
 
 
@@ -40,40 +32,37 @@ class CategoryCreateSchema(CategoryBaseSchema, BasePublishedSchema):
 
 
 class CategoryUpdateSchema(BaseModel):
-    title: Optional[str] = Field(
-        None,
-
+    title: str | None = Field(
+        default=None,
         min_length=1,
         max_length=256,
-
-        description="Заголовок категории",
+        description='Заголовок категории',
     )
-    description: Optional[str] = Field(
-        None,
+    description: str | None = Field(
+        default=None,
         min_length=1,
         max_length=10000,
-        description="Описание категории",
+        description='Описание категории',
     )
-    slug: Optional[str] = Field(
-        None,
+    slug: str | None = Field(
+        default=None,
         min_length=1,
         max_length=50,
         pattern=r'^[a-zA-Z0-9_-]+$',
-        description="Slug (URL-идентификатор)",
+        description='Slug (URL-идентификатор)',
     )
-    is_published: Optional[bool] = Field(
-        None,
-        description="Флаг публикации (True = опубликовано, False = черновик)",
+    is_published: bool | None = Field(
+        default=None,
+        description='Флаг публикации',
         examples=[True, False],
     )
+
 
 class CategoryResponseSchema(CategoryBaseSchema, BaseIdSchema, BaseCreatedAtSchema):
     is_published: bool = Field(
         default=True,
-        description="Опубликовано (True = видно на сайте, False = черновик)",
+        description='Опубликовано',
         examples=[True, False],
-        title="Статус публикации",
+        title='Статус публикации',
     )
-    model_config = ConfigDict(
-        from_attributes=True,
-    )
+    model_config = ConfigDict(from_attributes=True)

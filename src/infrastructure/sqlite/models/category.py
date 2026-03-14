@@ -1,7 +1,12 @@
 from datetime import datetime
-from sqlalchemy.orm import Mapped, mapped_column
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infrastructure.sqlite.metadata import Base
+
+if TYPE_CHECKING:
+    from src.infrastructure.sqlite.models.post import Post
 
 
 class Category(Base):
@@ -15,3 +20,7 @@ class Category(Base):
     title: Mapped[str] = mapped_column(nullable=False)
     description: Mapped[str] = mapped_column(nullable=False)
     slug: Mapped[str] = mapped_column(nullable=False, unique=True)
+
+    posts: Mapped[list['Post']] = relationship(
+        'Post', back_populates='category', foreign_keys='Post.category_id'
+    )

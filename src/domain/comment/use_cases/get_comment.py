@@ -1,9 +1,12 @@
+from datetime import datetime
+
 from fastapi import HTTPException
 
 from src.infrastructure.sqlite.database import database
+from src.infrastructure.sqlite.models.comment import Comment
 from src.infrastructure.sqlite.repositories.comment import CommentRepository
 from src.infrastructure.sqlite.repositories.post import PostRepository
-from src.schemas.comments import CommentCreateSchema, CommentResponseSchema
+from src.schemas.comments import CommentCreateSchema, CommentUpdateSchema, CommentResponseSchema
 
 
 class GetCommentUseCase:
@@ -20,7 +23,7 @@ class GetCommentUseCase:
                     status_code=404, detail=f'Комментарий с id={comment_id} не найден'
                 )
 
-        return CommentResponseSchema.model_validate(obj=comment)
+            return CommentResponseSchema.model_validate(obj=comment)
 
 
 class GetCommentsUseCase:
@@ -31,8 +34,9 @@ class GetCommentsUseCase:
     async def execute(self) -> list[CommentResponseSchema]:
         with self._database.session() as session:
             comments = self._repo.get_all(session=session)
-
-        return [CommentResponseSchema.model_validate(obj=comment) for comment in comments]
+            return [
+                CommentResponseSchema.model_validate(obj=comment) for comment in comments
+            ]
 
 
 class GetCommentsByPostUseCase:
@@ -43,8 +47,9 @@ class GetCommentsByPostUseCase:
     async def execute(self, post_id: int) -> list[CommentResponseSchema]:
         with self._database.session() as session:
             comments = self._repo.get_by_post(session=session, post_id=post_id)
-
-        return [CommentResponseSchema.model_validate(obj=comment) for comment in comments]
+            return [
+                CommentResponseSchema.model_validate(obj=comment) for comment in comments
+            ]
 
 
 class CreateCommentUseCase:
@@ -55,10 +60,6 @@ class CreateCommentUseCase:
 
     async def execute(self, data: CommentCreateSchema) -> CommentResponseSchema:
         with self._database.session() as session:
-            from src.infrastructure.sqlite.models.comment import Comment
-            from datetime import datetime
-
-            # Проверка существования поста
             post = self._post_repo.get(session=session, post_id=data.post_id)
             if post is None:
                 raise HTTPException(
@@ -74,7 +75,7 @@ class CreateCommentUseCase:
             )
             self._repo.create(session=session, comment=comment)
 
-        return CommentResponseSchema.model_validate(obj=comment)
+            return CommentResponseSchema.model_validate(obj=comment)
 
 
 class UpdateCommentUseCase:
@@ -82,7 +83,9 @@ class UpdateCommentUseCase:
         self._database = database
         self._repo = CommentRepository()
 
-    async def execute(self, comment_id: int, data: CommentCreateSchema) -> CommentResponseSchema:
+    async def execute(
+        self, comment_id: int, data: CommentUpdateSchema
+    ) -> CommentResponseSchema:
         with self._database.session() as session:
             comment = self._repo.get(session=session, comment_id=comment_id)
 
@@ -93,7 +96,7 @@ class UpdateCommentUseCase:
 
             self._repo.update(session=session, comment=comment, data=data)
 
-        return CommentResponseSchema.model_validate(obj=comment)
+            return CommentResponseSchema.model_validate(obj=comment)
 
 
 class DeleteCommentUseCase:

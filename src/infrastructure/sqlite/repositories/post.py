@@ -1,8 +1,9 @@
 from typing import Type
+
 from sqlalchemy.orm import Session
 
 from src.infrastructure.sqlite.models.post import Post
-from src.schemas.posts import PostCreateSchema
+from src.schemas.posts import PostUpdateSchema
 
 
 class PostRepository:
@@ -31,7 +32,7 @@ class PostRepository:
         session.refresh(post)
         return post
 
-    def update(self, session: Session, post: Post, data: PostCreateSchema) -> Post:
+    def update(self, session: Session, post: Post, data: PostUpdateSchema) -> Post:
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(post, field, value)
         session.commit()

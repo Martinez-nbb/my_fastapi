@@ -1,8 +1,9 @@
 from typing import Type
+
 from sqlalchemy.orm import Session
 
 from src.infrastructure.sqlite.models.location import Location
-from src.schemas.locations import LocationCreateSchema
+from src.schemas.locations import LocationUpdateSchema
 
 
 class LocationRepository:
@@ -22,7 +23,9 @@ class LocationRepository:
         session.refresh(location)
         return location
 
-    def update(self, session: Session, location: Location, data: LocationCreateSchema) -> Location:
+    def update(
+        self, session: Session, location: Location, data: LocationUpdateSchema
+    ) -> Location:
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(location, field, value)
         session.commit()

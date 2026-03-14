@@ -1,20 +1,15 @@
 from pydantic import BaseModel, Field, ConfigDict
 
-from typing import Optional
+from src.schemas.base import BaseCreatedAtSchema, BaseIdSchema, BasePublishedSchema
 
-from src.schemas.base import (
-    BasePublishedSchema,
-    BaseCreatedAtSchema,
-    BaseIdSchema,
-)
+
 class LocationBaseSchema(BaseModel):
-
     name: str = Field(
         ...,
         min_length=1,
         max_length=256,
-        description="Название места (город, регион, страна)",
-        title="Название места",
+        description='Название места (город, регион, страна)',
+        title='Название места',
     )
 
 
@@ -23,15 +18,15 @@ class LocationCreateSchema(LocationBaseSchema, BasePublishedSchema):
 
 
 class LocationUpdateSchema(BaseModel):
-    name: Optional[str] = Field(
-        None,
+    name: str | None = Field(
+        default=None,
         min_length=1,
         max_length=256,
-        description="Название места",
+        description='Название места',
     )
-    is_published: Optional[bool] = Field(
-        None,
-        description="Флаг публикации",
+    is_published: bool | None = Field(
+        default=None,
+        description='Флаг публикации',
         examples=[True, False],
     )
 
@@ -39,6 +34,6 @@ class LocationUpdateSchema(BaseModel):
 class LocationResponseSchema(LocationBaseSchema, BaseIdSchema, BaseCreatedAtSchema):
     is_published: bool = Field(
         default=True,
-        description="Опубликовано",
+        description='Опубликовано',
     )
     model_config = ConfigDict(from_attributes=True)

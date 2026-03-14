@@ -1,8 +1,9 @@
 from typing import Type
+
 from sqlalchemy.orm import Session
 
 from src.infrastructure.sqlite.models.user import User
-from src.schemas.users import UserCreateSchema
+from src.schemas.users import UserUpdateSchema
 
 
 class UserRepository:
@@ -26,10 +27,9 @@ class UserRepository:
         session.refresh(user)
         return user
 
-    def update(self, session: Session, user: User, data: UserCreateSchema) -> User:
+    def update(self, session: Session, user: User, data: UserUpdateSchema) -> User:
         for field, value in data.model_dump(exclude_none=True).items():
-            if field != 'password':
-                setattr(user, field, value)
+            setattr(user, field, value)
         session.commit()
         session.refresh(user)
         return user

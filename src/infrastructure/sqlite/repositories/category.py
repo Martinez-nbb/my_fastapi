@@ -1,8 +1,9 @@
 from typing import Type
+
 from sqlalchemy.orm import Session
 
 from src.infrastructure.sqlite.models.category import Category
-from src.schemas.categories import CategoryCreateSchema
+from src.schemas.categories import CategoryUpdateSchema
 
 
 class CategoryRepository:
@@ -22,7 +23,9 @@ class CategoryRepository:
         session.refresh(category)
         return category
 
-    def update(self, session: Session, category: Category, data: CategoryCreateSchema) -> Category:
+    def update(
+        self, session: Session, category: Category, data: CategoryUpdateSchema
+    ) -> Category:
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(category, field, value)
         session.commit()

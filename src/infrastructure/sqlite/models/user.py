@@ -1,7 +1,13 @@
 from datetime import datetime
-from sqlalchemy.orm import Mapped, mapped_column
+from typing import TYPE_CHECKING
+
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infrastructure.sqlite.metadata import Base
+
+if TYPE_CHECKING:
+    from src.infrastructure.sqlite.models.post import Post
+    from src.infrastructure.sqlite.models.comment import Comment
 
 
 class User(Base):
@@ -20,3 +26,10 @@ class User(Base):
     is_staff: Mapped[bool] = mapped_column(nullable=False, default=False)
     is_active: Mapped[bool] = mapped_column(nullable=False, default=True)
     date_joined: Mapped[datetime] = mapped_column(nullable=False, default=datetime.now)
+
+    posts: Mapped[list['Post']] = relationship(
+        'Post', back_populates='author', foreign_keys='Post.author_id'
+    )
+    comments: Mapped[list['Comment']] = relationship(
+        'Comment', back_populates='author', foreign_keys='Comment.author_id'
+    )

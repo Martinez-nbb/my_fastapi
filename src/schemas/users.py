@@ -14,16 +14,14 @@ class UserBaseSchema(BaseModel):
         description='Email адрес пользователя',
         title='Email',
     )
-    first_name: str = Field(
-        default='',
-        min_length=1,
+    first_name: str | None = Field(
+        default=None,
         max_length=150,
         description='Имя пользователя',
         title='Имя',
     )
-    last_name: str = Field(
-        default='',
-        min_length=1,
+    last_name: str | None = Field(
+        default=None,
         max_length=150,
         description='Фамилия пользователя',
         title='Фамилия',

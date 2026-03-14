@@ -1,6 +1,6 @@
 from typing import Type
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from src.infrastructure.sqlite.models.post import Post
 from src.schemas.posts import PostUpdateSchema
@@ -11,36 +11,56 @@ class PostRepository:
         self._model: Type[Post] = Post
 
     def get(self, session: Session, post_id: int) -> Post | None:
-        query = session.query(self._model).filter_by(id=post_id)
+        query = session.query(self._model).options(
+            joinedload(self._model.author),
+            joinedload(self._model.location),
+            joinedload(self._model.category),
+        ).filter_by(id=post_id)
         return query.first()
 
     def get_all(self, session: Session) -> list[Post]:
-        return session.query(self._model).all()
+        query = session.query(self._model).options(
+            joinedload(self._model.author),
+            joinedload(self._model.location),
+            joinedload(self._model.category),
+        )
+        return query.all()
 
     def get_by_author(
         self,
         session: Session,
         author_id: int,
     ) -> list[Post]:
-        return session.query(self._model).filter_by(author_id=author_id).all()
+        query = session.query(self._model).options(
+            joinedload(self._model.author),
+            joinedload(self._model.location),
+            joinedload(self._model.category),
+        ).filter_by(author_id=author_id)
+        return query.all()
 
     def get_by_category(
         self,
         session: Session,
         category_id: int,
     ) -> list[Post]:
-        return session.query(self._model).filter_by(
-            category_id=category_id,
-        ).all()
+        query = session.query(self._model).options(
+            joinedload(self._model.author),
+            joinedload(self._model.location),
+            joinedload(self._model.category),
+        ).filter_by(category_id=category_id)
+        return query.all()
 
     def get_by_location(
         self,
         session: Session,
         location_id: int,
     ) -> list[Post]:
-        return session.query(self._model).filter_by(
-            location_id=location_id,
-        ).all()
+        query = session.query(self._model).options(
+            joinedload(self._model.author),
+            joinedload(self._model.location),
+            joinedload(self._model.category),
+        ).filter_by(location_id=location_id)
+        return query.all()
 
     def create(self, session: Session, post: Post) -> Post:
         session.add(post)

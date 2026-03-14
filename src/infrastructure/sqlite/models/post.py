@@ -51,5 +51,8 @@ class Post(Base):
         'Category', back_populates='posts', foreign_keys=[category_id]
     )
     comments: Mapped[list['Comment']] = relationship(
-        'Comment', back_populates='post', foreign_keys='Comment.post_id'
+        'Comment',
+        back_populates='post',
+        foreign_keys='Comment.post_id',
+        cascade='all, delete-orphan',
     )

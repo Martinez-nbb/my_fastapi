@@ -1,5 +1,4 @@
-from passlib.context import CryptContext
-
+import bcrypt
 from fastapi import HTTPException
 
 from src.infrastructure.sqlite.database import database
@@ -11,14 +10,9 @@ from src.schemas.users import (
     UserResponseSchema,
 )
 
-pwd_context = CryptContext(
-    schemes=['bcrypt'],
-    deprecated='auto',
-)
-
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 class GetUserUseCase:

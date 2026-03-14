@@ -1,6 +1,6 @@
 from typing import Type
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from src.infrastructure.sqlite.models.comment import Comment
 from src.schemas.comments import CommentUpdateSchema
@@ -11,25 +11,40 @@ class CommentRepository:
         self._model: Type[Comment] = Comment
 
     def get(self, session: Session, comment_id: int) -> Comment | None:
-        query = session.query(self._model).filter_by(id=comment_id)
+        query = session.query(self._model).options(
+            joinedload(self._model.author),
+            joinedload(self._model.post),
+        ).filter_by(id=comment_id)
         return query.first()
 
     def get_all(self, session: Session) -> list[Comment]:
-        return session.query(self._model).all()
+        query = session.query(self._model).options(
+            joinedload(self._model.author),
+            joinedload(self._model.post),
+        )
+        return query.all()
 
     def get_by_post(
         self,
         session: Session,
         post_id: int,
     ) -> list[Comment]:
-        return session.query(self._model).filter_by(post_id=post_id).all()
+        query = session.query(self._model).options(
+            joinedload(self._model.author),
+            joinedload(self._model.post),
+        ).filter_by(post_id=post_id)
+        return query.all()
 
     def get_by_author(
         self,
         session: Session,
         author_id: int,
     ) -> list[Comment]:
-        return session.query(self._model).filter_by(author_id=author_id).all()
+        query = session.query(self._model).options(
+            joinedload(self._model.author),
+            joinedload(self._model.post),
+        ).filter_by(author_id=author_id)
+        return query.all()
 
     def create(self, session: Session, comment: Comment) -> Comment:
         session.add(comment)

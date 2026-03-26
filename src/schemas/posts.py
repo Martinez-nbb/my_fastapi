@@ -1,19 +1,19 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from src.schemas.base import (
     BaseCreatedAtSchema,
     BaseIdSchema,
     BasePublishedSchema,
-    TextValidatorMixin,
+    validate_text,
 )
 from src.schemas.categories import CategoryResponseSchema
 from src.schemas.locations import LocationResponseSchema
 from src.schemas.users import UserResponseSchema
 
 
-class PostBaseSchema(TextValidatorMixin):
+class PostBaseSchema(BaseModel):
     title: str = Field(
         ...,
         min_length=1,
@@ -33,6 +33,11 @@ class PostBaseSchema(TextValidatorMixin):
         description='Дата и время публикации',
         title='Дата публикации',
     )
+
+    @field_validator('text')
+    @classmethod
+    def validate_text_field(cls, value: str) -> str:
+        return validate_text(value)
 
 
 class PostCreateSchema(PostBaseSchema, BasePublishedSchema):
@@ -84,6 +89,13 @@ class PostUpdateSchema(BaseModel):
         description='ID категории',
         ge=1,
     )
+
+    @field_validator('text')
+    @classmethod
+    def validate_text_field(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        return validate_text(value)
 
 
 class PostResponseSchema(

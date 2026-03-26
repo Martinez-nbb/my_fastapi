@@ -1,13 +1,13 @@
-from pydantic import BaseModel, ConfigDict, Field, SecretStr
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, field_validator
 
 from src.schemas.base import (
     BaseIdSchema,
-    EmailValidatorMixin,
-    UsernameValidatorMixin,
+    validate_email,
+    validate_username,
 )
 
 
-class UserBaseSchema(UsernameValidatorMixin, EmailValidatorMixin):
+class UserBaseSchema(BaseModel):
     username: str = Field(
         ...,
         min_length=3,
@@ -32,6 +32,16 @@ class UserBaseSchema(UsernameValidatorMixin, EmailValidatorMixin):
         description='Фамилия пользователя',
         title='Фамилия',
     )
+
+    @field_validator('username')
+    @classmethod
+    def validate_username_field(cls, value: str) -> str:
+        return validate_username(value)
+
+    @field_validator('email')
+    @classmethod
+    def validate_email_field(cls, value: str | None) -> str | None:
+        return validate_email(value)
 
 
 class UserCreateSchema(UserBaseSchema):
@@ -73,8 +83,20 @@ class UserUpdateSchema(BaseModel):
         description='Активен ли пользователь',
     )
 
+    @field_validator('username')
+    @classmethod
+    def validate_username_field(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        return validate_username(value)
 
-class UserResponseSchema(UserBaseSchema):
+    @field_validator('email')
+    @classmethod
+    def validate_email_field(cls, value: str | None) -> str | None:
+        return validate_email(value)
+
+
+class UserResponseSchema(UserBaseSchema, BaseIdSchema):
     id: int = Field(
         ...,
         description='Уникальный идентификатор пользователя',

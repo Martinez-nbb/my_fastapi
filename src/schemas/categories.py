@@ -1,14 +1,14 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from src.schemas.base import (
     BaseCreatedAtSchema,
     BaseIdSchema,
     BasePublishedSchema,
-    SlugValidatorMixin,
+    validate_slug,
 )
 
 
-class CategoryBaseSchema(SlugValidatorMixin):
+class CategoryBaseSchema(BaseModel):
     title: str = Field(
         ...,
         min_length=1,
@@ -30,6 +30,11 @@ class CategoryBaseSchema(SlugValidatorMixin):
         description='Идентификатор страницы для URL',
         title='Slug (URL-идентификатор)',
     )
+
+    @field_validator('slug')
+    @classmethod
+    def validate_slug_field(cls, value: str) -> str:
+        return validate_slug(value)
 
 
 class CategoryCreateSchema(CategoryBaseSchema, BasePublishedSchema):
@@ -53,7 +58,6 @@ class CategoryUpdateSchema(BaseModel):
         default=None,
         min_length=1,
         max_length=50,
-        pattern=r'^[a-zA-Z0-9_-]+$',
         description='Slug (URL-идентификатор)',
     )
     is_published: bool | None = Field(
@@ -61,6 +65,13 @@ class CategoryUpdateSchema(BaseModel):
         description='Флаг публикации',
         examples=[True, False],
     )
+
+    @field_validator('slug')
+    @classmethod
+    def validate_slug_field(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        return validate_slug(value)
 
 
 class CategoryResponseSchema(

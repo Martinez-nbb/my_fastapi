@@ -1,15 +1,15 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from src.schemas.base import (
     BaseCreatedAtSchema,
     BaseIdSchema,
     BasePublishedSchema,
-    TextValidatorMixin,
+    validate_text,
 )
 from src.schemas.users import UserResponseSchema
 
 
-class CommentBaseSchema(TextValidatorMixin):
+class CommentBaseSchema(BaseModel):
     text: str = Field(
         ...,
         min_length=1,
@@ -17,6 +17,11 @@ class CommentBaseSchema(TextValidatorMixin):
         description='Текст комментария (1-1000 символов)',
         title='Текст комментария',
     )
+
+    @field_validator('text')
+    @classmethod
+    def validate_text_field(cls, value: str) -> str:
+        return validate_text(value)
 
 
 class CommentCreateSchema(CommentBaseSchema, BasePublishedSchema):
@@ -38,6 +43,13 @@ class CommentUpdateSchema(BaseModel):
         default=None,
         description='Флаг публикации',
     )
+
+    @field_validator('text')
+    @classmethod
+    def validate_text_field(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        return validate_text(value)
 
 
 class CommentResponseSchema(

@@ -3,7 +3,6 @@ import bcrypt
 
 from src.core.exceptions.database_exceptions import (
     UserNotFoundException,
-    UserUsernameAlreadyExistsException,
 )
 from src.core.exceptions.domain_exceptions import (
     UserNotFoundByIdException,

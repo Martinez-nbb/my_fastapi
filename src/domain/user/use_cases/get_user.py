@@ -17,4 +17,4 @@ class GetUserUseCase:
             except UserNotFoundException as exc:
                 raise UserNotFoundByIdException(id=user_id)
 
-        return UserResponseSchema.model_validate(obj=user)
+            return UserResponseSchema.model_validate(obj=user)

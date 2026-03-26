@@ -29,7 +29,7 @@ class CreateLocationUseCase:
             )
             self._repo.create(session=session, location=location)
 
-        return LocationResponseSchema.model_validate(obj=location)
+            return LocationResponseSchema.model_validate(obj=location)
 
 
 class UpdateLocationUseCase:
@@ -57,7 +57,7 @@ class UpdateLocationUseCase:
                 data=data,
             )
 
-        return LocationResponseSchema.model_validate(obj=location)
+            return LocationResponseSchema.model_validate(obj=location)
 
 
 class DeleteLocationUseCase:

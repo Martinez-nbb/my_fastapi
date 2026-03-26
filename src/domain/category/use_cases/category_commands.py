@@ -38,7 +38,7 @@ class CreateCategoryUseCase:
             )
             self._repo.create(session=session, category=category)
 
-        return CategoryResponseSchema.model_validate(obj=category)
+            return CategoryResponseSchema.model_validate(obj=category)
 
 
 class UpdateCategoryUseCase:
@@ -66,7 +66,7 @@ class UpdateCategoryUseCase:
                 data=data,
             )
 
-        return CategoryResponseSchema.model_validate(obj=category)
+            return CategoryResponseSchema.model_validate(obj=category)
 
 
 class DeleteCategoryUseCase:

@@ -45,7 +45,7 @@ class CreateUserUseCase:
             )
             self._repo.create(session=session, user=user)
 
-        return UserResponseSchema.model_validate(obj=user)
+            return UserResponseSchema.model_validate(obj=user)
 
 
 class UpdateUserUseCase:
@@ -73,7 +73,7 @@ class UpdateUserUseCase:
                 data=data,
             )
 
-        return UserResponseSchema.model_validate(obj=user)
+            return UserResponseSchema.model_validate(obj=user)
 
 
 class DeleteUserUseCase:

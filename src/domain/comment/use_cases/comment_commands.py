@@ -48,7 +48,7 @@ class CreateCommentUseCase:
             )
             self._repo.create(session=session, comment=comment)
 
-        return CommentResponseSchema.model_validate(obj=comment)
+            return CommentResponseSchema.model_validate(obj=comment)
 
 
 class UpdateCommentUseCase:
@@ -76,7 +76,7 @@ class UpdateCommentUseCase:
                 data=data,
             )
 
-        return CommentResponseSchema.model_validate(obj=comment)
+            return CommentResponseSchema.model_validate(obj=comment)
 
 
 class DeleteCommentUseCase:

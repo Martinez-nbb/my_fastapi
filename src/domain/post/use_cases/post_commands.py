@@ -47,7 +47,7 @@ class CreatePostUseCase:
             )
             self._repo.create(session=session, post=post)
 
-        return PostResponseSchema.model_validate(obj=post)
+            return PostResponseSchema.model_validate(obj=post)
 
 
 class UpdatePostUseCase:
@@ -75,7 +75,7 @@ class UpdatePostUseCase:
                 data=data,
             )
 
-        return PostResponseSchema.model_validate(obj=post)
+            return PostResponseSchema.model_validate(obj=post)
 
 
 class DeletePostUseCase:

@@ -4,12 +4,12 @@ from src.core.exceptions.domain_exceptions import (
     UserNotFoundByIdException,
     UserNotFoundByUsernameException,
 )
-from src.domain.user.use_cases.get_user import (
+from src.domain.user.use_cases.get_user import GetUserUseCase
+from src.domain.user.use_cases.create_user import GetUsersUseCase
+from src.domain.user.use_cases.user_commands import (
     CreateUserUseCase,
-    DeleteUserUseCase,
-    GetUserUseCase,
-    GetUsersUseCase,
     UpdateUserUseCase,
+    DeleteUserUseCase,
 )
 from src.schemas.users import (
     UserCreateSchema,

@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 
 from src.core.exceptions.database_exceptions import LocationNotFoundException
@@ -12,8 +11,6 @@ from src.schemas.locations import (
     LocationResponseSchema,
 )
 
-logger = logging.getLogger(__name__)
-
 
 class CreateLocationUseCase:
     def __init__(self):
@@ -24,7 +21,6 @@ class CreateLocationUseCase:
         self,
         data: LocationCreateSchema,
     ) -> LocationResponseSchema:
-        logger.debug('Создание местоположения: name=%s', data.name)
         with self._database.session() as session:
             location = Location(
                 name=data.name,
@@ -33,7 +29,6 @@ class CreateLocationUseCase:
             )
             self._repo.create(session=session, location=location)
 
-        logger.info('Местоположение успешно создано: name=%s', data.name)
         return LocationResponseSchema.model_validate(obj=location)
 
 
@@ -47,7 +42,6 @@ class UpdateLocationUseCase:
         location_id: int,
         data: LocationUpdateSchema,
     ) -> LocationResponseSchema:
-        logger.debug('Обновление местоположения: location_id=%s', location_id)
         with self._database.session() as session:
             try:
                 location = self._repo.get(
@@ -55,11 +49,6 @@ class UpdateLocationUseCase:
                     location_id=location_id,
                 )
             except LocationNotFoundException as exc:
-                logger.error(
-                    'Местоположение не найдено для обновления: location_id=%s, ошибка: %s',
-                    location_id,
-                    exc,
-                )
                 raise LocationNotFoundByIdException(id=location_id)
 
             self._repo.update(
@@ -68,7 +57,6 @@ class UpdateLocationUseCase:
                 data=data,
             )
 
-        logger.info('Местоположение успешно обновлено: %s', location_id)
         return LocationResponseSchema.model_validate(obj=location)
 
 
@@ -78,7 +66,6 @@ class DeleteLocationUseCase:
         self._repo = LocationRepository()
 
     async def execute(self, location_id: int) -> None:
-        logger.debug('Удаление местоположения: location_id=%s', location_id)
         with self._database.session() as session:
             try:
                 location = self._repo.get(
@@ -86,13 +73,6 @@ class DeleteLocationUseCase:
                     location_id=location_id,
                 )
             except LocationNotFoundException as exc:
-                logger.error(
-                    'Местоположение не найдено для удаления: location_id=%s, ошибка: %s',
-                    location_id,
-                    exc,
-                )
                 raise LocationNotFoundByIdException(id=location_id)
 
             self._repo.delete(session=session, location=location)
-
-        logger.info('Местоположение успешно удалено: %s', location_id)

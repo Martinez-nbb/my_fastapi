@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime
 
 from src.core.exceptions.database_exceptions import (
@@ -19,8 +18,6 @@ from src.schemas.posts import (
     PostResponseSchema,
 )
 
-logger = logging.getLogger(__name__)
-
 
 class CreatePostUseCase:
     def __init__(self):
@@ -29,11 +26,6 @@ class CreatePostUseCase:
         self._user_repo = UserRepository()
 
     async def execute(self, data: PostCreateSchema) -> PostResponseSchema:
-        logger.debug(
-            'Создание публикации: author_id=%s, title=%s',
-            data.author_id,
-            data.title,
-        )
         with self._database.session() as session:
             try:
                 author = self._user_repo.get(
@@ -41,11 +33,6 @@ class CreatePostUseCase:
                     user_id=data.author_id,
                 )
             except UserNotFoundException as exc:
-                logger.error(
-                    'Автор не найден для публикации: user_id=%s, ошибка: %s',
-                    data.author_id,
-                    exc,
-                )
                 raise UserNotFoundByIdException(id=data.author_id)
 
             post = Post(
@@ -60,7 +47,6 @@ class CreatePostUseCase:
             )
             self._repo.create(session=session, post=post)
 
-        logger.info('Публикация успешно создана: author_id=%s', data.author_id)
         return PostResponseSchema.model_validate(obj=post)
 
 
@@ -74,7 +60,6 @@ class UpdatePostUseCase:
         post_id: int,
         data: PostUpdateSchema,
     ) -> PostResponseSchema:
-        logger.debug('Обновление публикации: post_id=%s', post_id)
         with self._database.session() as session:
             try:
                 post = self._repo.get(
@@ -82,11 +67,6 @@ class UpdatePostUseCase:
                     post_id=post_id,
                 )
             except PostNotFoundException as exc:
-                logger.error(
-                    'Публикация не найдена для обновления: post_id=%s, ошибка: %s',
-                    post_id,
-                    exc,
-                )
                 raise PostNotFoundByIdException(id=post_id)
 
             self._repo.update(
@@ -95,7 +75,6 @@ class UpdatePostUseCase:
                 data=data,
             )
 
-        logger.info('Публикация успешно обновлена: %s', post_id)
         return PostResponseSchema.model_validate(obj=post)
 
 
@@ -105,7 +84,6 @@ class DeletePostUseCase:
         self._repo = PostRepository()
 
     async def execute(self, post_id: int) -> None:
-        logger.debug('Удаление публикации: post_id=%s', post_id)
         with self._database.session() as session:
             try:
                 post = self._repo.get(
@@ -113,13 +91,6 @@ class DeletePostUseCase:
                     post_id=post_id,
                 )
             except PostNotFoundException as exc:
-                logger.error(
-                    'Публикация не найдена для удаления: post_id=%s, ошибка: %s',
-                    post_id,
-                    exc,
-                )
                 raise PostNotFoundByIdException(id=post_id)
 
             self._repo.delete(session=session, post=post)
-
-        logger.info('Публикация успешно удалена: %s', post_id)

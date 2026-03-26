@@ -1,12 +1,8 @@
-import logging
-
 from src.core.exceptions.database_exceptions import LocationNotFoundException
 from src.core.exceptions.domain_exceptions import LocationNotFoundByIdException
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.repositories.location import LocationRepository
 from src.schemas.locations import LocationResponseSchema
-
-logger = logging.getLogger(__name__)
 
 
 class GetLocationUseCase:
@@ -15,7 +11,6 @@ class GetLocationUseCase:
         self._repo = LocationRepository()
 
     async def execute(self, location_id: int) -> LocationResponseSchema:
-        logger.debug('Получение местоположения по id: %s', location_id)
         with self._database.session() as session:
             try:
                 location = self._repo.get(
@@ -23,12 +18,6 @@ class GetLocationUseCase:
                     location_id=location_id,
                 )
             except LocationNotFoundException as exc:
-                logger.error(
-                    'Местоположение не найдено: location_id=%s, ошибка: %s',
-                    location_id,
-                    exc,
-                )
                 raise LocationNotFoundByIdException(id=location_id)
 
-        logger.debug('Местоположение успешно получено: %s', location_id)
         return LocationResponseSchema.model_validate(obj=location)

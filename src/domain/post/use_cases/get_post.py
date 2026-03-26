@@ -1,7 +1,13 @@
 from datetime import datetime
 
-from fastapi import HTTPException
-
+from src.core.exceptions.database_exceptions import (
+    PostNotFoundException,
+    UserNotFoundException,
+)
+from src.core.exceptions.domain_exceptions import (
+    PostNotFoundByIdException,
+    UserNotFoundByIdException,
+)
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.post import Post
 from src.infrastructure.sqlite.repositories.post import PostRepository
@@ -20,16 +26,13 @@ class GetPostUseCase:
 
     async def execute(self, post_id: int) -> PostResponseSchema:
         with self._database.session() as session:
-            post = self._repo.get(
-                session=session,
-                post_id=post_id,
-            )
-
-            if post is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f'Публикация с id={post_id} не найдена',
+            try:
+                post = self._repo.get(
+                    session=session,
+                    post_id=post_id,
                 )
+            except PostNotFoundException:
+                raise PostNotFoundByIdException(id=post_id)
 
             return PostResponseSchema.model_validate(obj=post)
 
@@ -56,15 +59,13 @@ class CreatePostUseCase:
 
     async def execute(self, data: PostCreateSchema) -> PostResponseSchema:
         with self._database.session() as session:
-            author = self._user_repo.get(
-                session=session,
-                user_id=data.author_id,
-            )
-            if author is None:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f'Автор с id={data.author_id} не найден',
+            try:
+                author = self._user_repo.get(
+                    session=session,
+                    user_id=data.author_id,
                 )
+            except UserNotFoundException:
+                raise UserNotFoundByIdException(id=data.author_id)
 
             post = Post(
                 title=data.title,
@@ -92,16 +93,13 @@ class UpdatePostUseCase:
         data: PostUpdateSchema,
     ) -> PostResponseSchema:
         with self._database.session() as session:
-            post = self._repo.get(
-                session=session,
-                post_id=post_id,
-            )
-
-            if post is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f'Публикация с id={post_id} не найдена',
+            try:
+                post = self._repo.get(
+                    session=session,
+                    post_id=post_id,
                 )
+            except PostNotFoundException:
+                raise PostNotFoundByIdException(id=post_id)
 
             self._repo.update(
                 session=session,
@@ -119,15 +117,12 @@ class DeletePostUseCase:
 
     async def execute(self, post_id: int) -> None:
         with self._database.session() as session:
-            post = self._repo.get(
-                session=session,
-                post_id=post_id,
-            )
-
-            if post is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f'Публикация с id={post_id} не найдена',
+            try:
+                post = self._repo.get(
+                    session=session,
+                    post_id=post_id,
                 )
+            except PostNotFoundException:
+                raise PostNotFoundByIdException(id=post_id)
 
             self._repo.delete(session=session, post=post)

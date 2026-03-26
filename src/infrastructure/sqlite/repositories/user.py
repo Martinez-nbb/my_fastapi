@@ -2,6 +2,7 @@ from typing import Type
 
 from sqlalchemy.orm import Session
 
+from src.core.exceptions.database_exceptions import UserNotFoundException
 from src.infrastructure.sqlite.models.user import User
 from src.schemas.users import UserUpdateSchema
 
@@ -10,9 +11,12 @@ class UserRepository:
     def __init__(self):
         self._model: Type[User] = User
 
-    def get(self, session: Session, user_id: int) -> User | None:
+    def get(self, session: Session, user_id: int) -> User:
         query = session.query(self._model).filter_by(id=user_id)
-        return query.first()
+        user = query.first()
+        if user is None:
+            raise UserNotFoundException(f'Пользователь с id={user_id} не найден')
+        return user
 
     def get_by_username(
         self,

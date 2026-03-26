@@ -2,6 +2,7 @@ from typing import Type
 
 from sqlalchemy.orm import Session, joinedload
 
+from src.core.exceptions.database_exceptions import CommentNotFoundException
 from src.infrastructure.sqlite.models.comment import Comment
 from src.schemas.comments import CommentUpdateSchema
 
@@ -10,12 +11,17 @@ class CommentRepository:
     def __init__(self):
         self._model: Type[Comment] = Comment
 
-    def get(self, session: Session, comment_id: int) -> Comment | None:
+    def get(self, session: Session, comment_id: int) -> Comment:
         query = session.query(self._model).options(
             joinedload(self._model.author),
             joinedload(self._model.post),
         ).filter_by(id=comment_id)
-        return query.first()
+        comment = query.first()
+        if comment is None:
+            raise CommentNotFoundException(
+                f'Комментарий с id={comment_id} не найден'
+            )
+        return comment
 
     def get_all(self, session: Session) -> list[Comment]:
         query = session.query(self._model).options(

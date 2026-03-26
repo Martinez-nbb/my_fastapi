@@ -2,6 +2,7 @@ from typing import Type
 
 from sqlalchemy.orm import Session, joinedload
 
+from src.core.exceptions.database_exceptions import PostNotFoundException
 from src.infrastructure.sqlite.models.post import Post
 from src.schemas.posts import PostUpdateSchema
 
@@ -10,13 +11,19 @@ class PostRepository:
     def __init__(self):
         self._model: Type[Post] = Post
 
-    def get(self, session: Session, post_id: int) -> Post | None:
+    def get(self, session: Session, post_id: int) -> Post:
         query = session.query(self._model).options(
             joinedload(self._model.author),
             joinedload(self._model.location),
             joinedload(self._model.category),
         ).filter_by(id=post_id)
-        return query.first()
+
+        post = query.first()
+
+        if post is None:
+            raise PostNotFoundException(f'Публикация с id={post_id} не найдена')
+
+        return post
 
     def get_all(self, session: Session) -> list[Post]:
         query = session.query(self._model).options(

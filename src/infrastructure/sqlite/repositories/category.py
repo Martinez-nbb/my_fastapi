@@ -2,6 +2,7 @@ from typing import Type
 
 from sqlalchemy.orm import Session
 
+from src.core.exceptions.database_exceptions import CategoryNotFoundException
 from src.infrastructure.sqlite.models.category import Category
 from src.schemas.categories import CategoryUpdateSchema
 
@@ -10,9 +11,14 @@ class CategoryRepository:
     def __init__(self):
         self._model: Type[Category] = Category
 
-    def get(self, session: Session, category_id: int) -> Category | None:
+    def get(self, session: Session, category_id: int) -> Category:
         query = session.query(self._model).filter_by(id=category_id)
-        return query.first()
+        category = query.first()
+        if category is None:
+            raise CategoryNotFoundException(
+                f'Категория с id={category_id} не найдена'
+            )
+        return category
 
     def get_by_slug(
         self,

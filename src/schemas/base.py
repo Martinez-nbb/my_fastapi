@@ -39,8 +39,6 @@ class BaseTimestampSchema(BaseModel):
 
 
 class SlugValidatorMixin(BaseModel):
-    """Миксин для валидации slug полей."""
-
     @field_validator('slug')
     @classmethod
     def validate_slug(cls, value: str) -> str:
@@ -53,8 +51,6 @@ class SlugValidatorMixin(BaseModel):
 
 
 class EmailValidatorMixin(BaseModel):
-    """Миксин для валидации email полей."""
-
     @field_validator('email')
     @classmethod
     def validate_email(cls, value: str | None) -> str | None:
@@ -67,8 +63,6 @@ class EmailValidatorMixin(BaseModel):
 
 
 class UsernameValidatorMixin(BaseModel):
-    """Миксин для валидации имени пользователя."""
-
     @field_validator('username')
     @classmethod
     def validate_username(cls, value: str) -> str:
@@ -85,8 +79,6 @@ class UsernameValidatorMixin(BaseModel):
 
 
 class TextValidatorMixin(BaseModel):
-    """Миксин для валидации текстовых полей."""
-
     @field_validator('text')
     @classmethod
     def validate_text(cls, value: str) -> str:

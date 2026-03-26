@@ -20,7 +20,6 @@ from src.core.exceptions.domain_exceptions import (
 )
 
 __all__ = [
-    # Database exceptions
     'BaseDatabaseException',
     'UserNotFoundException',
     'UserUsernameAlreadyExistsException',
@@ -29,7 +28,6 @@ __all__ = [
     'LocationNotFoundException',
     'PostNotFoundException',
     'CommentNotFoundException',
-    # Domain exceptions
     'BaseDomainException',
     'UserNotFoundByIdException',
     'UserNotFoundByUsernameException',

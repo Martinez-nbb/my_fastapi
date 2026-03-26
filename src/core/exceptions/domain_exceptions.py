@@ -2,8 +2,6 @@ from pydantic import EmailStr
 
 
 class BaseDomainException(Exception):
-    """Базовое исключение для ошибок предметной области."""
-
     def __init__(self, detail: str) -> None:
         self._detail = detail
 
@@ -12,8 +10,6 @@ class BaseDomainException(Exception):
 
 
 class UserNotFoundByIdException(BaseDomainException):
-    """Пользователь не найден по идентификатору."""
-
     _exception_text_template = "Пользователь с id '{id}' не найден"
 
     def __init__(self, id: int) -> None:
@@ -24,8 +20,6 @@ class UserNotFoundByIdException(BaseDomainException):
 
 
 class UserNotFoundByUsernameException(BaseDomainException):
-    """Пользователь не найден по имени пользователя."""
-
     _exception_text_template = "Пользователь с логином '{username}' не найден"
 
     def __init__(self, username: str) -> None:
@@ -36,8 +30,6 @@ class UserNotFoundByUsernameException(BaseDomainException):
 
 
 class UserUsernameOrEmailIsNotUniqueException(BaseDomainException):
-    """Пользователь с таким именем или email уже существует."""
-
     def __init__(self, detail: str) -> None:
         self._exception_text_template = detail
         super().__init__(detail=self._exception_text_template)
@@ -58,8 +50,6 @@ class UserUsernameOrEmailIsNotUniqueException(BaseDomainException):
 
 
 class CategoryNotFoundByIdException(BaseDomainException):
-    """Категория не найдена по идентификатору."""
-
     _exception_text_template = "Категория с id '{id}' не найдена"
 
     def __init__(self, id: int) -> None:
@@ -70,8 +60,6 @@ class CategoryNotFoundByIdException(BaseDomainException):
 
 
 class LocationNotFoundByIdException(BaseDomainException):
-    """Местоположение не найдено по идентификатору."""
-
     _exception_text_template = "Местоположение с id '{id}' не найдено"
 
     def __init__(self, id: int) -> None:
@@ -82,8 +70,6 @@ class LocationNotFoundByIdException(BaseDomainException):
 
 
 class PostNotFoundByIdException(BaseDomainException):
-    """Публикация не найдена по идентификатору."""
-
     _exception_text_template = "Публикация с id '{id}' не найдена"
 
     def __init__(self, id: int) -> None:
@@ -94,8 +80,6 @@ class PostNotFoundByIdException(BaseDomainException):
 
 
 class CommentNotFoundByIdException(BaseDomainException):
-    """Комментарий не найден по идентификатору."""
-
     _exception_text_template = "Комментарий с id '{id}' не найден"
 
     def __init__(self, id: int) -> None:

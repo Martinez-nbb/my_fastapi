@@ -1,7 +1,13 @@
 from pydantic import BaseModel, ConfigDict, Field, SecretStr
 
+from src.schemas.base import (
+    BaseIdSchema,
+    EmailValidatorMixin,
+    UsernameValidatorMixin,
+)
 
-class UserBaseSchema(BaseModel):
+
+class UserBaseSchema(UsernameValidatorMixin, EmailValidatorMixin):
     username: str = Field(
         ...,
         min_length=3,

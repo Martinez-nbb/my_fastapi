@@ -4,10 +4,11 @@ from src.schemas.base import (
     BaseCreatedAtSchema,
     BaseIdSchema,
     BasePublishedSchema,
+    SlugValidatorMixin,
 )
 
 
-class CategoryBaseSchema(BaseModel):
+class CategoryBaseSchema(SlugValidatorMixin):
     title: str = Field(
         ...,
         min_length=1,
@@ -26,7 +27,6 @@ class CategoryBaseSchema(BaseModel):
         ...,
         min_length=1,
         max_length=50,
-        pattern=r'^[a-zA-Z0-9_-]+$',
         description='Идентификатор страницы для URL',
         title='Slug (URL-идентификатор)',
     )

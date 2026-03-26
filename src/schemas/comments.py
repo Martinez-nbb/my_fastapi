@@ -4,11 +4,12 @@ from src.schemas.base import (
     BaseCreatedAtSchema,
     BaseIdSchema,
     BasePublishedSchema,
+    TextValidatorMixin,
 )
 from src.schemas.users import UserResponseSchema
 
 
-class CommentBaseSchema(BaseModel):
+class CommentBaseSchema(TextValidatorMixin):
     text: str = Field(
         ...,
         min_length=1,

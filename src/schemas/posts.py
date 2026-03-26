@@ -6,13 +6,14 @@ from src.schemas.base import (
     BaseCreatedAtSchema,
     BaseIdSchema,
     BasePublishedSchema,
+    TextValidatorMixin,
 )
 from src.schemas.categories import CategoryResponseSchema
 from src.schemas.locations import LocationResponseSchema
 from src.schemas.users import UserResponseSchema
 
 
-class PostBaseSchema(BaseModel):
+class PostBaseSchema(TextValidatorMixin):
     title: str = Field(
         ...,
         min_length=1,

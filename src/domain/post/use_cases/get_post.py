@@ -20,4 +20,4 @@ class GetPostUseCase:
             except PostNotFoundException as exc:
                 raise PostNotFoundByIdException(id=post_id)
 
-        return PostResponseSchema.model_validate(obj=post)
+            return PostResponseSchema.model_validate(obj=post)

@@ -23,7 +23,7 @@ class CommentRepository:
             ).filter_by(id=comment_id)
             comment = query.first()
             if comment is None:
-                raise CommentNotFoundException(f'Комментарий с идентификатором {comment_id} не найден')
+                raise CommentNotFoundException(comment_id=comment_id)
             return comment
         except CommentNotFoundException:
             raise

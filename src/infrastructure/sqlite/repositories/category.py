@@ -21,7 +21,7 @@ class CategoryRepository:
             query = session.query(self._model).filter_by(id=category_id)
             category = query.first()
             if category is None:
-                raise CategoryNotFoundException(f'Категория с идентификатором {category_id} не найдена')
+                raise CategoryNotFoundException(category_id=category_id)
             return category
         except CategoryNotFoundException:
             raise
@@ -53,9 +53,7 @@ class CategoryRepository:
             return category
         except SQLAlchemyError as exc:
             if 'slug' in str(exc.orig).lower():
-                raise CategorySlugAlreadyExistsException(
-                    f'Категория со slug {category.slug} уже существует'
-                )
+                raise CategorySlugAlreadyExistsException(slug=category.slug)
             raise handle_database_exception(exc, 'категория')
 
     def update(
@@ -72,9 +70,7 @@ class CategoryRepository:
             return category
         except SQLAlchemyError as exc:
             if 'slug' in str(exc.orig).lower():
-                raise CategorySlugAlreadyExistsException(
-                    f'Категория со slug {category.slug} уже существует'
-                )
+                raise CategorySlugAlreadyExistsException(slug=category.slug)
             raise handle_database_exception(exc, 'категория')
 
     def delete(self, session: Session, category: Category) -> None:

@@ -5,7 +5,7 @@ from src.core.exceptions.database_exceptions import (
 )
 from src.core.exceptions.domain_exceptions import (
     UserNotFoundByIdException,
-    UserNotFoundByUsernameException,
+    UserUsernameOrEmailIsNotUniqueException,
 )
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.user import User
@@ -33,7 +33,7 @@ class CreateUserUseCase:
                 username=data.username,
             )
             if existing is not None:
-                raise UserNotFoundByUsernameException(username=data.username)
+                raise UserUsernameOrEmailIsNotUniqueException.from_username(data.username)
 
             user = User(
                 username=data.username,
@@ -64,7 +64,7 @@ class UpdateUserUseCase:
                     session=session,
                     user_id=user_id,
                 )
-            except UserNotFoundException as exc:
+            except UserNotFoundException:
                 raise UserNotFoundByIdException(id=user_id)
 
             self._repo.update(
@@ -88,7 +88,7 @@ class DeleteUserUseCase:
                     session=session,
                     user_id=user_id,
                 )
-            except UserNotFoundException as exc:
+            except UserNotFoundException:
                 raise UserNotFoundByIdException(id=user_id)
 
             self._repo.delete(session=session, user=user)

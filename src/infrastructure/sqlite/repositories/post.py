@@ -26,7 +26,7 @@ class PostRepository:
             post = query.first()
 
             if post is None:
-                raise PostNotFoundException(f'Публикация с идентификатором {post_id} не найдена')
+                raise PostNotFoundException(post_id=post_id)
 
             return post
         except PostNotFoundException:

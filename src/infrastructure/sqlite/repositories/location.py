@@ -20,7 +20,7 @@ class LocationRepository:
             query = session.query(self._model).filter_by(id=location_id)
             location = query.first()
             if location is None:
-                raise LocationNotFoundException(f'Местоположение с идентификатором {location_id} не найдено')
+                raise LocationNotFoundException(location_id=location_id)
             return location
         except LocationNotFoundException:
             raise

@@ -6,7 +6,7 @@ from src.core.exceptions.database_exceptions import (
 )
 from src.core.exceptions.domain_exceptions import (
     PostNotFoundByIdException,
-    UserNotFoundByIdException,
+    AuthorNotFoundException,
 )
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.post import Post
@@ -32,8 +32,8 @@ class CreatePostUseCase:
                     session=session,
                     user_id=data.author_id,
                 )
-            except UserNotFoundException as exc:
-                raise UserNotFoundByIdException(id=data.author_id)
+            except UserNotFoundException:
+                raise AuthorNotFoundException(author_id=data.author_id)
 
             post = Post(
                 title=data.title,
@@ -66,7 +66,7 @@ class UpdatePostUseCase:
                     session=session,
                     post_id=post_id,
                 )
-            except PostNotFoundException as exc:
+            except PostNotFoundException:
                 raise PostNotFoundByIdException(id=post_id)
 
             self._repo.update(
@@ -90,7 +90,7 @@ class DeletePostUseCase:
                     session=session,
                     post_id=post_id,
                 )
-            except PostNotFoundException as exc:
+            except PostNotFoundException:
                 raise PostNotFoundByIdException(id=post_id)
 
             self._repo.delete(session=session, post=post)

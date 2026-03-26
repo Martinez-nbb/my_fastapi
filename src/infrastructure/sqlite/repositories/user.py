@@ -22,7 +22,7 @@ class UserRepository:
             query = session.query(self._model).filter_by(id=user_id)
             user = query.first()
             if user is None:
-                raise UserNotFoundException(f'Пользователь с идентификатором {user_id} не найден')
+                raise UserNotFoundException(user_id=user_id)
             return user
         except UserNotFoundException:
             raise
@@ -65,13 +65,9 @@ class UserRepository:
             return user
         except SQLAlchemyError as exc:
             if 'username' in str(exc.orig).lower():
-                raise UserUsernameAlreadyExistsException(
-                    f'Пользователь с именем {user.username} уже существует'
-                )
+                raise UserUsernameAlreadyExistsException(username=user.username)
             if 'email' in str(exc.orig).lower():
-                raise UserEmailAlreadyExistsException(
-                    f'Пользователь с email {user.email} уже существует'
-                )
+                raise UserEmailAlreadyExistsException(email=user.email)
             raise handle_database_exception(exc, 'пользователь')
 
     def update(
@@ -88,13 +84,9 @@ class UserRepository:
             return user
         except SQLAlchemyError as exc:
             if 'username' in str(exc.orig).lower():
-                raise UserUsernameAlreadyExistsException(
-                    f'Пользователь с именем {user.username} уже существует'
-                )
+                raise UserUsernameAlreadyExistsException(username=user.username)
             if 'email' in str(exc.orig).lower():
-                raise UserEmailAlreadyExistsException(
-                    f'Пользователь с email {user.email} уже существует'
-                )
+                raise UserEmailAlreadyExistsException(email=user.email)
             raise handle_database_exception(exc, 'пользователь')
 
     def delete(self, session: Session, user: User) -> None:

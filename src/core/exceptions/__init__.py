@@ -11,6 +11,7 @@ from src.core.exceptions.database_exceptions import (
     DatabaseConnectionError,
     DatabaseIntegrityError,
     DatabaseOperationalError,
+    DatabaseTimeoutError,
     handle_database_exception,
 )
 from src.core.exceptions.domain_exceptions import (
@@ -19,12 +20,16 @@ from src.core.exceptions.domain_exceptions import (
     UserNotFoundByUsernameException,
     UserUsernameOrEmailIsNotUniqueException,
     CategoryNotFoundByIdException,
+    CategoryNotFoundBySlugException,
     LocationNotFoundByIdException,
     PostNotFoundByIdException,
+    PostNotFoundException,
     CommentNotFoundByIdException,
+    AuthorNotFoundException,
 )
 
 __all__ = [
+    # Database exceptions
     'BaseDatabaseException',
     'UserNotFoundException',
     'UserUsernameAlreadyExistsException',
@@ -37,13 +42,18 @@ __all__ = [
     'DatabaseConnectionError',
     'DatabaseIntegrityError',
     'DatabaseOperationalError',
+    'DatabaseTimeoutError',
     'handle_database_exception',
+    # Domain exceptions
     'BaseDomainException',
     'UserNotFoundByIdException',
     'UserNotFoundByUsernameException',
     'UserUsernameOrEmailIsNotUniqueException',
     'CategoryNotFoundByIdException',
+    'CategoryNotFoundBySlugException',
     'LocationNotFoundByIdException',
     'PostNotFoundByIdException',
+    'PostNotFoundException',
     'CommentNotFoundByIdException',
+    'AuthorNotFoundException',
 ]

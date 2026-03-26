@@ -36,7 +36,7 @@ class CreateCommentUseCase:
                     session=session,
                     post_id=data.post_id,
                 )
-            except PostNotFoundException as exc:
+            except PostNotFoundException:
                 raise PostNotFoundByIdException(id=data.post_id)
 
             comment = Comment(
@@ -67,7 +67,7 @@ class UpdateCommentUseCase:
                     session=session,
                     comment_id=comment_id,
                 )
-            except CommentNotFoundException as exc:
+            except CommentNotFoundException:
                 raise CommentNotFoundByIdException(id=comment_id)
 
             self._repo.update(
@@ -91,7 +91,7 @@ class DeleteCommentUseCase:
                     session=session,
                     comment_id=comment_id,
                 )
-            except CommentNotFoundException as exc:
+            except CommentNotFoundException:
                 raise CommentNotFoundByIdException(id=comment_id)
 
             self._repo.delete(session=session, comment=comment)

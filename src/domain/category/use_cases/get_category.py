@@ -20,4 +20,4 @@ class GetCategoryUseCase:
             except CategoryNotFoundException as exc:
                 raise CategoryNotFoundByIdException(id=category_id)
 
-        return CategoryResponseSchema.model_validate(obj=category)
+            return CategoryResponseSchema.model_validate(obj=category)

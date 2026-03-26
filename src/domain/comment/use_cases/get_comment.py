@@ -20,4 +20,4 @@ class GetCommentUseCase:
             except CommentNotFoundException as exc:
                 raise CommentNotFoundByIdException(id=comment_id)
 
-        return CommentResponseSchema.model_validate(obj=comment)
+            return CommentResponseSchema.model_validate(obj=comment)

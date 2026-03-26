@@ -20,4 +20,4 @@ class GetLocationUseCase:
             except LocationNotFoundException as exc:
                 raise LocationNotFoundByIdException(id=location_id)
 
-        return LocationResponseSchema.model_validate(obj=location)
+            return LocationResponseSchema.model_validate(obj=location)

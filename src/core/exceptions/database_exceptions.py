@@ -53,14 +53,14 @@ class DatabaseOperationalError(BaseDatabaseException):
 def handle_database_exception(exc: SQLAlchemyError, entity: str = 'Запись') -> BaseDatabaseException:
     if isinstance(exc, IntegrityError):
         if 'username' in str(exc.orig).lower():
-            return UserUsernameAlreadyExistsException(f'Имя пользователя уже существует')
+            return UserUsernameAlreadyExistsException('Имя пользователя уже существует')
         if 'email' in str(exc.orig).lower():
-            return UserEmailAlreadyExistsException(f'Email уже существует')
+            return UserEmailAlreadyExistsException('Email уже существует')
         if 'slug' in str(exc.orig).lower():
-            return CategorySlugAlreadyExistsException(f'Slug уже существует')
-        return DatabaseIntegrityError(f'Нарушение целостности БД при работе с {entity}')
+            return CategorySlugAlreadyExistsException('Slug уже существует')
+        return DatabaseIntegrityError(f'Нарушение целостности базы данных при работе с сущностью {entity}')
     
     if isinstance(exc, DatabaseOperationalError):
-        return DatabaseConnectionError(f'Ошибка подключения к БД: {exc}')
+        return DatabaseConnectionError(f'Ошибка подключения к базе данных: {exc}')
     
-    return BaseDatabaseException(f'Ошибка БД при работе с {entity}: {exc}')
+    return BaseDatabaseException(f'Ошибка базы данных при работе с сущностью {entity}: {exc}')

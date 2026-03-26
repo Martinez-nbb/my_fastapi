@@ -22,12 +22,12 @@ class UserRepository:
             query = session.query(self._model).filter_by(id=user_id)
             user = query.first()
             if user is None:
-                raise UserNotFoundException(f'Пользователь с id={user_id} не найден')
+                raise UserNotFoundException(f'Пользователь с идентификатором {user_id} не найден')
             return user
         except UserNotFoundException:
             raise
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'пользователем')
+            raise handle_database_exception(exc, 'пользователь')
 
     def get_by_username(
         self,
@@ -38,7 +38,7 @@ class UserRepository:
             query = session.query(self._model).filter_by(username=username)
             return query.first()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'поиском пользователя')
+            raise handle_database_exception(exc, 'пользователь')
 
     def get_by_email(
         self,
@@ -49,13 +49,13 @@ class UserRepository:
             query = session.query(self._model).filter_by(email=email)
             return query.first()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'поиском пользователя по email')
+            raise handle_database_exception(exc, 'пользователь')
 
     def get_all(self, session: Session) -> list[User]:
         try:
             return session.query(self._model).all()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'получением списка пользователей')
+            raise handle_database_exception(exc, 'пользователь')
 
     def create(self, session: Session, user: User) -> User:
         try:
@@ -66,13 +66,13 @@ class UserRepository:
         except SQLAlchemyError as exc:
             if 'username' in str(exc.orig).lower():
                 raise UserUsernameAlreadyExistsException(
-                    f'Пользователь с именем "{user.username}" уже существует'
+                    f'Пользователь с именем {user.username} уже существует'
                 )
             if 'email' in str(exc.orig).lower():
                 raise UserEmailAlreadyExistsException(
-                    f'Пользователь с email "{user.email}" уже существует'
+                    f'Пользователь с email {user.email} уже существует'
                 )
-            raise handle_database_exception(exc, 'созданием пользователя')
+            raise handle_database_exception(exc, 'пользователь')
 
     def update(
         self,
@@ -89,17 +89,17 @@ class UserRepository:
         except SQLAlchemyError as exc:
             if 'username' in str(exc.orig).lower():
                 raise UserUsernameAlreadyExistsException(
-                    f'Пользователь с именем "{user.username}" уже существует'
+                    f'Пользователь с именем {user.username} уже существует'
                 )
             if 'email' in str(exc.orig).lower():
                 raise UserEmailAlreadyExistsException(
-                    f'Пользователь с email "{user.email}" уже существует'
+                    f'Пользователь с email {user.email} уже существует'
                 )
-            raise handle_database_exception(exc, 'обновлением пользователя')
+            raise handle_database_exception(exc, 'пользователь')
 
     def delete(self, session: Session, user: User) -> None:
         try:
             session.delete(user)
             session.flush()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'удалением пользователя')
+            raise handle_database_exception(exc, 'пользователь')

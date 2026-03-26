@@ -21,12 +21,12 @@ class CategoryRepository:
             query = session.query(self._model).filter_by(id=category_id)
             category = query.first()
             if category is None:
-                raise CategoryNotFoundException(f'Категория с id={category_id} не найдена')
+                raise CategoryNotFoundException(f'Категория с идентификатором {category_id} не найдена')
             return category
         except CategoryNotFoundException:
             raise
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'категорией')
+            raise handle_database_exception(exc, 'категория')
 
     def get_by_slug(
         self,
@@ -37,13 +37,13 @@ class CategoryRepository:
             query = session.query(self._model).filter_by(slug=slug)
             return query.first()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'поиском категории по slug')
+            raise handle_database_exception(exc, 'категория')
 
     def get_all(self, session: Session) -> list[Category]:
         try:
             return session.query(self._model).all()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'получением списка категорий')
+            raise handle_database_exception(exc, 'категория')
 
     def create(self, session: Session, category: Category) -> Category:
         try:
@@ -54,9 +54,9 @@ class CategoryRepository:
         except SQLAlchemyError as exc:
             if 'slug' in str(exc.orig).lower():
                 raise CategorySlugAlreadyExistsException(
-                    f'Категория со slug "{category.slug}" уже существует'
+                    f'Категория со slug {category.slug} уже существует'
                 )
-            raise handle_database_exception(exc, 'созданием категории')
+            raise handle_database_exception(exc, 'категория')
 
     def update(
         self,
@@ -73,13 +73,13 @@ class CategoryRepository:
         except SQLAlchemyError as exc:
             if 'slug' in str(exc.orig).lower():
                 raise CategorySlugAlreadyExistsException(
-                    f'Категория со slug "{category.slug}" уже существует'
+                    f'Категория со slug {category.slug} уже существует'
                 )
-            raise handle_database_exception(exc, 'обновлением категории')
+            raise handle_database_exception(exc, 'категория')
 
     def delete(self, session: Session, category: Category) -> None:
         try:
             session.delete(category)
             session.flush()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'удалением категории')
+            raise handle_database_exception(exc, 'категория')

@@ -23,12 +23,12 @@ class CommentRepository:
             ).filter_by(id=comment_id)
             comment = query.first()
             if comment is None:
-                raise CommentNotFoundException(f'Комментарий с id={comment_id} не найден')
+                raise CommentNotFoundException(f'Комментарий с идентификатором {comment_id} не найден')
             return comment
         except CommentNotFoundException:
             raise
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'комментарием')
+            raise handle_database_exception(exc, 'комментарий')
 
     def get_all(self, session: Session) -> list[Comment]:
         try:
@@ -38,7 +38,7 @@ class CommentRepository:
             )
             return query.all()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'получением списка комментариев')
+            raise handle_database_exception(exc, 'комментарий')
 
     def get_by_post(
         self,
@@ -52,7 +52,7 @@ class CommentRepository:
             ).filter_by(post_id=post_id)
             return query.all()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'поиском комментариев по посту')
+            raise handle_database_exception(exc, 'комментарий')
 
     def get_by_author(
         self,
@@ -66,7 +66,7 @@ class CommentRepository:
             ).filter_by(author_id=author_id)
             return query.all()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'поиском комментариев по автору')
+            raise handle_database_exception(exc, 'комментарий')
 
     def create(self, session: Session, comment: Comment) -> Comment:
         try:
@@ -75,7 +75,7 @@ class CommentRepository:
             session.refresh(comment)
             return comment
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'созданием комментария')
+            raise handle_database_exception(exc, 'комментарий')
 
     def update(
         self,
@@ -90,11 +90,11 @@ class CommentRepository:
             session.refresh(comment)
             return comment
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'обновлением комментария')
+            raise handle_database_exception(exc, 'комментарий')
 
     def delete(self, session: Session, comment: Comment) -> None:
         try:
             session.delete(comment)
             session.flush()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'удалением комментария')
+            raise handle_database_exception(exc, 'комментарий')

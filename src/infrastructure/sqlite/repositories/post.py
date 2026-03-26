@@ -26,13 +26,13 @@ class PostRepository:
             post = query.first()
 
             if post is None:
-                raise PostNotFoundException(f'Публикация с id={post_id} не найдена')
+                raise PostNotFoundException(f'Публикация с идентификатором {post_id} не найдена')
 
             return post
         except PostNotFoundException:
             raise
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'публикацией')
+            raise handle_database_exception(exc, 'публикация')
 
     def get_all(self, session: Session) -> list[Post]:
         try:
@@ -43,7 +43,7 @@ class PostRepository:
             )
             return query.all()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'получением списка публикаций')
+            raise handle_database_exception(exc, 'публикация')
 
     def get_by_author(
         self,
@@ -58,7 +58,7 @@ class PostRepository:
             ).filter_by(author_id=author_id)
             return query.all()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'поиском публикаций по автору')
+            raise handle_database_exception(exc, 'публикация')
 
     def get_by_category(
         self,
@@ -73,7 +73,7 @@ class PostRepository:
             ).filter_by(category_id=category_id)
             return query.all()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'поиском публикаций по категории')
+            raise handle_database_exception(exc, 'публикация')
 
     def get_by_location(
         self,
@@ -88,7 +88,7 @@ class PostRepository:
             ).filter_by(location_id=location_id)
             return query.all()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'поиском публикаций по местоположению')
+            raise handle_database_exception(exc, 'публикация')
 
     def create(self, session: Session, post: Post) -> Post:
         try:
@@ -97,7 +97,7 @@ class PostRepository:
             session.refresh(post)
             return post
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'созданием публикации')
+            raise handle_database_exception(exc, 'публикация')
 
     def update(
         self,
@@ -112,11 +112,11 @@ class PostRepository:
             session.refresh(post)
             return post
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'обновлением публикации')
+            raise handle_database_exception(exc, 'публикация')
 
     def delete(self, session: Session, post: Post) -> None:
         try:
             session.delete(post)
             session.flush()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'удалением публикации')
+            raise handle_database_exception(exc, 'публикация')

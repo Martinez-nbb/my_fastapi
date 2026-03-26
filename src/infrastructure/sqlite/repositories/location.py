@@ -20,18 +20,18 @@ class LocationRepository:
             query = session.query(self._model).filter_by(id=location_id)
             location = query.first()
             if location is None:
-                raise LocationNotFoundException(f'Местоположение с id={location_id} не найдено')
+                raise LocationNotFoundException(f'Местоположение с идентификатором {location_id} не найдено')
             return location
         except LocationNotFoundException:
             raise
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'местоположением')
+            raise handle_database_exception(exc, 'местоположение')
 
     def get_all(self, session: Session) -> list[Location]:
         try:
             return session.query(self._model).all()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'получением списка местоположений')
+            raise handle_database_exception(exc, 'местоположение')
 
     def create(self, session: Session, location: Location) -> Location:
         try:
@@ -40,7 +40,7 @@ class LocationRepository:
             session.refresh(location)
             return location
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'созданием местоположения')
+            raise handle_database_exception(exc, 'местоположение')
 
     def update(
         self,
@@ -55,11 +55,11 @@ class LocationRepository:
             session.refresh(location)
             return location
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'обновлением местоположения')
+            raise handle_database_exception(exc, 'местоположение')
 
     def delete(self, session: Session, location: Location) -> None:
         try:
             session.delete(location)
             session.flush()
         except SQLAlchemyError as exc:
-            raise handle_database_exception(exc, 'удалением местоположения')
+            raise handle_database_exception(exc, 'местоположение')

@@ -10,7 +10,7 @@ class BaseDomainException(Exception):
 
 
 class UserNotFoundByIdException(BaseDomainException):
-    _exception_text_template = "Пользователь с id '{id}' не найден"
+    _exception_text_template = "Пользователь с идентификатором {id} не найден"
 
     def __init__(self, id: int) -> None:
         self._exception_text_template = self._exception_text_template.format(
@@ -20,7 +20,7 @@ class UserNotFoundByIdException(BaseDomainException):
 
 
 class UserNotFoundByUsernameException(BaseDomainException):
-    _exception_text_template = "Пользователь с логином '{username}' не найден"
+    _exception_text_template = "Пользователь с именем {username} не найден"
 
     def __init__(self, username: str) -> None:
         self._exception_text_template = self._exception_text_template.format(
@@ -38,19 +38,19 @@ class UserUsernameOrEmailIsNotUniqueException(BaseDomainException):
     def from_username(
         cls, username: str
     ) -> 'UserUsernameOrEmailIsNotUniqueException':
-        detail = f"Пользователь с логином '{username}' уже существует"
+        detail = f"Пользователь с именем {username} уже существует"
         return cls(detail=detail)
 
     @classmethod
     def from_email(
         cls, email: str
     ) -> 'UserUsernameOrEmailIsNotUniqueException':
-        detail = f"Пользователь с email '{email}' уже существует"
+        detail = f"Пользователь с email {email} уже существует"
         return cls(detail=detail)
 
 
 class CategoryNotFoundByIdException(BaseDomainException):
-    _exception_text_template = "Категория с id '{id}' не найдена"
+    _exception_text_template = "Категория с идентификатором {id} не найдена"
 
     def __init__(self, id: int) -> None:
         self._exception_text_template = self._exception_text_template.format(
@@ -60,7 +60,7 @@ class CategoryNotFoundByIdException(BaseDomainException):
 
 
 class LocationNotFoundByIdException(BaseDomainException):
-    _exception_text_template = "Местоположение с id '{id}' не найдено"
+    _exception_text_template = "Местоположение с идентификатором {id} не найдено"
 
     def __init__(self, id: int) -> None:
         self._exception_text_template = self._exception_text_template.format(
@@ -70,7 +70,7 @@ class LocationNotFoundByIdException(BaseDomainException):
 
 
 class PostNotFoundByIdException(BaseDomainException):
-    _exception_text_template = "Публикация с id '{id}' не найдена"
+    _exception_text_template = "Публикация с идентификатором {id} не найдена"
 
     def __init__(self, id: int) -> None:
         self._exception_text_template = self._exception_text_template.format(
@@ -80,7 +80,7 @@ class PostNotFoundByIdException(BaseDomainException):
 
 
 class CommentNotFoundByIdException(BaseDomainException):
-    _exception_text_template = "Комментарий с id '{id}' не найден"
+    _exception_text_template = "Комментарий с идентификатором {id} не найден"
 
     def __init__(self, id: int) -> None:
         self._exception_text_template = self._exception_text_template.format(

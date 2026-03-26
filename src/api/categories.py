@@ -19,13 +19,13 @@ from src.schemas.categories import (
 router = APIRouter()
 
 
-@router.get('/list')
+@router.get('/list', status_code=status.HTTP_200_OK, response_model=list[CategoryResponseSchema])
 async def get_categories_list() -> list[CategoryResponseSchema]:
     use_case = GetCategoriesUseCase()
     return await use_case.execute()
 
 
-@router.get('/get/{category_id}')
+@router.get('/get/{category_id}', status_code=status.HTTP_200_OK, response_model=CategoryResponseSchema)
 async def get_category(category_id: int) -> CategoryResponseSchema:
     use_case = GetCategoryUseCase()
     try:
@@ -37,7 +37,7 @@ async def get_category(category_id: int) -> CategoryResponseSchema:
         )
 
 
-@router.post('/create')
+@router.post('/create', status_code=status.HTTP_201_CREATED, response_model=CategoryResponseSchema)
 async def create_category(
     category: CategoryCreateSchema,
 ) -> CategoryResponseSchema:
@@ -45,7 +45,7 @@ async def create_category(
     return await use_case.execute(data=category)
 
 
-@router.put('/update/{category_id}')
+@router.put('/update/{category_id}', status_code=status.HTTP_200_OK, response_model=CategoryResponseSchema)
 async def update_category(
     category_id: int,
     category: CategoryUpdateSchema,
@@ -63,7 +63,7 @@ async def update_category(
         )
 
 
-@router.delete('/delete/{category_id}')
+@router.delete('/delete/{category_id}', status_code=status.HTTP_200_OK)
 async def delete_category(category_id: int) -> dict:
     use_case = DeleteCategoryUseCase()
     try:

@@ -20,13 +20,13 @@ from src.schemas.users import (
 user_router = APIRouter()
 
 
-@user_router.get('/')
+@user_router.get('/', status_code=status.HTTP_200_OK, response_model=list[UserResponseSchema])
 async def get_users() -> list[UserResponseSchema]:
     use_case = GetUsersUseCase()
     return await use_case.execute()
 
 
-@user_router.get('/{user_id}')
+@user_router.get('/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponseSchema)
 async def get_user(user_id: int) -> UserResponseSchema:
     use_case = GetUserUseCase()
     try:
@@ -38,7 +38,7 @@ async def get_user(user_id: int) -> UserResponseSchema:
         )
 
 
-@user_router.post('/')
+@user_router.post('/', status_code=status.HTTP_201_CREATED, response_model=UserResponseSchema)
 async def create_user(data: UserCreateSchema) -> UserResponseSchema:
     use_case = CreateUserUseCase()
     try:
@@ -50,7 +50,7 @@ async def create_user(data: UserCreateSchema) -> UserResponseSchema:
         )
 
 
-@user_router.put('/{user_id}')
+@user_router.put('/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponseSchema)
 async def update_user(
     user_id: int,
     data: UserUpdateSchema,
@@ -68,7 +68,7 @@ async def update_user(
         )
 
 
-@user_router.delete('/{user_id}')
+@user_router.delete('/{user_id}', status_code=status.HTTP_200_OK)
 async def delete_user(user_id: int) -> dict:
     use_case = DeleteUserUseCase()
     try:

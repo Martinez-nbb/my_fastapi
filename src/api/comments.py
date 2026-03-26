@@ -23,13 +23,13 @@ from src.schemas.comments import (
 router = APIRouter()
 
 
-@router.get('/list')
+@router.get('/list', status_code=status.HTTP_200_OK, response_model=list[CommentResponseSchema])
 async def get_comments_list() -> list[CommentResponseSchema]:
     use_case = GetCommentsUseCase()
     return await use_case.execute()
 
 
-@router.get('/list/by_post/{post_id}')
+@router.get('/list/by_post/{post_id}', status_code=status.HTTP_200_OK, response_model=list[CommentResponseSchema])
 async def get_comments_by_post(
     post_id: int,
 ) -> list[CommentResponseSchema]:
@@ -37,7 +37,7 @@ async def get_comments_by_post(
     return await use_case.execute(post_id=post_id)
 
 
-@router.get('/get/{comment_id}')
+@router.get('/get/{comment_id}', status_code=status.HTTP_200_OK, response_model=CommentResponseSchema)
 async def get_comment(comment_id: int) -> CommentResponseSchema:
     use_case = GetCommentUseCase()
     try:
@@ -49,7 +49,7 @@ async def get_comment(comment_id: int) -> CommentResponseSchema:
         )
 
 
-@router.post('/create')
+@router.post('/create', status_code=status.HTTP_201_CREATED, response_model=CommentResponseSchema)
 async def create_comment(
     comment: CommentCreateSchema,
     author_id: int,
@@ -67,7 +67,7 @@ async def create_comment(
         )
 
 
-@router.put('/update/{comment_id}')
+@router.put('/update/{comment_id}', status_code=status.HTTP_200_OK, response_model=CommentResponseSchema)
 async def update_comment(
     comment_id: int,
     comment: CommentUpdateSchema,
@@ -85,7 +85,7 @@ async def update_comment(
         )
 
 
-@router.delete('/delete/{comment_id}')
+@router.delete('/delete/{comment_id}', status_code=status.HTTP_200_OK)
 async def delete_comment(comment_id: int) -> dict:
     use_case = DeleteCommentUseCase()
     try:

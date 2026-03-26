@@ -20,13 +20,13 @@ from src.schemas.posts import (
 router = APIRouter()
 
 
-@router.get('/list')
+@router.get('/list', status_code=status.HTTP_200_OK, response_model=list[PostResponseSchema])
 async def get_posts_list() -> list[PostResponseSchema]:
     use_case = GetPostsUseCase()
     return await use_case.execute()
 
 
-@router.get('/get/{post_id}')
+@router.get('/get/{post_id}', status_code=status.HTTP_200_OK, response_model=PostResponseSchema)
 async def get_post(post_id: int) -> PostResponseSchema:
     use_case = GetPostUseCase()
     try:
@@ -38,7 +38,7 @@ async def get_post(post_id: int) -> PostResponseSchema:
         )
 
 
-@router.post('/create', status_code=status.HTTP_201_CREATED)
+@router.post('/create', status_code=status.HTTP_201_CREATED, response_model=PostResponseSchema)
 async def create_post(post: PostCreateSchema) -> PostResponseSchema:
     use_case = CreatePostUseCase()
     try:
@@ -50,7 +50,7 @@ async def create_post(post: PostCreateSchema) -> PostResponseSchema:
         )
 
 
-@router.put('/update/{post_id}')
+@router.put('/update/{post_id}', status_code=status.HTTP_200_OK, response_model=PostResponseSchema)
 async def update_post(
     post_id: int,
     post: PostUpdateSchema,
@@ -68,7 +68,7 @@ async def update_post(
         )
 
 
-@router.delete('/delete/{post_id}')
+@router.delete('/delete/{post_id}', status_code=status.HTTP_200_OK)
 async def delete_post(post_id: int) -> dict:
     use_case = DeletePostUseCase()
     try:

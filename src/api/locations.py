@@ -19,13 +19,13 @@ from src.schemas.locations import (
 router = APIRouter()
 
 
-@router.get('/list')
+@router.get('/list', status_code=status.HTTP_200_OK, response_model=list[LocationResponseSchema])
 async def get_locations_list() -> list[LocationResponseSchema]:
     use_case = GetLocationsUseCase()
     return await use_case.execute()
 
 
-@router.get('/get/{location_id}')
+@router.get('/get/{location_id}', status_code=status.HTTP_200_OK, response_model=LocationResponseSchema)
 async def get_location(location_id: int) -> LocationResponseSchema:
     use_case = GetLocationUseCase()
     try:
@@ -37,7 +37,7 @@ async def get_location(location_id: int) -> LocationResponseSchema:
         )
 
 
-@router.post('/create')
+@router.post('/create', status_code=status.HTTP_201_CREATED, response_model=LocationResponseSchema)
 async def create_location(
     location: LocationCreateSchema,
 ) -> LocationResponseSchema:
@@ -45,7 +45,7 @@ async def create_location(
     return await use_case.execute(data=location)
 
 
-@router.put('/update/{location_id}')
+@router.put('/update/{location_id}', status_code=status.HTTP_200_OK, response_model=LocationResponseSchema)
 async def update_location(
     location_id: int,
     location: LocationUpdateSchema,
@@ -63,7 +63,7 @@ async def update_location(
         )
 
 
-@router.delete('/delete/{location_id}')
+@router.delete('/delete/{location_id}', status_code=status.HTTP_200_OK)
 async def delete_location(location_id: int) -> dict:
     use_case = DeleteLocationUseCase()
     try:

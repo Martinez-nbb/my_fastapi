@@ -1,22 +1,12 @@
-from datetime import datetime
+import logging
 
-from src.core.exceptions.database_exceptions import (
-    CommentNotFoundException,
-    PostNotFoundException,
-)
-from src.core.exceptions.domain_exceptions import (
-    CommentNotFoundByIdException,
-    PostNotFoundByIdException,
-)
+from src.core.exceptions.database_exceptions import CommentNotFoundException
+from src.core.exceptions.domain_exceptions import CommentNotFoundByIdException
 from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.models.comment import Comment
 from src.infrastructure.sqlite.repositories.comment import CommentRepository
-from src.infrastructure.sqlite.repositories.post import PostRepository
-from src.schemas.comments import (
-    CommentCreateSchema,
-    CommentUpdateSchema,
-    CommentResponseSchema,
-)
+from src.schemas.comments import CommentResponseSchema
+
+logger = logging.getLogger(__name__)
 
 
 class GetCommentUseCase:
@@ -25,122 +15,20 @@ class GetCommentUseCase:
         self._repo = CommentRepository()
 
     async def execute(self, comment_id: int) -> CommentResponseSchema:
+        logger.debug('Получение комментария по id: %s', comment_id)
         with self._database.session() as session:
             try:
                 comment = self._repo.get(
                     session=session,
                     comment_id=comment_id,
                 )
-            except CommentNotFoundException:
+            except CommentNotFoundException as exc:
+                logger.error(
+                    'Комментарий не найден: comment_id=%s, ошибка: %s',
+                    comment_id,
+                    exc,
+                )
                 raise CommentNotFoundByIdException(id=comment_id)
 
-            return CommentResponseSchema.model_validate(obj=comment)
-
-
-class GetCommentsUseCase:
-    def __init__(self):
-        self._database = database
-        self._repo = CommentRepository()
-
-    async def execute(self) -> list[CommentResponseSchema]:
-        with self._database.session() as session:
-            comments = self._repo.get_all(session=session)
-            return [
-                CommentResponseSchema.model_validate(obj=comment)
-                for comment in comments
-            ]
-
-
-class GetCommentsByPostUseCase:
-    def __init__(self):
-        self._database = database
-        self._repo = CommentRepository()
-
-    async def execute(self, post_id: int) -> list[CommentResponseSchema]:
-        with self._database.session() as session:
-            comments = self._repo.get_by_post(
-                session=session,
-                post_id=post_id,
-            )
-            return [
-                CommentResponseSchema.model_validate(obj=comment)
-                for comment in comments
-            ]
-
-
-class CreateCommentUseCase:
-    def __init__(self):
-        self._database = database
-        self._repo = CommentRepository()
-        self._post_repo = PostRepository()
-
-    async def execute(
-        self,
-        data: CommentCreateSchema,
-        author_id: int,
-    ) -> CommentResponseSchema:
-        with self._database.session() as session:
-            try:
-                post = self._post_repo.get(
-                    session=session,
-                    post_id=data.post_id,
-                )
-            except PostNotFoundException:
-                raise PostNotFoundByIdException(id=data.post_id)
-
-            comment = Comment(
-                text=data.text,
-                post_id=data.post_id,
-                author_id=author_id,
-                is_published=data.is_published,
-                created_at=datetime.now(),
-            )
-            self._repo.create(session=session, comment=comment)
-
-            return CommentResponseSchema.model_validate(obj=comment)
-
-
-class UpdateCommentUseCase:
-    def __init__(self):
-        self._database = database
-        self._repo = CommentRepository()
-
-    async def execute(
-        self,
-        comment_id: int,
-        data: CommentUpdateSchema,
-    ) -> CommentResponseSchema:
-        with self._database.session() as session:
-            try:
-                comment = self._repo.get(
-                    session=session,
-                    comment_id=comment_id,
-                )
-            except CommentNotFoundException:
-                raise CommentNotFoundByIdException(id=comment_id)
-
-            self._repo.update(
-                session=session,
-                comment=comment,
-                data=data,
-            )
-
-            return CommentResponseSchema.model_validate(obj=comment)
-
-
-class DeleteCommentUseCase:
-    def __init__(self):
-        self._database = database
-        self._repo = CommentRepository()
-
-    async def execute(self, comment_id: int) -> None:
-        with self._database.session() as session:
-            try:
-                comment = self._repo.get(
-                    session=session,
-                    comment_id=comment_id,
-                )
-            except CommentNotFoundException:
-                raise CommentNotFoundByIdException(id=comment_id)
-
-            self._repo.delete(session=session, comment=comment)
+        logger.debug('Комментарий успешно получен: %s', comment_id)
+        return CommentResponseSchema.model_validate(obj=comment)

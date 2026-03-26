@@ -4,13 +4,15 @@ from src.core.exceptions.domain_exceptions import (
     CommentNotFoundByIdException,
     PostNotFoundByIdException,
 )
-from src.domain.comment.use_cases.get_comment import (
-    CreateCommentUseCase,
-    DeleteCommentUseCase,
-    GetCommentUseCase,
-    GetCommentsByPostUseCase,
+from src.domain.comment.use_cases.get_comment import GetCommentUseCase
+from src.domain.comment.use_cases.list_comments import (
     GetCommentsUseCase,
+    GetCommentsByPostUseCase,
+)
+from src.domain.comment.use_cases.comment_commands import (
+    CreateCommentUseCase,
     UpdateCommentUseCase,
+    DeleteCommentUseCase,
 )
 from src.schemas.comments import (
     CommentCreateSchema,

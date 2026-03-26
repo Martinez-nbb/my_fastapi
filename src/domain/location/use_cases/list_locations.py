@@ -11,7 +11,7 @@ class GetLocationsUseCase:
     async def execute(self) -> list[LocationResponseSchema]:
         with self._database.session() as session:
             locations = self._repo.get_all(session=session)
-        return [
-            LocationResponseSchema.model_validate(obj=loc)
-            for loc in locations
-        ]
+            return [
+                LocationResponseSchema.model_validate(obj=loc)
+                for loc in locations
+            ]

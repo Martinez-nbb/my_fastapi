@@ -11,7 +11,7 @@ class GetUsersUseCase:
     async def execute(self) -> list[UserResponseSchema]:
         with self._database.session() as session:
             users = self._repo.get_all(session=session)
-        return [
-            UserResponseSchema.model_validate(obj=user)
-            for user in users
-        ]
+            return [
+                UserResponseSchema.model_validate(obj=user)
+                for user in users
+            ]

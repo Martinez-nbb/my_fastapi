@@ -11,10 +11,10 @@ class GetCommentsUseCase:
     async def execute(self) -> list[CommentResponseSchema]:
         with self._database.session() as session:
             comments = self._repo.get_all(session=session)
-        return [
-            CommentResponseSchema.model_validate(obj=comment)
-            for comment in comments
-        ]
+            return [
+                CommentResponseSchema.model_validate(obj=comment)
+                for comment in comments
+            ]
 
 
 class GetCommentsByPostUseCase:
@@ -28,7 +28,7 @@ class GetCommentsByPostUseCase:
                 session=session,
                 post_id=post_id,
             )
-        return [
-            CommentResponseSchema.model_validate(obj=comment)
-            for comment in comments
-        ]
+            return [
+                CommentResponseSchema.model_validate(obj=comment)
+                for comment in comments
+            ]

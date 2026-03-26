@@ -11,7 +11,7 @@ class GetCategoriesUseCase:
     async def execute(self) -> list[CategoryResponseSchema]:
         with self._database.session() as session:
             categories = self._repo.get_all(session=session)
-        return [
-            CategoryResponseSchema.model_validate(obj=cat)
-            for cat in categories
-        ]
+            return [
+                CategoryResponseSchema.model_validate(obj=cat)
+                for cat in categories
+            ]

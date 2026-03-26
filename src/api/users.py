@@ -1,5 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status, HTTPException
 
+from src.core.exceptions.domain_exceptions import (
+    UserNotFoundByIdException,
+    UserNotFoundByUsernameException,
+)
 from src.domain.user.use_cases.get_user import (
     CreateUserUseCase,
     DeleteUserUseCase,
@@ -25,13 +29,25 @@ async def get_users() -> list[UserResponseSchema]:
 @user_router.get('/{user_id}')
 async def get_user(user_id: int) -> UserResponseSchema:
     use_case = GetUserUseCase()
-    return await use_case.execute(user_id=user_id)
+    try:
+        return await use_case.execute(user_id=user_id)
+    except UserNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail(),
+        )
 
 
 @user_router.post('/')
 async def create_user(data: UserCreateSchema) -> UserResponseSchema:
     use_case = CreateUserUseCase()
-    return await use_case.execute(data=data)
+    try:
+        return await use_case.execute(data=data)
+    except UserNotFoundByUsernameException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=exc.get_detail(),
+        )
 
 
 @user_router.put('/{user_id}')
@@ -40,14 +56,26 @@ async def update_user(
     data: UserUpdateSchema,
 ) -> UserResponseSchema:
     use_case = UpdateUserUseCase()
-    return await use_case.execute(
-        user_id=user_id,
-        data=data,
-    )
+    try:
+        return await use_case.execute(
+            user_id=user_id,
+            data=data,
+        )
+    except UserNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail(),
+        )
 
 
 @user_router.delete('/{user_id}')
 async def delete_user(user_id: int) -> dict:
     use_case = DeleteUserUseCase()
-    await use_case.execute(user_id=user_id)
+    try:
+        await use_case.execute(user_id=user_id)
+    except UserNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail(),
+        )
     return {'message': f'Пользователь с id={user_id} успешно удален'}

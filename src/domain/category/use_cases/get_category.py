@@ -1,7 +1,11 @@
 from datetime import datetime
 
-from fastapi import HTTPException
-
+from src.core.exceptions.database_exceptions import (
+    CategoryNotFoundException,
+)
+from src.core.exceptions.domain_exceptions import (
+    CategoryNotFoundByIdException,
+)
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.category import Category
 from src.infrastructure.sqlite.repositories.category import CategoryRepository
@@ -19,16 +23,13 @@ class GetCategoryUseCase:
 
     async def execute(self, category_id: int) -> CategoryResponseSchema:
         with self._database.session() as session:
-            category = self._repo.get(
-                session=session,
-                category_id=category_id,
-            )
-
-            if category is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f'Категория с id={category_id} не найдена',
+            try:
+                category = self._repo.get(
+                    session=session,
+                    category_id=category_id,
                 )
+            except CategoryNotFoundException:
+                raise CategoryNotFoundByIdException(id=category_id)
 
             return CategoryResponseSchema.model_validate(obj=category)
 
@@ -61,11 +62,8 @@ class CreateCategoryUseCase:
                 session=session,
                 slug=data.slug,
             )
-            if existing:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f'Категория со slug "{data.slug}" уже существует',
-                )
+            if existing is not None:
+                raise CategoryNotFoundByIdException(id=existing.id)
 
             category = Category(
                 title=data.title,
@@ -90,16 +88,13 @@ class UpdateCategoryUseCase:
         data: CategoryUpdateSchema,
     ) -> CategoryResponseSchema:
         with self._database.session() as session:
-            category = self._repo.get(
-                session=session,
-                category_id=category_id,
-            )
-
-            if category is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f'Категория с id={category_id} не найдена',
+            try:
+                category = self._repo.get(
+                    session=session,
+                    category_id=category_id,
                 )
+            except CategoryNotFoundException:
+                raise CategoryNotFoundByIdException(id=category_id)
 
             self._repo.update(
                 session=session,
@@ -117,15 +112,12 @@ class DeleteCategoryUseCase:
 
     async def execute(self, category_id: int) -> None:
         with self._database.session() as session:
-            category = self._repo.get(
-                session=session,
-                category_id=category_id,
-            )
-
-            if category is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f'Категория с id={category_id} не найдена',
+            try:
+                category = self._repo.get(
+                    session=session,
+                    category_id=category_id,
                 )
+            except CategoryNotFoundException:
+                raise CategoryNotFoundByIdException(id=category_id)
 
             self._repo.delete(session=session, category=category)

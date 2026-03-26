@@ -1,5 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status, HTTPException
 
+from src.core.exceptions.domain_exceptions import (
+    CategoryNotFoundByIdException,
+)
 from src.domain.category.use_cases.get_category import (
     CreateCategoryUseCase,
     DeleteCategoryUseCase,
@@ -25,7 +28,13 @@ async def get_categories_list() -> list[CategoryResponseSchema]:
 @router.get('/get/{category_id}')
 async def get_category(category_id: int) -> CategoryResponseSchema:
     use_case = GetCategoryUseCase()
-    return await use_case.execute(category_id=category_id)
+    try:
+        return await use_case.execute(category_id=category_id)
+    except CategoryNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail(),
+        )
 
 
 @router.post('/create')
@@ -42,14 +51,26 @@ async def update_category(
     category: CategoryUpdateSchema,
 ) -> CategoryResponseSchema:
     use_case = UpdateCategoryUseCase()
-    return await use_case.execute(
-        category_id=category_id,
-        data=category,
-    )
+    try:
+        return await use_case.execute(
+            category_id=category_id,
+            data=category,
+        )
+    except CategoryNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail(),
+        )
 
 
 @router.delete('/delete/{category_id}')
 async def delete_category(category_id: int) -> dict:
     use_case = DeleteCategoryUseCase()
-    await use_case.execute(category_id=category_id)
+    try:
+        await use_case.execute(category_id=category_id)
+    except CategoryNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail(),
+        )
     return {'message': 'Категория успешно удалена'}

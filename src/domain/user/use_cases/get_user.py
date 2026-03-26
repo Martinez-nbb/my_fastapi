@@ -1,6 +1,13 @@
 import bcrypt
-from fastapi import HTTPException
 
+from src.core.exceptions.database_exceptions import (
+    UserNotFoundException,
+    UserUsernameAlreadyExistsException,
+)
+from src.core.exceptions.domain_exceptions import (
+    UserNotFoundByIdException,
+    UserNotFoundByUsernameException,
+)
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.user import User
 from src.infrastructure.sqlite.repositories.user import UserRepository
@@ -22,13 +29,10 @@ class GetUserUseCase:
 
     async def execute(self, user_id: int) -> UserResponseSchema:
         with self._database.session() as session:
-            user = self._repo.get(session=session, user_id=user_id)
-
-            if user is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f'Пользователь с id={user_id} не найден',
-                )
+            try:
+                user = self._repo.get(session=session, user_id=user_id)
+            except UserNotFoundException:
+                raise UserNotFoundByIdException(id=user_id)
 
             return UserResponseSchema.model_validate(obj=user)
 
@@ -58,11 +62,8 @@ class CreateUserUseCase:
                 session=session,
                 username=data.username,
             )
-            if existing:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f'Пользователь "{data.username}" уже существует',
-                )
+            if existing is not None:
+                raise UserNotFoundByUsernameException(username=data.username)
 
             user = User(
                 username=data.username,
@@ -88,16 +89,13 @@ class UpdateUserUseCase:
         data: UserUpdateSchema,
     ) -> UserResponseSchema:
         with self._database.session() as session:
-            user = self._repo.get(
-                session=session,
-                user_id=user_id,
-            )
-
-            if user is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f'Пользователь с id={user_id} не найден',
+            try:
+                user = self._repo.get(
+                    session=session,
+                    user_id=user_id,
                 )
+            except UserNotFoundException:
+                raise UserNotFoundByIdException(id=user_id)
 
             self._repo.update(
                 session=session,
@@ -115,15 +113,12 @@ class DeleteUserUseCase:
 
     async def execute(self, user_id: int) -> None:
         with self._database.session() as session:
-            user = self._repo.get(
-                session=session,
-                user_id=user_id,
-            )
-
-            if user is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f'Пользователь с id={user_id} не найден',
+            try:
+                user = self._repo.get(
+                    session=session,
+                    user_id=user_id,
                 )
+            except UserNotFoundException:
+                raise UserNotFoundByIdException(id=user_id)
 
             self._repo.delete(session=session, user=user)

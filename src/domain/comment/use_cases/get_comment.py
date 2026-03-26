@@ -1,7 +1,13 @@
 from datetime import datetime
 
-from fastapi import HTTPException
-
+from src.core.exceptions.database_exceptions import (
+    CommentNotFoundException,
+    PostNotFoundException,
+)
+from src.core.exceptions.domain_exceptions import (
+    CommentNotFoundByIdException,
+    PostNotFoundByIdException,
+)
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.comment import Comment
 from src.infrastructure.sqlite.repositories.comment import CommentRepository
@@ -20,16 +26,13 @@ class GetCommentUseCase:
 
     async def execute(self, comment_id: int) -> CommentResponseSchema:
         with self._database.session() as session:
-            comment = self._repo.get(
-                session=session,
-                comment_id=comment_id,
-            )
-
-            if comment is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f'Комментарий с id={comment_id} не найден',
+            try:
+                comment = self._repo.get(
+                    session=session,
+                    comment_id=comment_id,
                 )
+            except CommentNotFoundException:
+                raise CommentNotFoundByIdException(id=comment_id)
 
             return CommentResponseSchema.model_validate(obj=comment)
 
@@ -77,15 +80,13 @@ class CreateCommentUseCase:
         author_id: int,
     ) -> CommentResponseSchema:
         with self._database.session() as session:
-            post = self._post_repo.get(
-                session=session,
-                post_id=data.post_id,
-            )
-            if post is None:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f'Публикация с id={data.post_id} не найдена',
+            try:
+                post = self._post_repo.get(
+                    session=session,
+                    post_id=data.post_id,
                 )
+            except PostNotFoundException:
+                raise PostNotFoundByIdException(id=data.post_id)
 
             comment = Comment(
                 text=data.text,
@@ -110,16 +111,13 @@ class UpdateCommentUseCase:
         data: CommentUpdateSchema,
     ) -> CommentResponseSchema:
         with self._database.session() as session:
-            comment = self._repo.get(
-                session=session,
-                comment_id=comment_id,
-            )
-
-            if comment is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f'Комментарий с id={comment_id} не найден',
+            try:
+                comment = self._repo.get(
+                    session=session,
+                    comment_id=comment_id,
                 )
+            except CommentNotFoundException:
+                raise CommentNotFoundByIdException(id=comment_id)
 
             self._repo.update(
                 session=session,
@@ -137,15 +135,12 @@ class DeleteCommentUseCase:
 
     async def execute(self, comment_id: int) -> None:
         with self._database.session() as session:
-            comment = self._repo.get(
-                session=session,
-                comment_id=comment_id,
-            )
-
-            if comment is None:
-                raise HTTPException(
-                    status_code=404,
-                    detail=f'Комментарий с id={comment_id} не найден',
+            try:
+                comment = self._repo.get(
+                    session=session,
+                    comment_id=comment_id,
                 )
+            except CommentNotFoundException:
+                raise CommentNotFoundByIdException(id=comment_id)
 
             self._repo.delete(session=session, comment=comment)

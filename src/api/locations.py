@@ -1,5 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status, HTTPException
 
+from src.core.exceptions.domain_exceptions import (
+    LocationNotFoundByIdException,
+)
 from src.domain.location.use_cases.get_location import (
     CreateLocationUseCase,
     DeleteLocationUseCase,
@@ -25,7 +28,13 @@ async def get_locations_list() -> list[LocationResponseSchema]:
 @router.get('/get/{location_id}')
 async def get_location(location_id: int) -> LocationResponseSchema:
     use_case = GetLocationUseCase()
-    return await use_case.execute(location_id=location_id)
+    try:
+        return await use_case.execute(location_id=location_id)
+    except LocationNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail(),
+        )
 
 
 @router.post('/create')
@@ -42,14 +51,26 @@ async def update_location(
     location: LocationUpdateSchema,
 ) -> LocationResponseSchema:
     use_case = UpdateLocationUseCase()
-    return await use_case.execute(
-        location_id=location_id,
-        data=location,
-    )
+    try:
+        return await use_case.execute(
+            location_id=location_id,
+            data=location,
+        )
+    except LocationNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail(),
+        )
 
 
 @router.delete('/delete/{location_id}')
 async def delete_location(location_id: int) -> dict:
     use_case = DeleteLocationUseCase()
-    await use_case.execute(location_id=location_id)
+    try:
+        await use_case.execute(location_id=location_id)
+    except LocationNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail(),
+        )
     return {'message': 'Местоположение успешно удалено'}

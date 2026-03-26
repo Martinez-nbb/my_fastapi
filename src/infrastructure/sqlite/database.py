@@ -5,6 +5,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
+Base = declarative_base()
+
 
 class Database:
     def __init__(self):
@@ -47,4 +49,3 @@ class Database:
 
 
 database = Database()
-Base = declarative_base()

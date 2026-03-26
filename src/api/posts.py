@@ -4,12 +4,12 @@ from src.core.exceptions.domain_exceptions import (
     PostNotFoundByIdException,
     UserNotFoundByIdException,
 )
-from src.domain.post.use_cases.get_post import (
+from src.domain.post.use_cases.get_post import GetPostUseCase
+from src.domain.post.use_cases.list_posts import GetPostsUseCase
+from src.domain.post.use_cases.post_commands import (
     CreatePostUseCase,
-    DeletePostUseCase,
-    GetPostUseCase,
-    GetPostsUseCase,
     UpdatePostUseCase,
+    DeletePostUseCase,
 )
 from src.schemas.posts import (
     PostCreateSchema,

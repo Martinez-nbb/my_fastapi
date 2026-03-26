@@ -3,12 +3,12 @@ from fastapi import APIRouter, status, HTTPException
 from src.core.exceptions.domain_exceptions import (
     CategoryNotFoundByIdException,
 )
-from src.domain.category.use_cases.get_category import (
+from src.domain.category.use_cases.get_category import GetCategoryUseCase
+from src.domain.category.use_cases.list_categories import GetCategoriesUseCase
+from src.domain.category.use_cases.category_commands import (
     CreateCategoryUseCase,
-    DeleteCategoryUseCase,
-    GetCategoryUseCase,
-    GetCategoriesUseCase,
     UpdateCategoryUseCase,
+    DeleteCategoryUseCase,
 )
 from src.schemas.categories import (
     CategoryCreateSchema,

@@ -1,5 +1,3 @@
-from src.core.exceptions.database_exceptions import UserNotFoundException
-from src.core.exceptions.domain_exceptions import UserNotFoundByIdException
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.repositories.user import UserRepository
 from src.schemas.users import UserUpdateSchema, UserResponseSchema
@@ -16,13 +14,10 @@ class UpdateUserUseCase:
         data: UserUpdateSchema,
     ) -> UserResponseSchema:
         with self._database.session() as session:
-            try:
-                user = self._repo.get(
-                    session=session,
-                    user_id=user_id,
-                )
-            except UserNotFoundException:
-                raise UserNotFoundByIdException(id=user_id)
+            user = self._repo.get(
+                session=session,
+                user_id=user_id,
+            )
 
             self._repo.update(
                 session=session,

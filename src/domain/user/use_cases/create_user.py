@@ -1,6 +1,10 @@
 import bcrypt
 
-from src.core.exceptions.domain_exceptions import UserUsernameOrEmailIsNotUniqueException
+from src.core.exceptions.domain_exceptions import (
+    UserUsernameOrEmailIsNotUniqueException,
+    UserNotFoundByUsernameException,
+    UserNotFoundByEmailException,
+)
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.user import User
 from src.infrastructure.sqlite.repositories.user import UserRepository
@@ -18,12 +22,24 @@ class CreateUserUseCase:
 
     async def execute(self, data: UserCreateSchema) -> UserResponseSchema:
         with self._database.session() as session:
-            existing = self._repo.get_by_username(
-                session=session,
-                username=data.username,
-            )
-            if existing is not None:
+            try:
+                self._repo.get_by_username(
+                    session=session,
+                    username=data.username,
+                )
                 raise UserUsernameOrEmailIsNotUniqueException.from_username(data.username)
+            except UserNotFoundByUsernameException:
+                pass
+
+            if data.email:
+                try:
+                    self._repo.get_by_email(
+                        session=session,
+                        email=data.email,
+                    )
+                    raise UserUsernameOrEmailIsNotUniqueException.from_email(data.email)
+                except UserNotFoundByEmailException:
+                    pass
 
             user = User(
                 username=data.username,

@@ -1,6 +1,5 @@
 from datetime import datetime
 
-from src.core.exceptions.database_exceptions import PostNotFoundException
 from src.core.exceptions.domain_exceptions import PostNotFoundByIdException
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.comment import Comment
@@ -22,11 +21,11 @@ class CreateCommentUseCase:
     ) -> CommentResponseSchema:
         with self._database.session() as session:
             try:
-                post = self._post_repo.get(
+                self._post_repo.get(
                     session=session,
                     post_id=data.post_id,
                 )
-            except PostNotFoundException:
+            except PostNotFoundByIdException:
                 raise PostNotFoundByIdException(id=data.post_id)
 
             comment = Comment(

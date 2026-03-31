@@ -3,6 +3,7 @@ from fastapi import APIRouter, status, HTTPException
 from src.core.exceptions.domain_exceptions import (
     UserNotFoundByIdException,
     UserNotFoundByUsernameException,
+    UserUsernameOrEmailIsNotUniqueException,
 )
 from src.domain.user.use_cases.get_user import GetUserUseCase
 from src.domain.user.use_cases.get_users import GetUsersUseCase
@@ -41,7 +42,7 @@ async def create_user(data: UserCreateSchema) -> UserResponseSchema:
     use_case = CreateUserUseCase()
     try:
         return await use_case.execute(data=data)
-    except UserNotFoundByUsernameException as exc:
+    except UserUsernameOrEmailIsNotUniqueException as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=exc.get_detail(),

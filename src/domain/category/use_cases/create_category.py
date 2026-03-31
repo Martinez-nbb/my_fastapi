@@ -1,7 +1,9 @@
 from datetime import datetime
 
-from src.core.exceptions.database_exceptions import CategoryNotFoundException
-from src.core.exceptions.domain_exceptions import CategoryNotFoundByIdException
+from src.core.exceptions.domain_exceptions import (
+    CategoryNotFoundBySlugException,
+    CategorySlugAlreadyExistsException,
+)
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.category import Category
 from src.infrastructure.sqlite.repositories.category import CategoryRepository
@@ -15,12 +17,14 @@ class CreateCategoryUseCase:
 
     async def execute(self, data: CategoryCreateSchema) -> CategoryResponseSchema:
         with self._database.session() as session:
-            existing = self._repo.get_by_slug(
-                session=session,
-                slug=data.slug,
-            )
-            if existing is not None:
-                raise CategoryNotFoundByIdException(id=existing.id)
+            try:
+                self._repo.get_by_slug(
+                    session=session,
+                    slug=data.slug,
+                )
+                raise CategorySlugAlreadyExistsException(slug=data.slug)
+            except CategoryNotFoundBySlugException:
+                pass
 
             category = Category(
                 title=data.title,

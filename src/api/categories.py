@@ -2,6 +2,7 @@ from fastapi import APIRouter, status, HTTPException
 
 from src.core.exceptions.domain_exceptions import (
     CategoryNotFoundByIdException,
+    CategorySlugAlreadyExistsException,
 )
 from src.domain.category.use_cases.get_category import GetCategoryUseCase
 from src.domain.category.use_cases.list_categories import GetCategoriesUseCase
@@ -40,7 +41,13 @@ async def create_category(
     category: CategoryCreateSchema,
 ) -> CategoryResponseSchema:
     use_case = CreateCategoryUseCase()
-    return await use_case.execute(data=category)
+    try:
+        return await use_case.execute(data=category)
+    except CategorySlugAlreadyExistsException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=exc.get_detail(),
+        )
 
 
 @router.put('/update/{category_id}', status_code=status.HTTP_200_OK, response_model=CategoryResponseSchema)

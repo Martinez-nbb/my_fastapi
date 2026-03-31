@@ -1,5 +1,3 @@
-from src.core.exceptions.database_exceptions import CategoryNotFoundException
-from src.core.exceptions.domain_exceptions import CategoryNotFoundByIdException
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.repositories.category import CategoryRepository
 from src.schemas.categories import CategoryUpdateSchema, CategoryResponseSchema
@@ -16,13 +14,10 @@ class UpdateCategoryUseCase:
         data: CategoryUpdateSchema,
     ) -> CategoryResponseSchema:
         with self._database.session() as session:
-            try:
-                category = self._repo.get(
-                    session=session,
-                    category_id=category_id,
-                )
-            except CategoryNotFoundException:
-                raise CategoryNotFoundByIdException(id=category_id)
+            category = self._repo.get(
+                session=session,
+                category_id=category_id,
+            )
 
             self._repo.update(
                 session=session,

@@ -1,7 +1,9 @@
 from datetime import datetime
 
-from src.core.exceptions.database_exceptions import UserNotFoundException
-from src.core.exceptions.domain_exceptions import AuthorNotFoundException
+from src.core.exceptions.domain_exceptions import (
+    AuthorNotFoundException,
+    UserNotFoundByIdException,
+)
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.post import Post
 from src.infrastructure.sqlite.repositories.post import PostRepository
@@ -18,11 +20,11 @@ class CreatePostUseCase:
     async def execute(self, data: PostCreateSchema) -> PostResponseSchema:
         with self._database.session() as session:
             try:
-                author = self._user_repo.get(
+                self._user_repo.get(
                     session=session,
                     user_id=data.author_id,
                 )
-            except UserNotFoundException:
+            except UserNotFoundByIdException:
                 raise AuthorNotFoundException(author_id=data.author_id)
 
             post = Post(

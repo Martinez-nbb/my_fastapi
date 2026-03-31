@@ -36,6 +36,16 @@ class UserNotFoundByUsernameException(BaseDomainException):
         self.username = username
 
 
+class UserNotFoundByEmailException(BaseDomainException):
+    def __init__(self, email: str) -> None:
+        detail = (
+            f'Пользователь с email "{email}" не найден в системе. '
+            f'Проверьте корректность переданного email'
+        )
+        super().__init__(detail=detail)
+        self.email = email
+
+
 class UserUsernameOrEmailIsNotUniqueException(BaseDomainException):
     def __init__(self, detail: str) -> None:
         super().__init__(detail=detail)
@@ -72,6 +82,16 @@ class CategoryNotFoundBySlugException(BaseDomainException):
         detail = (
             f'Категория со slug "{slug}" не найдена в системе. '
             f'Проверьте корректность переданного slug категории'
+        )
+        super().__init__(detail=detail)
+        self.slug = slug
+
+
+class CategorySlugAlreadyExistsException(BaseDomainException):
+    def __init__(self, slug: str) -> None:
+        detail = (
+            f'Категория со slug "{slug}" уже существует в системе. '
+            f'Slug должен быть уникальным для каждой категории'
         )
         super().__init__(detail=detail)
         self.slug = slug

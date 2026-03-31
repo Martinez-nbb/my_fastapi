@@ -1,10 +1,12 @@
 from typing import Type
 
+from sqlalchemy import insert, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from src.core.exceptions.domain_exceptions import (
-    CategoryNotFoundByIdException,
-    CategoryNotFoundBySlugException,
+from src.core.exceptions.database_exceptions import (
+    CategoryNotFoundException,
+    CategorySlugAlreadyExistsException,
 )
 from src.infrastructure.sqlite.models.category import Category
 from src.schemas.categories import CategoryUpdateSchema
@@ -15,10 +17,10 @@ class CategoryRepository:
         self._model: Type[Category] = Category
 
     def get(self, session: Session, category_id: int) -> Category:
-        query = session.query(self._model).filter_by(id=category_id)
-        category = query.first()
-        if category is None:
-            raise CategoryNotFoundByIdException(id=category_id)
+        query = select(self._model).where(self._model.id == category_id)
+        category = session.scalar(query)
+        if not category:
+            raise CategoryNotFoundException()
         return category
 
     def get_by_slug(
@@ -26,20 +28,31 @@ class CategoryRepository:
         session: Session,
         slug: str,
     ) -> Category:
-        query = session.query(self._model).filter_by(slug=slug)
-        category = query.first()
-        if category is None:
-            raise CategoryNotFoundBySlugException(slug=slug)
+        query = select(self._model).where(self._model.slug == slug)
+        category = session.scalar(query)
+        if not category:
+            raise CategoryNotFoundException()
         return category
 
     def get_all(self, session: Session) -> list[Category]:
-        return session.query(self._model).all()
+        query = select(self._model)
+        return list(session.scalars(query))
 
     def create(self, session: Session, category: Category) -> Category:
-        session.add(category)
-        session.flush()
-        session.refresh(category)
-        return category
+        query = insert(self._model).values(
+            title=category.title,
+            description=category.description,
+            slug=category.slug,
+            is_published=category.is_published,
+            created_at=category.created_at,
+        ).returning(self._model)
+
+        try:
+            created_category = session.scalar(query)
+            session.refresh(created_category)
+            return created_category
+        except IntegrityError:
+            raise CategorySlugAlreadyExistsException()
 
     def update(
         self,

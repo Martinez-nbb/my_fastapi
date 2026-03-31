@@ -2,6 +2,7 @@ from datetime import datetime
 import re
 
 from pydantic import BaseModel, Field, field_validator, model_validator
+from fastapi import HTTPException, status
 
 
 class BasePublishedSchema(BaseModel):
@@ -40,9 +41,9 @@ class BaseTimestampSchema(BaseModel):
 
 def validate_slug(value: str) -> str:
     if not re.match(r'^[a-zA-Z0-9_-]+$', value):
-        raise ValueError(
-            'Slug должен содержать только латинские буквы, цифры, '
-            'дефисы и подчеркивания'
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail='Slug должен содержать только латинские буквы, цифры, дефисы и подчеркивания'
         )
     return value
 
@@ -52,24 +53,31 @@ def validate_email(value: str | None) -> str | None:
         return value
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if not re.match(email_pattern, value):
-        raise ValueError('Некорректный формат email адреса')
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail='Некорректный формат email адреса'
+        )
     return value
 
 
 def validate_username(value: str) -> str:
     if len(value) < 3 or len(value) > 150:
-        raise ValueError(
-            'Имя пользователя должно быть от 3 до 150 символов'
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail='Имя пользователя должно быть от 3 до 150 символов'
         )
     if not re.match(r'^[\w.@+-]+\Z', value):
-        raise ValueError(
-            'Имя пользователя может содержать буквы, цифры и символы: '
-            '@/./+/-/_'
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail='Имя пользователя может содержать буквы, цифры и символы: @/./+/-/_'
         )
     return value
 
 
 def validate_text(value: str) -> str:
     if not value or len(value.strip()) == 0:
-        raise ValueError('Текст не может быть пустым')
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail='Текст не может быть пустым'
+        )
     return value.strip()

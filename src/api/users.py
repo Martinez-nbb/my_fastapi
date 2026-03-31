@@ -1,8 +1,7 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, Depends
 
 from src.core.exceptions.domain_exceptions import (
     UserNotFoundByIdException,
-    UserNotFoundByUsernameException,
     UserUsernameOrEmailIsNotUniqueException,
 )
 from src.domain.user.use_cases.get_user import GetUserUseCase
@@ -10,6 +9,13 @@ from src.domain.user.use_cases.get_users import GetUsersUseCase
 from src.domain.user.use_cases.create_user import CreateUserUseCase
 from src.domain.user.use_cases.update_user import UpdateUserUseCase
 from src.domain.user.use_cases.delete_user import DeleteUserUseCase
+from src.api.depends import (
+    get_user_use_case,
+    get_users_use_case,
+    create_user_use_case,
+    update_user_use_case,
+    delete_user_use_case,
+)
 from src.schemas.users import (
     UserCreateSchema,
     UserUpdateSchema,
@@ -20,14 +26,17 @@ user_router = APIRouter()
 
 
 @user_router.get('/', status_code=status.HTTP_200_OK, response_model=list[UserResponseSchema])
-async def get_users() -> list[UserResponseSchema]:
-    use_case = GetUsersUseCase()
+async def get_users(
+    use_case: GetUsersUseCase = Depends(get_users_use_case),
+) -> list[UserResponseSchema]:
     return await use_case.execute()
 
 
 @user_router.get('/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponseSchema)
-async def get_user(user_id: int) -> UserResponseSchema:
-    use_case = GetUserUseCase()
+async def get_user(
+    user_id: int,
+    use_case: GetUserUseCase = Depends(get_user_use_case),
+) -> UserResponseSchema:
     try:
         return await use_case.execute(user_id=user_id)
     except UserNotFoundByIdException as exc:
@@ -38,8 +47,10 @@ async def get_user(user_id: int) -> UserResponseSchema:
 
 
 @user_router.post('/', status_code=status.HTTP_201_CREATED, response_model=UserResponseSchema)
-async def create_user(data: UserCreateSchema) -> UserResponseSchema:
-    use_case = CreateUserUseCase()
+async def create_user(
+    data: UserCreateSchema,
+    use_case: CreateUserUseCase = Depends(create_user_use_case),
+) -> UserResponseSchema:
     try:
         return await use_case.execute(data=data)
     except UserUsernameOrEmailIsNotUniqueException as exc:
@@ -53,8 +64,8 @@ async def create_user(data: UserCreateSchema) -> UserResponseSchema:
 async def update_user(
     user_id: int,
     data: UserUpdateSchema,
+    use_case: UpdateUserUseCase = Depends(update_user_use_case),
 ) -> UserResponseSchema:
-    use_case = UpdateUserUseCase()
     try:
         return await use_case.execute(
             user_id=user_id,
@@ -68,8 +79,10 @@ async def update_user(
 
 
 @user_router.delete('/{user_id}', status_code=status.HTTP_200_OK)
-async def delete_user(user_id: int) -> dict:
-    use_case = DeleteUserUseCase()
+async def delete_user(
+    user_id: int,
+    use_case: DeleteUserUseCase = Depends(delete_user_use_case),
+) -> dict:
     try:
         await use_case.execute(user_id=user_id)
     except UserNotFoundByIdException as exc:

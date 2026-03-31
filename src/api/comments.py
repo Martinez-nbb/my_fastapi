@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, Depends
 
 from src.core.exceptions.domain_exceptions import (
     CommentNotFoundByIdException,
@@ -12,6 +12,14 @@ from src.domain.comment.use_cases.list_comments import (
 from src.domain.comment.use_cases.create_comment import CreateCommentUseCase
 from src.domain.comment.use_cases.update_comment import UpdateCommentUseCase
 from src.domain.comment.use_cases.delete_comment import DeleteCommentUseCase
+from src.api.depends import (
+    get_comment_use_case,
+    get_comments_use_case,
+    get_comments_by_post_use_case,
+    create_comment_use_case,
+    update_comment_use_case,
+    delete_comment_use_case,
+)
 from src.schemas.comments import (
     CommentCreateSchema,
     CommentUpdateSchema,
@@ -22,22 +30,25 @@ router = APIRouter()
 
 
 @router.get('/list', status_code=status.HTTP_200_OK, response_model=list[CommentResponseSchema])
-async def get_comments_list() -> list[CommentResponseSchema]:
-    use_case = GetCommentsUseCase()
+async def get_comments_list(
+    use_case: GetCommentsUseCase = Depends(get_comments_use_case),
+) -> list[CommentResponseSchema]:
     return await use_case.execute()
 
 
 @router.get('/list/by_post/{post_id}', status_code=status.HTTP_200_OK, response_model=list[CommentResponseSchema])
 async def get_comments_by_post(
     post_id: int,
+    use_case: GetCommentsByPostUseCase = Depends(get_comments_by_post_use_case),
 ) -> list[CommentResponseSchema]:
-    use_case = GetCommentsByPostUseCase()
     return await use_case.execute(post_id=post_id)
 
 
 @router.get('/get/{comment_id}', status_code=status.HTTP_200_OK, response_model=CommentResponseSchema)
-async def get_comment(comment_id: int) -> CommentResponseSchema:
-    use_case = GetCommentUseCase()
+async def get_comment(
+    comment_id: int,
+    use_case: GetCommentUseCase = Depends(get_comment_use_case),
+) -> CommentResponseSchema:
     try:
         return await use_case.execute(comment_id=comment_id)
     except CommentNotFoundByIdException as exc:
@@ -51,8 +62,8 @@ async def get_comment(comment_id: int) -> CommentResponseSchema:
 async def create_comment(
     comment: CommentCreateSchema,
     author_id: int,
+    use_case: CreateCommentUseCase = Depends(create_comment_use_case),
 ) -> CommentResponseSchema:
-    use_case = CreateCommentUseCase()
     try:
         return await use_case.execute(
             data=comment,
@@ -69,8 +80,8 @@ async def create_comment(
 async def update_comment(
     comment_id: int,
     comment: CommentUpdateSchema,
+    use_case: UpdateCommentUseCase = Depends(update_comment_use_case),
 ) -> CommentResponseSchema:
-    use_case = UpdateCommentUseCase()
     try:
         return await use_case.execute(
             comment_id=comment_id,
@@ -84,8 +95,10 @@ async def update_comment(
 
 
 @router.delete('/delete/{comment_id}', status_code=status.HTTP_200_OK)
-async def delete_comment(comment_id: int) -> dict:
-    use_case = DeleteCommentUseCase()
+async def delete_comment(
+    comment_id: int,
+    use_case: DeleteCommentUseCase = Depends(delete_comment_use_case),
+) -> dict:
     try:
         await use_case.execute(comment_id=comment_id)
     except CommentNotFoundByIdException as exc:

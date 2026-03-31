@@ -1,6 +1,12 @@
+import logging
+
+from src.core.exceptions.database_exceptions import CommentNotFoundException
+from src.core.exceptions.domain_exceptions import CommentNotFoundByIdException
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.repositories.comment import CommentRepository
 from src.schemas.comments import CommentUpdateSchema, CommentResponseSchema
+
+logger = logging.getLogger(__name__)
 
 
 class UpdateCommentUseCase:
@@ -13,16 +19,12 @@ class UpdateCommentUseCase:
         comment_id: int,
         data: CommentUpdateSchema,
     ) -> CommentResponseSchema:
-        with self._database.session() as session:
-            comment = self._repo.get(
-                session=session,
-                comment_id=comment_id,
-            )
-
-            self._repo.update(
-                session=session,
-                comment=comment,
-                data=data,
-            )
-
-            return CommentResponseSchema.model_validate(obj=comment)
+        try:
+            with self._database.session() as session:
+                comment = self._repo.get(session=session, comment_id=comment_id)
+                self._repo.update(session=session, comment=comment, data=data)
+                return CommentResponseSchema.model_validate(obj=comment)
+        except CommentNotFoundException:
+            error = CommentNotFoundByIdException(id=comment_id)
+            logger.error(error.get_detail())
+            raise error

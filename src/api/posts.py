@@ -1,14 +1,21 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, Depends
 
 from src.core.exceptions.domain_exceptions import (
     PostNotFoundByIdException,
-    UserNotFoundByIdException,
+    AuthorNotFoundException,
 )
 from src.domain.post.use_cases.get_post import GetPostUseCase
 from src.domain.post.use_cases.list_posts import GetPostsUseCase
 from src.domain.post.use_cases.create_post import CreatePostUseCase
 from src.domain.post.use_cases.update_post import UpdatePostUseCase
 from src.domain.post.use_cases.delete_post import DeletePostUseCase
+from src.api.depends import (
+    get_post_use_case,
+    get_posts_use_case,
+    create_post_use_case,
+    update_post_use_case,
+    delete_post_use_case,
+)
 from src.schemas.posts import (
     PostCreateSchema,
     PostUpdateSchema,
@@ -19,14 +26,17 @@ router = APIRouter()
 
 
 @router.get('/list', status_code=status.HTTP_200_OK, response_model=list[PostResponseSchema])
-async def get_posts_list() -> list[PostResponseSchema]:
-    use_case = GetPostsUseCase()
+async def get_posts_list(
+    use_case: GetPostsUseCase = Depends(get_posts_use_case),
+) -> list[PostResponseSchema]:
     return await use_case.execute()
 
 
 @router.get('/get/{post_id}', status_code=status.HTTP_200_OK, response_model=PostResponseSchema)
-async def get_post(post_id: int) -> PostResponseSchema:
-    use_case = GetPostUseCase()
+async def get_post(
+    post_id: int,
+    use_case: GetPostUseCase = Depends(get_post_use_case),
+) -> PostResponseSchema:
     try:
         return await use_case.execute(post_id=post_id)
     except PostNotFoundByIdException as exc:
@@ -37,11 +47,13 @@ async def get_post(post_id: int) -> PostResponseSchema:
 
 
 @router.post('/create', status_code=status.HTTP_201_CREATED, response_model=PostResponseSchema)
-async def create_post(post: PostCreateSchema) -> PostResponseSchema:
-    use_case = CreatePostUseCase()
+async def create_post(
+    post: PostCreateSchema,
+    use_case: CreatePostUseCase = Depends(create_post_use_case),
+) -> PostResponseSchema:
     try:
         return await use_case.execute(data=post)
-    except UserNotFoundByIdException as exc:
+    except AuthorNotFoundException as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=exc.get_detail(),
@@ -52,8 +64,8 @@ async def create_post(post: PostCreateSchema) -> PostResponseSchema:
 async def update_post(
     post_id: int,
     post: PostUpdateSchema,
+    use_case: UpdatePostUseCase = Depends(update_post_use_case),
 ) -> PostResponseSchema:
-    use_case = UpdatePostUseCase()
     try:
         return await use_case.execute(
             post_id=post_id,
@@ -67,8 +79,10 @@ async def update_post(
 
 
 @router.delete('/delete/{post_id}', status_code=status.HTTP_200_OK)
-async def delete_post(post_id: int) -> dict:
-    use_case = DeletePostUseCase()
+async def delete_post(
+    post_id: int,
+    use_case: DeletePostUseCase = Depends(delete_post_use_case),
+) -> dict:
     try:
         await use_case.execute(post_id=post_id)
     except PostNotFoundByIdException as exc:

@@ -24,10 +24,7 @@ class GetCommentsByPostUseCase:
 
     async def execute(self, post_id: int) -> list[CommentResponseSchema]:
         with self._database.session() as session:
-            comments = self._repo.get_by_post(
-                session=session,
-                post_id=post_id,
-            )
+            comments = self._repo.get_by_post(session=session, post_id=post_id)
             return [
                 CommentResponseSchema.model_validate(obj=comment)
                 for comment in comments

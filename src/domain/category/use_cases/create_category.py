@@ -1,13 +1,14 @@
+import logging
 from datetime import datetime
 
-from src.core.exceptions.domain_exceptions import (
-    CategoryNotFoundBySlugException,
-    CategorySlugAlreadyExistsException,
-)
+from src.core.exceptions.database_exceptions import CategoryNotFoundException, CategorySlugAlreadyExistsException
+from src.core.exceptions.domain_exceptions import CategorySlugAlreadyExistsException as DomainCategorySlugAlreadyExistsException
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.category import Category
 from src.infrastructure.sqlite.repositories.category import CategoryRepository
 from src.schemas.categories import CategoryCreateSchema, CategoryResponseSchema
+
+logger = logging.getLogger(__name__)
 
 
 class CreateCategoryUseCase:
@@ -17,15 +18,6 @@ class CreateCategoryUseCase:
 
     async def execute(self, data: CategoryCreateSchema) -> CategoryResponseSchema:
         with self._database.session() as session:
-            try:
-                self._repo.get_by_slug(
-                    session=session,
-                    slug=data.slug,
-                )
-                raise CategorySlugAlreadyExistsException(slug=data.slug)
-            except CategoryNotFoundBySlugException:
-                pass
-
             category = Category(
                 title=data.title,
                 description=data.description,
@@ -33,6 +25,12 @@ class CreateCategoryUseCase:
                 is_published=data.is_published,
                 created_at=datetime.now(),
             )
-            self._repo.create(session=session, category=category)
+
+            try:
+                self._repo.create(session=session, category=category)
+            except CategorySlugAlreadyExistsException:
+                error = DomainCategorySlugAlreadyExistsException(slug=data.slug)
+                logger.error(error.get_detail())
+                raise error
 
             return CategoryResponseSchema.model_validate(obj=category)

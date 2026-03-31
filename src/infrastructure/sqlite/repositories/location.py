@@ -1,8 +1,10 @@
 from typing import Type
 
+from sqlalchemy import insert, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from src.core.exceptions.domain_exceptions import LocationNotFoundByIdException
+from src.core.exceptions.database_exceptions import LocationNotFoundException
 from src.infrastructure.sqlite.models.location import Location
 from src.schemas.locations import LocationUpdateSchema
 
@@ -12,20 +14,29 @@ class LocationRepository:
         self._model: Type[Location] = Location
 
     def get(self, session: Session, location_id: int) -> Location:
-        query = session.query(self._model).filter_by(id=location_id)
-        location = query.first()
-        if location is None:
-            raise LocationNotFoundByIdException(id=location_id)
+        query = select(self._model).where(self._model.id == location_id)
+        location = session.scalar(query)
+        if not location:
+            raise LocationNotFoundException()
         return location
 
     def get_all(self, session: Session) -> list[Location]:
-        return session.query(self._model).all()
+        query = select(self._model)
+        return list(session.scalars(query))
 
     def create(self, session: Session, location: Location) -> Location:
-        session.add(location)
-        session.flush()
-        session.refresh(location)
-        return location
+        query = insert(self._model).values(
+            name=location.name,
+            is_published=location.is_published,
+            created_at=location.created_at,
+        ).returning(self._model)
+
+        try:
+            created_location = session.scalar(query)
+            session.refresh(created_location)
+            return created_location
+        except IntegrityError:
+            raise LocationNotFoundException()
 
     def update(
         self,

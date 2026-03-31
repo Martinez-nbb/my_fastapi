@@ -1,71 +1,84 @@
-from typing import Type
+from datetime import datetime
+from typing import Type, cast
 
-from sqlalchemy import insert, select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import CursorResult, insert, select, delete, update
 from sqlalchemy.orm import Session
 
 from src.core.exceptions.database_exceptions import (
     CategoryNotFoundException,
-    CategorySlugAlreadyExistsException,
 )
-from src.infrastructure.sqlite.models.category import Category
-from src.schemas.categories import CategoryUpdateSchema
+from src.infrastructure.sqlite.models.category import Category as CategoryModel
+from src.schemas.categories import CategoryCreateSchema, CategoryUpdateSchema
 
 
 class CategoryRepository:
-    def __init__(self):
-        self._model: Type[Category] = Category
+    def __init__(self) -> None:
+        self._model: Type[CategoryModel] = CategoryModel
 
-    def get(self, session: Session, category_id: int) -> Category:
+    def get(self, session: Session, category_id: int) -> CategoryModel:
         query = select(self._model).where(self._model.id == category_id)
         category = session.scalar(query)
+
         if not category:
             raise CategoryNotFoundException()
+
         return category
 
-    def get_by_slug(
-        self,
-        session: Session,
-        slug: str,
-    ) -> Category:
+    def get_by_slug(self, session: Session, slug: str) -> CategoryModel:
         query = select(self._model).where(self._model.slug == slug)
         category = session.scalar(query)
+
         if not category:
             raise CategoryNotFoundException()
+
         return category
 
-    def get_all(self, session: Session) -> list[Category]:
+    def get_all(self, session: Session) -> list[CategoryModel]:
         query = select(self._model)
         return list(session.scalars(query))
 
-    def create(self, session: Session, category: Category) -> Category:
-        query = insert(self._model).values(
-            title=category.title,
-            description=category.description,
-            slug=category.slug,
-            is_published=category.is_published,
-            created_at=category.created_at,
-        ).returning(self._model)
+    def create(self, session: Session, data: CategoryCreateSchema) -> CategoryModel:
+        query = (
+            insert(self._model)
+            .values(
+                title=data.title,
+                description=data.description,
+                slug=data.slug,
+                is_published=data.is_published,
+                created_at=datetime.now(),
+            )
+            .returning(self._model)
+        )
+        category = session.scalar(query)
 
-        try:
-            created_category = session.scalar(query)
-            session.refresh(created_category)
-            return created_category
-        except IntegrityError:
-            raise CategorySlugAlreadyExistsException()
+        return category
 
     def update(
         self,
         session: Session,
-        category: Category,
+        category_id: int,
         data: CategoryUpdateSchema,
-    ) -> Category:
-        for field, value in data.model_dump(exclude_none=True).items():
-            setattr(category, field, value)
-        session.flush()
-        session.refresh(category)
+    ) -> CategoryModel:
+        category = self.get(session=session, category_id=category_id)
+
+        update_data = data.model_dump(exclude_none=True)
+
+        query = (
+            update(self._model)
+            .where(self._model.id == category_id)
+            .values(**update_data)
+            .returning(self._model)
+        )
+        category = session.scalar(query)
+
+        if not category:
+            raise CategoryNotFoundException()
+
         return category
 
-    def delete(self, session: Session, category: Category) -> None:
-        session.delete(category)
-        session.flush()
+    def delete(self, session: Session, category_id: int) -> None:
+        query = delete(self._model).where(self._model.id == category_id)
+        result = cast(CursorResult, session.execute(query))
+
+        if not result.rowcount:
+            raise CategoryNotFoundException()

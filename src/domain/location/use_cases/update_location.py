@@ -19,12 +19,16 @@ class UpdateLocationUseCase:
         location_id: int,
         data: LocationUpdateSchema,
     ) -> LocationResponseSchema:
-        try:
-            with self._database.session() as session:
-                location = self._repo.get(session=session, location_id=location_id)
-                self._repo.update(session=session, location=location, data=data)
-                return LocationResponseSchema.model_validate(obj=location)
-        except LocationNotFoundException:
-            error = LocationNotFoundByIdException(id=location_id)
-            logger.error(error.get_detail())
-            raise error
+        with self._database.session() as session:
+            try:
+                location = self._repo.update(
+                    session=session,
+                    location_id=location_id,
+                    data=data,
+                )
+            except LocationNotFoundException:
+                error = LocationNotFoundByIdException(id=location_id)
+                logger.error(error.get_detail())
+                raise error
+
+            return LocationResponseSchema.model_validate(obj=location)

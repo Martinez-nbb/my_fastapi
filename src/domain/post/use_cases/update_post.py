@@ -19,12 +19,16 @@ class UpdatePostUseCase:
         post_id: int,
         data: PostUpdateSchema,
     ) -> PostResponseSchema:
-        try:
-            with self._database.session() as session:
-                post = self._repo.get(session=session, post_id=post_id)
-                self._repo.update(session=session, post=post, data=data)
-                return PostResponseSchema.model_validate(obj=post)
-        except PostNotFoundException:
-            error = PostNotFoundByIdException(id=post_id)
-            logger.error(error.get_detail())
-            raise error
+        with self._database.session() as session:
+            try:
+                post = self._repo.update(
+                    session=session,
+                    post_id=post_id,
+                    data=data,
+                )
+            except PostNotFoundException:
+                error = PostNotFoundByIdException(id=post_id)
+                logger.error(error.get_detail())
+                raise error
+
+            return PostResponseSchema.model_validate(obj=post)

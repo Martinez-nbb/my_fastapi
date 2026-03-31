@@ -14,11 +14,10 @@ class DeleteCommentUseCase:
         self._repo = CommentRepository()
 
     async def execute(self, comment_id: int) -> None:
-        try:
-            with self._database.session() as session:
-                comment = self._repo.get(session=session, comment_id=comment_id)
-                self._repo.delete(session=session, comment=comment)
-        except CommentNotFoundException:
-            error = CommentNotFoundByIdException(id=comment_id)
-            logger.error(error.get_detail())
-            raise error
+        with self._database.session() as session:
+            try:
+                self._repo.delete(session=session, comment_id=comment_id)
+            except CommentNotFoundException:
+                error = CommentNotFoundByIdException(id=comment_id)
+                logger.error(error.get_detail())
+                raise error

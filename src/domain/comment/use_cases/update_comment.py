@@ -19,12 +19,16 @@ class UpdateCommentUseCase:
         comment_id: int,
         data: CommentUpdateSchema,
     ) -> CommentResponseSchema:
-        try:
-            with self._database.session() as session:
-                comment = self._repo.get(session=session, comment_id=comment_id)
-                self._repo.update(session=session, comment=comment, data=data)
-                return CommentResponseSchema.model_validate(obj=comment)
-        except CommentNotFoundException:
-            error = CommentNotFoundByIdException(id=comment_id)
-            logger.error(error.get_detail())
-            raise error
+        with self._database.session() as session:
+            try:
+                comment = self._repo.update(
+                    session=session,
+                    comment_id=comment_id,
+                    data=data,
+                )
+            except CommentNotFoundException:
+                error = CommentNotFoundByIdException(id=comment_id)
+                logger.error(error.get_detail())
+                raise error
+
+            return CommentResponseSchema.model_validate(obj=comment)

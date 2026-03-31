@@ -14,11 +14,10 @@ class DeleteCategoryUseCase:
         self._repo = CategoryRepository()
 
     async def execute(self, category_id: int) -> None:
-        try:
-            with self._database.session() as session:
-                category = self._repo.get(session=session, category_id=category_id)
-                self._repo.delete(session=session, category=category)
-        except CategoryNotFoundException:
-            error = CategoryNotFoundByIdException(id=category_id)
-            logger.error(error.get_detail())
-            raise error
+        with self._database.session() as session:
+            try:
+                self._repo.delete(session=session, category_id=category_id)
+            except CategoryNotFoundException:
+                error = CategoryNotFoundByIdException(id=category_id)
+                logger.error(error.get_detail())
+                raise error

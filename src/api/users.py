@@ -1,5 +1,9 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 
+from src.core.exceptions.database_exceptions import (
+    UserEmailAlreadyExistsException,
+    UserUsernameAlreadyExistsException,
+)
 from src.core.exceptions.domain_exceptions import (
     UserNotFoundByIdException,
     UserUsernameOrEmailIsNotUniqueException,
@@ -75,6 +79,16 @@ async def update_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=exc.get_detail(),
+        )
+    except UserEmailAlreadyExistsException:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f'Пользователь с email "{data.email}" уже существует',
+        )
+    except UserUsernameAlreadyExistsException:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f'Пользователь с именем "{data.username}" уже существует',
         )
 
 

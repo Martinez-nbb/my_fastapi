@@ -19,12 +19,16 @@ class UpdateCategoryUseCase:
         category_id: int,
         data: CategoryUpdateSchema,
     ) -> CategoryResponseSchema:
-        try:
-            with self._database.session() as session:
-                category = self._repo.get(session=session, category_id=category_id)
-                self._repo.update(session=session, category=category, data=data)
-                return CategoryResponseSchema.model_validate(obj=category)
-        except CategoryNotFoundException:
-            error = CategoryNotFoundByIdException(id=category_id)
-            logger.error(error.get_detail())
-            raise error
+        with self._database.session() as session:
+            try:
+                category = self._repo.update(
+                    session=session,
+                    category_id=category_id,
+                    data=data,
+                )
+            except CategoryNotFoundException:
+                error = CategoryNotFoundByIdException(id=category_id)
+                logger.error(error.get_detail())
+                raise error
+
+            return CategoryResponseSchema.model_validate(obj=category)

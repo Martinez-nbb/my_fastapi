@@ -1,15 +1,11 @@
-import bcrypt
-
-from src.core.exceptions.database_exceptions import UserAlreadyExistsException
+from src.core.exceptions.database_exceptions import (
+    UserUsernameAlreadyExistsException,
+    UserEmailAlreadyExistsException,
+)
 from src.core.exceptions.domain_exceptions import UserUsernameOrEmailIsNotUniqueException
 from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.models.user import User
 from src.infrastructure.sqlite.repositories.user import UserRepository
 from src.schemas.users import UserCreateSchema, UserResponseSchema
-
-
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 class CreateUserUseCase:
@@ -19,33 +15,15 @@ class CreateUserUseCase:
 
     async def execute(self, data: UserCreateSchema) -> UserResponseSchema:
         with self._database.session() as session:
-            # Проверяем существование пользователя по username
             try:
-                self._repo.get_by_username(session=session, username=data.username)
-                raise UserUsernameOrEmailIsNotUniqueException.from_username(data.username)
-            except UserNotFoundException:
-                pass
-
-            # Проверяем существование пользователя по email (если указан)
-            if data.email:
-                try:
-                    self._repo.get_by_email(session=session, email=data.email)
-                    raise UserUsernameOrEmailIsNotUniqueException.from_email(data.email)
-                except UserNotFoundException:
-                    pass
-
-            user = User(
-                username=data.username,
-                password=hash_password(data.password.get_secret_value()),
-                email=data.email or '',
-                first_name=data.first_name,
-                last_name=data.last_name,
-                is_active=True,
-            )
-
-            try:
-                self._repo.create(session=session, user=user)
-            except UserAlreadyExistsException:
-                raise UserUsernameOrEmailIsNotUniqueException.from_username(data.username)
+                user = self._repo.create(session=session, data=data)
+            except UserUsernameAlreadyExistsException:
+                raise UserUsernameOrEmailIsNotUniqueException.from_username(
+                    username=data.username
+                )
+            except UserEmailAlreadyExistsException:
+                raise UserUsernameOrEmailIsNotUniqueException.from_email(
+                    email=data.email
+                )
 
             return UserResponseSchema.model_validate(obj=user)

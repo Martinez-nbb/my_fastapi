@@ -14,11 +14,10 @@ class DeleteUserUseCase:
         self._repo = UserRepository()
 
     async def execute(self, user_id: int) -> None:
-        try:
-            with self._database.session() as session:
-                user = self._repo.get(session=session, user_id=user_id)
-                self._repo.delete(session=session, user=user)
-        except UserNotFoundException:
-            error = UserNotFoundByIdException(id=user_id)
-            logger.error(error.get_detail())
-            raise error
+        with self._database.session() as session:
+            try:
+                self._repo.delete(session=session, user_id=user_id)
+            except UserNotFoundException:
+                error = UserNotFoundByIdException(id=user_id)
+                logger.error(error.get_detail())
+                raise error

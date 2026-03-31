@@ -1,8 +1,16 @@
 import logging
 from datetime import datetime
 
-from src.core.exceptions.database_exceptions import UserNotFoundException
-from src.core.exceptions.domain_exceptions import AuthorNotFoundException
+from src.core.exceptions.database_exceptions import (
+    CategoryNotFoundException,
+    LocationNotFoundException,
+    UserNotFoundException,
+)
+from src.core.exceptions.domain_exceptions import (
+    AuthorNotFoundException,
+    CategoryNotFoundByIdException,
+    LocationNotFoundByIdException,
+)
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.models.post import Post
 from src.infrastructure.sqlite.repositories.post import PostRepository
@@ -20,25 +28,19 @@ class CreatePostUseCase:
 
     async def execute(self, data: PostCreateSchema) -> PostResponseSchema:
         with self._database.session() as session:
-            # Проверяем существование автора
             try:
-                self._user_repo.get(session=session, user_id=data.author_id)
+                post = self._repo.create(session=session, data=data)
             except UserNotFoundException:
                 error = AuthorNotFoundException(author_id=data.author_id)
                 logger.error(error.get_detail())
                 raise error
-
-            post = Post(
-                title=data.title,
-                text=data.text,
-                pub_date=data.pub_date,
-                author_id=data.author_id,
-                location_id=data.location_id,
-                category_id=data.category_id,
-                is_published=data.is_published,
-                created_at=datetime.now(),
-            )
-
-            self._repo.create(session=session, post=post)
+            except LocationNotFoundException:
+                error = LocationNotFoundByIdException(id=data.location_id)
+                logger.error(error.get_detail())
+                raise error
+            except CategoryNotFoundException:
+                error = CategoryNotFoundByIdException(id=data.category_id)
+                logger.error(error.get_detail())
+                raise error
 
             return PostResponseSchema.model_validate(obj=post)

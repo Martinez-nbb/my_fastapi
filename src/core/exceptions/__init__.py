@@ -1,7 +1,8 @@
 from src.core.exceptions.database_exceptions import (
     BaseDatabaseException,
     UserNotFoundException,
-    UserAlreadyExistsException,
+    UserUsernameAlreadyExistsException,
+    UserEmailAlreadyExistsException,
     CategoryNotFoundException,
     CategorySlugAlreadyExistsException,
     LocationNotFoundException,
@@ -25,17 +26,16 @@ from src.core.exceptions.domain_exceptions import (
 )
 
 __all__ = [
-    # Database exceptions
     'BaseDatabaseException',
     'UserNotFoundException',
-    'UserAlreadyExistsException',
+    'UserUsernameAlreadyExistsException',
+    'UserEmailAlreadyExistsException',
     'CategoryNotFoundException',
     'CategorySlugAlreadyExistsException',
     'LocationNotFoundException',
     'PostNotFoundException',
     'CommentNotFoundException',
     'AuthorNotFoundException',
-    # Domain exceptions
     'BaseDomainException',
     'UserNotFoundByIdException',
     'UserNotFoundByUsernameException',

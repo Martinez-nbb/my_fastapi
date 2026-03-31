@@ -15,12 +15,12 @@ class GetUserUseCase:
         self._repo = UserRepository()
 
     async def execute(self, user_id: int) -> UserResponseSchema:
-        try:
-            with self._database.session() as session:
+        with self._database.session() as session:
+            try:
                 user = self._repo.get(session=session, user_id=user_id)
-        except UserNotFoundException:
-            error = UserNotFoundByIdException(id=user_id)
-            logger.error(error.get_detail())
-            raise error
+            except UserNotFoundException:
+                error = UserNotFoundByIdException(id=user_id)
+                logger.error(error.get_detail())
+                raise error
 
-        return UserResponseSchema.model_validate(obj=user)
+            return UserResponseSchema.model_validate(obj=user)

@@ -1,8 +1,10 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 
+from src.core.exceptions.database_exceptions import UserNotFoundException
 from src.core.exceptions.domain_exceptions import (
     CommentNotFoundByIdException,
     PostNotFoundByIdException,
+    AuthorNotFoundException,
 )
 from src.domain.comment.use_cases.get_comment import GetCommentUseCase
 from src.domain.comment.use_cases.list_comments import (
@@ -70,6 +72,11 @@ async def create_comment(
             author_id=author_id,
         )
     except PostNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=exc.get_detail(),
+        )
+    except AuthorNotFoundException as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=exc.get_detail(),

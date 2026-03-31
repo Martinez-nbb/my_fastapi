@@ -19,12 +19,16 @@ class UpdateUserUseCase:
         user_id: int,
         data: UserUpdateSchema,
     ) -> UserResponseSchema:
-        try:
-            with self._database.session() as session:
-                user = self._repo.get(session=session, user_id=user_id)
-                self._repo.update(session=session, user=user, data=data)
-                return UserResponseSchema.model_validate(obj=user)
-        except UserNotFoundException:
-            error = UserNotFoundByIdException(id=user_id)
-            logger.error(error.get_detail())
-            raise error
+        with self._database.session() as session:
+            try:
+                user = self._repo.update(
+                    session=session,
+                    user_id=user_id,
+                    data=data,
+                )
+            except UserNotFoundException:
+                error = UserNotFoundByIdException(id=user_id)
+                logger.error(error.get_detail())
+                raise error
+
+            return UserResponseSchema.model_validate(obj=user)

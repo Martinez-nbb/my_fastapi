@@ -15,12 +15,12 @@ class GetCategoryUseCase:
         self._repo = CategoryRepository()
 
     async def execute(self, category_id: int) -> CategoryResponseSchema:
-        try:
-            with self._database.session() as session:
+        with self._database.session() as session:
+            try:
                 category = self._repo.get(session=session, category_id=category_id)
-        except CategoryNotFoundException:
-            error = CategoryNotFoundByIdException(id=category_id)
-            logger.error(error.get_detail())
-            raise error
+            except CategoryNotFoundException:
+                error = CategoryNotFoundByIdException(id=category_id)
+                logger.error(error.get_detail())
+                raise error
 
-        return CategoryResponseSchema.model_validate(obj=category)
+            return CategoryResponseSchema.model_validate(obj=category)

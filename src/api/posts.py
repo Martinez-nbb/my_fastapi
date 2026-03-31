@@ -1,8 +1,14 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 
+from src.core.exceptions.database_exceptions import (
+    LocationNotFoundException,
+    CategoryNotFoundException,
+)
 from src.core.exceptions.domain_exceptions import (
     PostNotFoundByIdException,
     AuthorNotFoundException,
+    LocationNotFoundByIdException,
+    CategoryNotFoundByIdException,
 )
 from src.domain.post.use_cases.get_post import GetPostUseCase
 from src.domain.post.use_cases.list_posts import GetPostsUseCase
@@ -58,6 +64,16 @@ async def create_post(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=exc.get_detail(),
         )
+    except LocationNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=exc.get_detail(),
+        )
+    except CategoryNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=exc.get_detail(),
+        )
 
 
 @router.put('/update/{post_id}', status_code=status.HTTP_200_OK, response_model=PostResponseSchema)
@@ -74,6 +90,16 @@ async def update_post(
     except PostNotFoundByIdException as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail(),
+        )
+    except LocationNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=exc.get_detail(),
+        )
+    except CategoryNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=exc.get_detail(),
         )
 

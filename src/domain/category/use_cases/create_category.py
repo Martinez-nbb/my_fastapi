@@ -1,8 +1,9 @@
 import logging
 from datetime import datetime
 
-from src.core.exceptions.database_exceptions import CategoryNotFoundException
-from src.core.exceptions.domain_exceptions import CategoryNotFoundBySlugException
+from sqlalchemy.exc import IntegrityError
+
+from src.core.exceptions.domain_exceptions import CategorySlugAlreadyExistsException
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.repositories.category import CategoryRepository
 from src.schemas.categories import CategoryCreateSchema, CategoryResponseSchema
@@ -19,8 +20,8 @@ class CreateCategoryUseCase:
         with self._database.session() as session:
             try:
                 category = self._repo.create(session=session, data=data)
-            except CategoryNotFoundException:
-                error = CategoryNotFoundBySlugException(slug=data.slug)
+            except IntegrityError:
+                error = CategorySlugAlreadyExistsException(slug=data.slug)
                 logger.error(error.get_detail())
                 raise error
 

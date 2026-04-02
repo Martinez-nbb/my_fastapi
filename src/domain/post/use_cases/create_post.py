@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
 
+from sqlalchemy.exc import IntegrityError
+
 from src.core.exceptions.database_exceptions import (
     CategoryNotFoundException,
     LocationNotFoundException,
@@ -42,5 +44,8 @@ class CreatePostUseCase:
                 error = CategoryNotFoundByIdException(id=data.category_id)
                 logger.error(error.get_detail())
                 raise error
+            except IntegrityError as e:
+                logger.error(f"Ошибка IntegrityError при создании поста: {e}")
+                raise
 
             return PostResponseSchema.model_validate(obj=post)

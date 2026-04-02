@@ -1,5 +1,7 @@
 import logging
 
+from sqlalchemy.exc import IntegrityError
+
 from src.core.exceptions.database_exceptions import PostNotFoundException
 from src.core.exceptions.domain_exceptions import PostNotFoundByIdException
 from src.infrastructure.sqlite.database import database
@@ -30,5 +32,8 @@ class UpdatePostUseCase:
                 error = PostNotFoundByIdException(id=post_id)
                 logger.error(error.get_detail())
                 raise error
+            except IntegrityError as e:
+                logger.error(f"Ошибка IntegrityError при обновлении поста: {e}")
+                raise
 
             return PostResponseSchema.model_validate(obj=post)

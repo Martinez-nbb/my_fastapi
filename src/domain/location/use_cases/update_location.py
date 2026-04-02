@@ -1,5 +1,7 @@
 import logging
 
+from sqlalchemy.exc import IntegrityError
+
 from src.core.exceptions.database_exceptions import LocationNotFoundException
 from src.core.exceptions.domain_exceptions import LocationNotFoundByIdException
 from src.infrastructure.sqlite.database import database
@@ -30,5 +32,8 @@ class UpdateLocationUseCase:
                 error = LocationNotFoundByIdException(id=location_id)
                 logger.error(error.get_detail())
                 raise error
+            except IntegrityError as e:
+                logger.error(f"Ошибка IntegrityError при обновлении location: {e}")
+                raise
 
             return LocationResponseSchema.model_validate(obj=location)

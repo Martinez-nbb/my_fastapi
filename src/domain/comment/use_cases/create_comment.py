@@ -1,6 +1,8 @@
 import logging
 from datetime import datetime
 
+from sqlalchemy.exc import IntegrityError
+
 from src.core.exceptions.database_exceptions import (
     PostNotFoundException,
     UserNotFoundException,
@@ -46,5 +48,8 @@ class CreateCommentUseCase:
                 error = PostNotFoundByIdException(id=data.post_id)
                 logger.error(error.get_detail())
                 raise error
+            except IntegrityError as e:
+                logger.error(f"Ошибка IntegrityError при создании комментария: {e}")
+                raise
 
             return CommentResponseSchema.model_validate(obj=comment)

@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime
 
-from src.core.exceptions.database_exceptions import LocationNotFoundException
+from sqlalchemy.exc import IntegrityError
+
 from src.core.exceptions.domain_exceptions import LocationNotFoundByIdException
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.repositories.location import LocationRepository
@@ -19,9 +20,8 @@ class CreateLocationUseCase:
         with self._database.session() as session:
             try:
                 location = self._repo.create(session=session, data=data)
-            except LocationNotFoundException:
-                error = LocationNotFoundByIdException(id=0)
-                logger.error(error.get_detail())
-                raise error
+            except IntegrityError as e:
+                logger.error(f"Ошибка IntegrityError при создании location: {e}")
+                raise
 
             return LocationResponseSchema.model_validate(obj=location)

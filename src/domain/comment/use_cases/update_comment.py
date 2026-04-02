@@ -1,5 +1,7 @@
 import logging
 
+from sqlalchemy.exc import IntegrityError
+
 from src.core.exceptions.database_exceptions import CommentNotFoundException
 from src.core.exceptions.domain_exceptions import CommentNotFoundByIdException
 from src.infrastructure.sqlite.database import database
@@ -30,5 +32,8 @@ class UpdateCommentUseCase:
                 error = CommentNotFoundByIdException(id=comment_id)
                 logger.error(error.get_detail())
                 raise error
+            except IntegrityError as e:
+                logger.error(f"Ошибка IntegrityError при обновлении комментария: {e}")
+                raise
 
             return CommentResponseSchema.model_validate(obj=comment)

@@ -1,7 +1,12 @@
 import logging
 
+from sqlalchemy.exc import IntegrityError
+
 from src.core.exceptions.database_exceptions import CategoryNotFoundException
-from src.core.exceptions.domain_exceptions import CategoryNotFoundByIdException
+from src.core.exceptions.domain_exceptions import (
+    CategoryNotFoundByIdException,
+    CategorySlugAlreadyExistsException,
+)
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.repositories.category import CategoryRepository
 from src.schemas.categories import CategoryUpdateSchema, CategoryResponseSchema
@@ -30,5 +35,12 @@ class UpdateCategoryUseCase:
                 error = CategoryNotFoundByIdException(id=category_id)
                 logger.error(error.get_detail())
                 raise error
+            except IntegrityError as e:
+                if 'slug' in str(e.orig):
+                    error = CategorySlugAlreadyExistsException(slug=data.slug)
+                    logger.error(error.get_detail())
+                    raise error
+                logger.error(f"Ошибка IntegrityError при обновлении категории: {e}")
+                raise
 
             return CategoryResponseSchema.model_validate(obj=category)

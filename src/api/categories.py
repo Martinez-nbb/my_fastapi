@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends
 
 from src.core.exceptions.domain_exceptions import (
@@ -21,12 +22,15 @@ from src.schemas.categories import (
     CategoryUpdateSchema,
     CategoryResponseSchema,
 )
+from src.schemas.users import UserResponseSchema
+from src.services.auth import AuthService
 
 router = APIRouter()
 
 
 @router.get('/list', status_code=status.HTTP_200_OK, response_model=list[CategoryResponseSchema])
 async def get_categories_list(
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: GetCategoriesUseCase = Depends(get_categories_use_case),
 ) -> list[CategoryResponseSchema]:
     return await use_case.execute()
@@ -35,6 +39,7 @@ async def get_categories_list(
 @router.get('/get/{category_id}', status_code=status.HTTP_200_OK, response_model=CategoryResponseSchema)
 async def get_category(
     category_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: GetCategoryUseCase = Depends(get_category_use_case),
 ) -> CategoryResponseSchema:
     try:
@@ -49,6 +54,7 @@ async def get_category(
 @router.post('/create', status_code=status.HTTP_201_CREATED, response_model=CategoryResponseSchema)
 async def create_category(
     category: CategoryCreateSchema,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: CreateCategoryUseCase = Depends(create_category_use_case),
 ) -> CategoryResponseSchema:
     try:
@@ -64,6 +70,7 @@ async def create_category(
 async def update_category(
     category_id: int,
     category: CategoryUpdateSchema,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: UpdateCategoryUseCase = Depends(update_category_use_case),
 ) -> CategoryResponseSchema:
     try:
@@ -81,6 +88,7 @@ async def update_category(
 @router.delete('/delete/{category_id}', status_code=status.HTTP_200_OK)
 async def delete_category(
     category_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: DeleteCategoryUseCase = Depends(delete_category_use_case),
 ) -> dict:
     try:

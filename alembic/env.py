@@ -6,11 +6,11 @@ from sqlalchemy import pool
 from alembic import context
 
 from src.infrastructure.sqlite.database import Base
-from src.infrastructure.sqlite.models.user import User  # noqa: F401
-from src.infrastructure.sqlite.models.category import Category  # noqa: F401
-from src.infrastructure.sqlite.models.location import Location  # noqa: F401
-from src.infrastructure.sqlite.models.post import Post  # noqa: F401
-from src.infrastructure.sqlite.models.comment import Comment  # noqa: F401
+from src.infrastructure.sqlite.models.user import User
+from src.infrastructure.sqlite.models.category import Category
+from src.infrastructure.sqlite.models.location import Location  
+from src.infrastructure.sqlite.models.post import Post
+from src.infrastructure.sqlite.models.comment import Comment
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -74,7 +74,7 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            render_as_batch=True,  # для SQLite
+            render_as_batch=True, 
         )
 
         with context.begin_transaction():

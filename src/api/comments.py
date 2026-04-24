@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends
 
 from src.core.exceptions.database_exceptions import UserNotFoundException
@@ -27,12 +28,15 @@ from src.schemas.comments import (
     CommentUpdateSchema,
     CommentResponseSchema,
 )
+from src.schemas.users import UserResponseSchema
+from src.services.auth import AuthService
 
 router = APIRouter()
 
 
 @router.get('/list', status_code=status.HTTP_200_OK, response_model=list[CommentResponseSchema])
 async def get_comments_list(
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: GetCommentsUseCase = Depends(get_comments_use_case),
 ) -> list[CommentResponseSchema]:
     return await use_case.execute()
@@ -41,6 +45,7 @@ async def get_comments_list(
 @router.get('/list/by_post/{post_id}', status_code=status.HTTP_200_OK, response_model=list[CommentResponseSchema])
 async def get_comments_by_post(
     post_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: GetCommentsByPostUseCase = Depends(get_comments_by_post_use_case),
 ) -> list[CommentResponseSchema]:
     return await use_case.execute(post_id=post_id)
@@ -49,6 +54,7 @@ async def get_comments_by_post(
 @router.get('/get/{comment_id}', status_code=status.HTTP_200_OK, response_model=CommentResponseSchema)
 async def get_comment(
     comment_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: GetCommentUseCase = Depends(get_comment_use_case),
 ) -> CommentResponseSchema:
     try:
@@ -64,6 +70,7 @@ async def get_comment(
 async def create_comment(
     comment: CommentCreateSchema,
     author_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: CreateCommentUseCase = Depends(create_comment_use_case),
 ) -> CommentResponseSchema:
     try:
@@ -87,6 +94,7 @@ async def create_comment(
 async def update_comment(
     comment_id: int,
     comment: CommentUpdateSchema,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: UpdateCommentUseCase = Depends(update_comment_use_case),
 ) -> CommentResponseSchema:
     try:
@@ -104,6 +112,7 @@ async def update_comment(
 @router.delete('/delete/{comment_id}', status_code=status.HTTP_200_OK)
 async def delete_comment(
     comment_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: DeleteCommentUseCase = Depends(delete_comment_use_case),
 ) -> dict:
     try:

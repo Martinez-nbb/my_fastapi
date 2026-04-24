@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends
 
 from src.core.exceptions.database_exceptions import (
@@ -25,12 +26,14 @@ from src.schemas.users import (
     UserUpdateSchema,
     UserResponseSchema,
 )
+from src.services.auth import AuthService
 
 user_router = APIRouter()
 
 
 @user_router.get('/', status_code=status.HTTP_200_OK, response_model=list[UserResponseSchema])
 async def get_users(
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: GetUsersUseCase = Depends(get_users_use_case),
 ) -> list[UserResponseSchema]:
     return await use_case.execute()
@@ -39,6 +42,7 @@ async def get_users(
 @user_router.get('/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponseSchema)
 async def get_user(
     user_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: GetUserUseCase = Depends(get_user_use_case),
 ) -> UserResponseSchema:
     try:
@@ -68,6 +72,7 @@ async def create_user(
 async def update_user(
     user_id: int,
     data: UserUpdateSchema,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: UpdateUserUseCase = Depends(update_user_use_case),
 ) -> UserResponseSchema:
     try:
@@ -95,6 +100,7 @@ async def update_user(
 @user_router.delete('/{user_id}', status_code=status.HTTP_200_OK)
 async def delete_user(
     user_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: DeleteUserUseCase = Depends(delete_user_use_case),
 ) -> dict:
     try:

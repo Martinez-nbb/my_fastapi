@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends
 
 from src.core.exceptions.database_exceptions import (
@@ -27,12 +28,15 @@ from src.schemas.posts import (
     PostUpdateSchema,
     PostResponseSchema,
 )
+from src.schemas.users import UserResponseSchema
+from src.services.auth import AuthService
 
 router = APIRouter()
 
 
 @router.get('/list', status_code=status.HTTP_200_OK, response_model=list[PostResponseSchema])
 async def get_posts_list(
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: GetPostsUseCase = Depends(get_posts_use_case),
 ) -> list[PostResponseSchema]:
     return await use_case.execute()
@@ -41,6 +45,7 @@ async def get_posts_list(
 @router.get('/get/{post_id}', status_code=status.HTTP_200_OK, response_model=PostResponseSchema)
 async def get_post(
     post_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: GetPostUseCase = Depends(get_post_use_case),
 ) -> PostResponseSchema:
     try:
@@ -55,6 +60,7 @@ async def get_post(
 @router.post('/create', status_code=status.HTTP_201_CREATED, response_model=PostResponseSchema)
 async def create_post(
     post: PostCreateSchema,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: CreatePostUseCase = Depends(create_post_use_case),
 ) -> PostResponseSchema:
     try:
@@ -80,6 +86,7 @@ async def create_post(
 async def update_post(
     post_id: int,
     post: PostUpdateSchema,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: UpdatePostUseCase = Depends(update_post_use_case),
 ) -> PostResponseSchema:
     try:
@@ -107,6 +114,7 @@ async def update_post(
 @router.delete('/delete/{post_id}', status_code=status.HTTP_200_OK)
 async def delete_post(
     post_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: DeletePostUseCase = Depends(delete_post_use_case),
 ) -> dict:
     try:

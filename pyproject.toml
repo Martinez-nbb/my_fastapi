@@ -16,4 +16,6 @@ dependencies = [
     "sqlalchemy>=2.0.48",
     "passlib[bcrypt]>=1.7.4",
     "alembic>=1.14.0",
+    "python-jose>=3.5.0",
+    "python-multipart>=0.0.22",
 ]

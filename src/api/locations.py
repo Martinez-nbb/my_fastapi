@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends
 
 from src.core.exceptions.domain_exceptions import (
@@ -20,12 +21,15 @@ from src.schemas.locations import (
     LocationUpdateSchema,
     LocationResponseSchema,
 )
+from src.schemas.users import UserResponseSchema
+from src.services.auth import AuthService
 
 router = APIRouter()
 
 
 @router.get('/list', status_code=status.HTTP_200_OK, response_model=list[LocationResponseSchema])
 async def get_locations_list(
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: GetLocationsUseCase = Depends(get_locations_use_case),
 ) -> list[LocationResponseSchema]:
     return await use_case.execute()
@@ -34,6 +38,7 @@ async def get_locations_list(
 @router.get('/get/{location_id}', status_code=status.HTTP_200_OK, response_model=LocationResponseSchema)
 async def get_location(
     location_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: GetLocationUseCase = Depends(get_location_use_case),
 ) -> LocationResponseSchema:
     try:
@@ -48,6 +53,7 @@ async def get_location(
 @router.post('/create', status_code=status.HTTP_201_CREATED, response_model=LocationResponseSchema)
 async def create_location(
     location: LocationCreateSchema,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: CreateLocationUseCase = Depends(create_location_use_case),
 ) -> LocationResponseSchema:
     return await use_case.execute(data=location)
@@ -57,6 +63,7 @@ async def create_location(
 async def update_location(
     location_id: int,
     location: LocationUpdateSchema,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: UpdateLocationUseCase = Depends(update_location_use_case),
 ) -> LocationResponseSchema:
     try:
@@ -74,6 +81,7 @@ async def update_location(
 @router.delete('/delete/{location_id}', status_code=status.HTTP_200_OK)
 async def delete_location(
     location_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: DeleteLocationUseCase = Depends(delete_location_use_case),
 ) -> dict:
     try:

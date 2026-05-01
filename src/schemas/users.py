@@ -48,20 +48,10 @@ class UserCreateSchema(UserBaseSchema):
     password: SecretStr = Field(
         ...,
         min_length=8,
-        max_length=72,
-        description='Пароль (минимум 8 символов, максимум 72)',
+        description='Пароль (минимум 8 символов)',
         examples=['********'],
         title='Пароль',
     )
-
-    @field_validator('password')
-    @classmethod
-    def validate_password_length(cls, value: SecretStr) -> SecretStr:
-        password_str = value.get_secret_value()
-        # Проверяем длину в байтах (bcrypt ограничение)
-        if len(password_str.encode('utf-8')) > 72:
-            raise ValueError('Пароль не может быть длиннее 72 байт')
-        return value
 
 
 class UserUpdateSchema(BaseModel):

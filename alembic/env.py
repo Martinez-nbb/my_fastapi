@@ -1,11 +1,12 @@
 from logging.config import fileConfig
+import os
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
 
-from src.infrastructure.sqlite.database import Base
+from src.infrastructure.sqlite.models.base import Base
 from src.infrastructure.sqlite.models.user import User
 from src.infrastructure.sqlite.models.category import Category
 from src.infrastructure.sqlite.models.location import Location  
@@ -15,6 +16,11 @@ from src.infrastructure.sqlite.models.comment import Comment
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# Override sqlalchemy.url with environment variable if set
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    config.set_main_option('sqlalchemy.url', database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

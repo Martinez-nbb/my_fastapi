@@ -62,10 +62,7 @@ class UserRepository:
             elif existing_user.email == (data.email or ''):
                 raise UserEmailAlreadyExistsException()
 
-        password_hash = bcrypt.hashpw(
-            data.password.get_secret_value().encode(),
-            bcrypt.gensalt()
-        ).decode()
+        password_hash = data.password.get_secret_value()
 
         query = (
             insert(self._model)

@@ -4,15 +4,19 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from src.core.config import settings
+from src.core.logging import get_logger
+
+logger = get_logger(__name__)
+
 
 class Database:
     def __init__(self):
-        base_dir = Path(__file__).resolve().parent.parent.parent.parent
-        db_path = base_dir / 'db.sqlite3'
-        self._db_url = f'sqlite:///{db_path}'
+        self._db_url = settings.DATABASE_URL
+        logger.info(f"Подключение к базе данных: {self._db_url}")
         self._engine = create_engine(
             self._db_url,
-            connect_args={'check_same_thread': False},
+            connect_args={'check_same_thread': False} if 'sqlite' in self._db_url else {},
         )
 
     @contextmanager
@@ -20,13 +24,17 @@ class Database:
         Session = sessionmaker(bind=self._engine)
         session = Session()
         try:
+            logger.debug("Открыта сессия БД")
             yield session
             session.commit()
-        except Exception:
+            logger.debug("Сессия БД закоммичена")
+        except Exception as e:
             session.rollback()
+            logger.error(f"Ошибка в сессии БД: {e}")
             raise
         finally:
             session.close()
+            logger.debug("Сессия БД закрыта")
 
 
 database = Database()

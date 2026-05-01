@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     SECRET_AUTH_KEY: SecretStr = SecretStr('your-secret-key-change-in-production')
     AUTH_ALGORITHM: str = 'HS256'
 
-    SQLITE_URL: str = 'sqlite:///db.sqlite3'
+    DATABASE_URL: str = 'sqlite:///db.sqlite3'
 
 
 settings = Settings()

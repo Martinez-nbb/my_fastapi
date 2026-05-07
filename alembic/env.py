@@ -18,9 +18,8 @@ from src.infrastructure.sqlite.models.comment import Comment
 config = context.config
 
 # Override sqlalchemy.url with environment variable if set
-database_url = os.environ.get('DATABASE_URL')
-if database_url:
-    config.set_main_option('sqlalchemy.url', database_url)
+from src.core.config import settings
+config.set_main_option('sqlalchemy.url', settings.database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

@@ -33,10 +33,21 @@ class AuthService:
         try:
             with _database.session() as session:
                 user = _repo.get_by_username(session=session, username=username)
+                user_data = {
+                    'id': user.id,
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'is_active': user.is_active,
+                    'is_superuser': user.is_superuser,
+                    'is_staff': user.is_staff,
+                    'date_joined': user.date_joined,
+                }
         except UserNotFoundException:
             raise CredentialsException(detail=_AUTH_EXCEPTION_MESSAGE)
 
-        return UserResponseSchema.model_validate(user)
+        return UserResponseSchema(**user_data)
 
     @staticmethod
     async def get_current_user(

@@ -119,3 +119,12 @@ class AuthorNotFoundException(BaseDomainException):
         detail = self._exception_text_template.format(author_id=author_id)
         super().__init__(detail=detail)
         self.author_id = author_id
+
+
+class PostHasNoImageException(BaseDomainException):
+    _exception_text_template = "Публикация с id '{post_id}' не имеет изображения"
+
+    def __init__(self, post_id: int) -> None:
+        detail = self._exception_text_template.format(post_id=post_id)
+        super().__init__(detail=detail)
+        self.post_id = post_id

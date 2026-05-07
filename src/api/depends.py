@@ -21,6 +21,8 @@ from src.domain.post.use_cases.list_posts import GetPostsUseCase
 from src.domain.post.use_cases.create_post import CreatePostUseCase
 from src.domain.post.use_cases.update_post import UpdatePostUseCase
 from src.domain.post.use_cases.delete_post import DeletePostUseCase
+from src.domain.post.use_cases.add_post_image import AddPostImageUseCase
+from src.domain.post.use_cases.get_post_image import GetPostImageUseCase
 
 from src.domain.comment.use_cases.get_comment import GetCommentUseCase
 from src.domain.comment.use_cases.list_comments import GetCommentsUseCase, GetCommentsByPostUseCase
@@ -131,3 +133,11 @@ def update_comment_use_case() -> UpdateCommentUseCase:
 
 def delete_comment_use_case() -> DeleteCommentUseCase:
     return DeleteCommentUseCase()
+
+
+def add_post_image_use_case() -> AddPostImageUseCase:
+    return AddPostImageUseCase()
+
+
+def get_post_image_use_case() -> GetPostImageUseCase:
+    return GetPostImageUseCase()

@@ -1,6 +1,8 @@
 class BaseDatabaseException(Exception):
     def __init__(self, detail: str | None = None) -> None:
+        message = detail or "Database error occurred"
         self._detail = detail
+        super().__init__(message)
 
 
 class UserNotFoundException(BaseDatabaseException):

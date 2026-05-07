@@ -11,11 +11,12 @@ class CreateAccessTokenUseCase:
     async def execute(
         self, username: str, expires_delta: timedelta | None = None
     ) -> str:
-        to_encode: dict[str, str | datetime] = {'sub': username}
+        now = datetime.now(timezone.utc)
+        to_encode: dict[str, str | datetime] = {'sub': username, 'iat': now}
         if expires_delta:
-            expire = datetime.now(timezone.utc) + expires_delta
+            expire = now + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(
+            expire = now + timedelta(
                 minutes=self._ACCESS_TOKEN_EXPIRE_MINUTES
             )
 

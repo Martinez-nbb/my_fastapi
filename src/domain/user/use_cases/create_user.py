@@ -29,6 +29,17 @@ class CreateUserUseCase:
             try:
                 user = self._repo.create(session=session, data=data)
                 logger.info(f"Пользователь создан: id={user.id}, username={user.username}")
+                user_data = {
+                    'id': user.id,
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'is_active': user.is_active,
+                    'is_superuser': user.is_superuser,
+                    'is_staff': user.is_staff,
+                    'date_joined': user.date_joined,
+                }
             except UserUsernameAlreadyExistsException:
                 logger.warning(f"Попытка создания пользователя с существующим username: {data.username}")
                 raise UserUsernameOrEmailIsNotUniqueException.from_username(
@@ -40,4 +51,4 @@ class CreateUserUseCase:
                     email=data.email
                 )
 
-            return UserResponseSchema.model_validate(obj=user)
+        return UserResponseSchema(**user_data)

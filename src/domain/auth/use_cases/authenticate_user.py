@@ -23,10 +23,18 @@ class AuthenticateUserUseCase:
         try:
             with self._database.session() as session:
                 user = self._repo.get_by_username(session=session, username=username)
-                # Получаем пароль внутри сессии
                 hashed_password = user.password
-                # Создаем схему внутри сессии, чтобы загрузить все атрибуты
-                user_schema = UserResponseSchema.model_validate(user)
+                user_data = {
+                    'id': user.id,
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'is_active': user.is_active,
+                    'is_superuser': user.is_superuser,
+                    'is_staff': user.is_staff,
+                    'date_joined': user.date_joined,
+                }
         except UserNotFoundException:
             logger.error(f"User not found: {username}")
             raise
@@ -37,4 +45,4 @@ class AuthenticateUserUseCase:
             logger.error(f"Wrong password for user: {username}")
             raise ValueError("Неверный пароль")
 
-        return user_schema
+        return UserResponseSchema(**user_data)

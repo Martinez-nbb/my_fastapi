@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 
 class Database:
     def __init__(self):
-        self._db_url = settings.DATABASE_URL
+        self._db_url = settings.database_url
         logger.info(f"Подключение к базе данных: {self._db_url}")
         self._engine = create_engine(
             self._db_url,

@@ -3,11 +3,12 @@ from pydantic import BaseModel, Field
 
 class Token(BaseModel):
     access_token: str = Field(description="JWT access token")
-    token_type: str = Field(description="Token type (bearer)")
+    token_type: str = Field(default="bearer", description="Token type (bearer)")
 
 
 class TokenData(BaseModel):
     username: str | None = None
+    exp: int | None = None
 
 
 class UserLogin(BaseModel):

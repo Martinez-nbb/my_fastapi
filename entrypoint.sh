@@ -1,4 +1,5 @@
 #!/bin/sh
 
+export DATABASE_URL
 alembic upgrade head
-python main.py
+exec python main.py

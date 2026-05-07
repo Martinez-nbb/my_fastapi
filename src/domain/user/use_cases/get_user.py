@@ -23,4 +23,16 @@ class GetUserUseCase:
                 logger.error(error.get_detail())
                 raise error
 
-            return UserResponseSchema.model_validate(obj=user)
+            user_data = {
+                'id': user.id,
+                'username': user.username,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'email': user.email,
+                'is_active': user.is_active,
+                'is_superuser': user.is_superuser,
+                'is_staff': user.is_staff,
+                'date_joined': user.date_joined,
+            }
+
+        return UserResponseSchema(**user_data)

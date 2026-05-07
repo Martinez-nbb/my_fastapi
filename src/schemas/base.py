@@ -53,10 +53,7 @@ def validate_email(value: str | None) -> str | None:
         return value
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if not re.match(email_pattern, value):
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-            detail='Некорректный формат email адреса'
-        )
+        raise ValueError('Некорректный формат email адреса')
     return value
 
 

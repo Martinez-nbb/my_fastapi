@@ -57,11 +57,6 @@ class PostCreateSchema(PostBaseSchema, BasePublishedSchema):
         description='ID категории (опционально)',
         title='ID категории',
     )
-    image: str | None = Field(
-        default=None,
-        description='Путь к изображению публикации',
-        title='Изображение',
-    )
 
 
 class PostUpdateSchema(BaseModel):
@@ -93,11 +88,6 @@ class PostUpdateSchema(BaseModel):
         default=None,
         description='ID категории',
         ge=1,
-    )
-    image: str | None = Field(
-        default=None,
-        description='Путь к изображению публикации',
-        title='Изображение',
     )
 
     @field_validator('text')
@@ -132,11 +122,6 @@ class PostResponseSchema(
         default=None,
         description='Категория публикации (опционально)',
         title='Категория',
-    )
-    image: str | None = Field(
-        default=None,
-        description='Путь к изображению публикации',
-        title='Изображение',
     )
     model_config = ConfigDict(from_attributes=True, extra='ignore')
 

@@ -66,7 +66,7 @@ def upgrade() -> None:
     sa.Column('author_id', sa.Integer(), nullable=False),
     sa.Column('location_id', sa.Integer(), nullable=True),
     sa.Column('category_id', sa.Integer(), nullable=True),
-    sa.Column('image', sa.String(), nullable=False),
+    sa.Column('image', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['author_id'], ['auth_user.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['category_id'], ['blog_category.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['location_id'], ['blog_location.id'], ondelete='SET NULL'),

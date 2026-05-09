@@ -13,6 +13,10 @@ from src.core.exceptions.domain_exceptions import (
     LocationNotFoundByIdException,
     CategoryNotFoundByIdException,
     PostHasNoImageException,
+    UploadFileIsNotImageException,
+    ImageFileReadException,
+    ImageFileSaveException,
+    ImageFolderNotFoundException,
 )
 from src.domain.post.use_cases.get_post import GetPostUseCase
 from src.domain.post.use_cases.list_posts import GetPostsUseCase
@@ -138,7 +142,7 @@ async def delete_post(
 @router.post('/image/{post_id}', status_code=status.HTTP_201_CREATED, response_model=PostImageResponse)
 async def add_post_image(
     post_id: int,
-    image: Annotated[UploadFile, FileParam(description='Изображение (JPEG, PNG, до 10MB)')],
+    image: Annotated[UploadFile, FileParam(description='Изображение (JPEG)')],
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: AddPostImageUseCase = Depends(add_post_image_use_case),
 ) -> PostImageResponse:
@@ -149,10 +153,36 @@ async def add_post_image(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         )
+    except UploadFileIsNotImageException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=exc.get_detail(),
+        )
     except PostNotFoundException as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=exc._detail,
+        )
+    except ImageFileReadException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+    except ImageFileSaveException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(exc),
+        )
+    except ImageFolderNotFoundException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Необработанная ошибка при загрузке изображения: {str(exc)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера",
         )
 
 

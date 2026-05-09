@@ -128,3 +128,26 @@ class PostHasNoImageException(BaseDomainException):
         detail = self._exception_text_template.format(post_id=post_id)
         super().__init__(detail=detail)
         self.post_id = post_id
+
+
+class UploadFileIsNotImageException(BaseDomainException):
+    _exception_text_template = "Загруженный файл не является изображением JPEG"
+
+    def __init__(self) -> None:
+        detail = self._exception_text_template
+        super().__init__(detail=detail)
+
+
+class ImageFileReadException(BaseDomainException):
+    def __init__(self, detail: str = "Ошибка чтения файла изображения") -> None:
+        super().__init__(detail=detail)
+
+
+class ImageFileSaveException(BaseDomainException):
+    def __init__(self, detail: str = "Ошибка сохранения файла изображения") -> None:
+        super().__init__(detail=detail)
+
+
+class ImageFolderNotFoundException(BaseDomainException):
+    def __init__(self, detail: str = "Папка для изображений не найдена") -> None:
+        super().__init__(detail=detail)

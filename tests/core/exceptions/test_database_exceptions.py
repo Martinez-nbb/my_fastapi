@@ -19,6 +19,7 @@ from src.core.exceptions.domain_exceptions import (
     LocationNotFoundByIdException,
     CommentNotFoundByIdException,
     PostHasNoImageException,
+    UploadFileIsNotImageException,
 )
 from src.core.exceptions.auth_exceptions import (
     CredentialsException,
@@ -97,6 +98,10 @@ class TestDomainExceptions:
         exc = PostHasNoImageException(post_id=42)
         assert "42" in exc.get_detail()
         assert exc.post_id == 42
+
+    def test_upload_file_is_not_image_exception(self):
+        exc = UploadFileIsNotImageException()
+        assert "JPEG" in exc.get_detail()
 
 
 class TestAuthExceptions:

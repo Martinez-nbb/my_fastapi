@@ -1,20 +1,16 @@
-FROM python:3.12-alpine
+FROM python:3.13-alpine
 
 ENV PATH="${PATH}:/root/.local/bin"
 COPY ./src /app/src
 COPY main.py /app/
-COPY entrypoint.sh /app/
 COPY alembic /app/alembic
 COPY alembic.ini /app/
-COPY pyproject.toml /app/
 COPY requirements.txt /app/
-COPY tests /app/tests
+COPY ./images /images
 
-ENV PYTHONPATH /app/src
+ENV PYTHONPATH=/app/src
 WORKDIR /app
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-RUN chmod +x /app/entrypoint.sh
-RUN mkdir -p /app/images
-
+RUN pip install -r ./requirements.txt
+RUN chmod +x ./src/start.sh
+RUN mkdir -p /app/logs
 EXPOSE 8000

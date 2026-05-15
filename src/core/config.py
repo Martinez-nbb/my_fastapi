@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     SECRET_AUTH_KEY: SecretStr = SecretStr('your-secret-key-change-in-production')
     AUTH_ALGORITHM: str = 'HS256'
 
-    POSTGRES_HOST: str = 'localhost'
+    POSTGRES_HOST: str = 'db'
     POSTGRES_DB: str = 'myfastapi'
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: SecretStr = SecretStr('postgres')

@@ -49,15 +49,28 @@ def upgrade() -> None:
     
     user_ids = []
     for username, email, first_name, last_name, password in users_data:
-        conn.execute(
-            sa.text("""
-                INSERT INTO auth_user (password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined)
-                SELECT :password, NULL, false, :username, :first_name, :last_name, :email, false, true, :date_joined
-                WHERE NOT EXISTS (SELECT 1 FROM auth_user WHERE username = :username)
-            """),
-            {'password': hash_password(password), 'username': username, 'first_name': first_name, 'last_name': last_name, 'email': email, 'date_joined': now}
+        # Проверяем, существует ли пользователь
+        result = conn.execute(
+            sa.text("SELECT id FROM auth_user WHERE username = :username"),
+            {'username': username}
         )
-        user_ids.append(conn.execute(sa.text("SELECT lastval()")).scalar())
+        existing = result.fetchone()
+        
+        if existing:
+            user_ids.append(existing[0])
+        else:
+            # Вставляем нового пользователя
+            result = conn.execute(
+                sa.text("""
+                    INSERT INTO auth_user (password, last_login, is_superuser, username, first_name, last_name, email, is_staff, is_active, date_joined)
+                    VALUES (:password, NULL, false, :username, :first_name, :last_name, :email, false, true, :date_joined)
+                    RETURNING id
+                """),
+                {'password': hash_password(password), 'username': username, 
+                 'first_name': first_name, 'last_name': last_name, 
+                 'email': email, 'date_joined': now}
+            )
+            user_ids.append(result.scalar())
     
     # Categories (4)
     categories_data = [
@@ -69,22 +82,48 @@ def upgrade() -> None:
     
     category_ids = []
     for title, slug, description in categories_data:
-        conn.execute(
-            sa.text("INSERT INTO blog_category (created_at, is_published, title, description, slug) VALUES (:created_at, true, :title, :description, :slug)"),
-            {'created_at': now, 'title': title, 'description': description, 'slug': slug}
+        result = conn.execute(
+            sa.text("SELECT id FROM blog_category WHERE slug = :slug"),
+            {'slug': slug}
         )
-        category_ids.append(conn.execute(sa.text("SELECT lastval()")).scalar())
+        existing = result.fetchone()
+        
+        if existing:
+            category_ids.append(existing[0])
+        else:
+            result = conn.execute(
+                sa.text("""
+                    INSERT INTO blog_category (created_at, is_published, title, description, slug) 
+                    VALUES (:created_at, true, :title, :description, :slug)
+                    RETURNING id
+                """),
+                {'created_at': now, 'title': title, 'description': description, 'slug': slug}
+            )
+            category_ids.append(result.scalar())
     
     # Locations (5)
     locations_data = ['Москва', 'Санкт-Петербург', 'Казань', 'Новосибирск', 'Екатеринбург']
     
     location_ids = []
     for name in locations_data:
-        conn.execute(
-            sa.text("INSERT INTO blog_location (created_at, is_published, name) VALUES (:created_at, true, :name)"),
-            {'created_at': now, 'name': name}
+        result = conn.execute(
+            sa.text("SELECT id FROM blog_location WHERE name = :name"),
+            {'name': name}
         )
-        location_ids.append(conn.execute(sa.text("SELECT lastval()")).scalar())
+        existing = result.fetchone()
+        
+        if existing:
+            location_ids.append(existing[0])
+        else:
+            result = conn.execute(
+                sa.text("""
+                    INSERT INTO blog_location (created_at, is_published, name) 
+                    VALUES (:created_at, true, :name)
+                    RETURNING id
+                """),
+                {'created_at': now, 'name': name}
+            )
+            location_ids.append(result.scalar())
     
     # Posts (10)
     posts_data = [
@@ -102,15 +141,18 @@ def upgrade() -> None:
     
     post_ids = []
     for title, text, author_idx, location_idx, category_idx in posts_data:
-        pub_date = (datetime.now()).isoformat()
-        conn.execute(
+        pub_date = datetime.now().isoformat()
+        result = conn.execute(
             sa.text("""
                 INSERT INTO blog_post (created_at, is_published, title, text, pub_date, author_id, location_id, category_id, image)
                 VALUES (:created_at, true, :title, :text, :pub_date, :author_id, :location_id, :category_id, '')
+                RETURNING id
             """),
-            {'created_at': now, 'title': title, 'text': text, 'pub_date': pub_date, 'author_id': user_ids[author_idx-1], 'location_id': location_ids[location_idx-1], 'category_id': category_ids[category_idx-1]}
+            {'created_at': now, 'title': title, 'text': text, 'pub_date': pub_date, 
+             'author_id': user_ids[author_idx-1], 'location_id': location_ids[location_idx-1], 
+             'category_id': category_ids[category_idx-1]}
         )
-        post_ids.append(conn.execute(sa.text("SELECT lastval()")).scalar())
+        post_ids.append(result.scalar())
     
     # Comments (15)
     comments_data = [
@@ -123,8 +165,12 @@ def upgrade() -> None:
     
     for text, post_idx, author_idx in comments_data:
         conn.execute(
-            sa.text("INSERT INTO blog_comment (created_at, is_published, post_id, text, author_id) VALUES (:created_at, true, :post_id, :text, :author_id)"),
-            {'created_at': now, 'post_id': post_ids[post_idx-1], 'text': text, 'author_id': user_ids[author_idx-1]}
+            sa.text("""
+                INSERT INTO blog_comment (created_at, is_published, post_id, text, author_id) 
+                VALUES (:created_at, true, :post_id, :text, :author_id)
+            """),
+            {'created_at': now, 'post_id': post_ids[post_idx-1], 'text': text, 
+             'author_id': user_ids[author_idx-1]}
         )
     
     conn.commit()

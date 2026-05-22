@@ -1,12 +1,23 @@
 from typing import Annotated
-from fastapi import APIRouter, status, HTTPException, Depends
+from fastapi import APIRouter, status, HTTPException, Depends, File as FileParam, UploadFile
 
 from src.core.exceptions.database_exceptions import UserNotFoundException
+from src.core.exceptions.database_exceptions import (
+    PostImageNotFoundException,
+    CommentImageNotFoundException,
+)
 from src.core.exceptions.domain_exceptions import (
     CommentNotFoundByIdException,
     PostNotFoundByIdException,
     AuthorNotFoundException,
+    UploadFileIsNotImageException,
+    ImageFileReadException,
+    ImageFileSaveException,
+    ImageFolderNotFoundException,
 )
+from src.domain.comment.use_cases.add_comment_image import AddCommentImageUseCase
+from src.domain.comment.use_cases.list_comment_images import ListCommentImagesUseCase
+from src.domain.comment.use_cases.delete_comment_image import DeleteCommentImageUseCase
 from src.domain.comment.use_cases.get_comment import GetCommentUseCase
 from src.domain.comment.use_cases.list_comments import (
     GetCommentsUseCase,
@@ -22,11 +33,15 @@ from src.api.depends import (
     create_comment_use_case,
     update_comment_use_case,
     delete_comment_use_case,
+    add_comment_image_use_case,
+    list_comment_images_use_case,
+    delete_comment_image_use_case,
 )
 from src.schemas.comments import (
     CommentCreateSchema,
     CommentUpdateSchema,
     CommentResponseSchema,
+    CommentImageSchema,
 )
 from src.schemas.users import UserResponseSchema
 from src.services.auth import AuthService
@@ -122,3 +137,70 @@ async def delete_comment(
             detail=exc.get_detail(),
         )
     return {'message': 'Комментарий успешно удален'}
+
+
+@router.post('/image/{comment_id}', status_code=status.HTTP_201_CREATED, response_model=CommentImageSchema)
+async def add_comment_image(
+    comment_id: int,
+    image: Annotated[UploadFile, FileParam(description='Изображение')],
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
+    use_case: Annotated[AddCommentImageUseCase, Depends(add_comment_image_use_case)],
+) -> CommentImageSchema:
+    try:
+        return await use_case.execute(comment_id=comment_id, image=image)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+    except UploadFileIsNotImageException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=exc.get_detail(),
+        )
+    except ImageFileReadException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+    except ImageFileSaveException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(exc),
+        )
+    except ImageFolderNotFoundException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Необработанная ошибка при загрузке изображения: {str(exc)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера",
+        )
+
+
+@router.get('/{comment_id}/images', status_code=status.HTTP_200_OK, response_model=list[CommentImageSchema])
+async def list_comment_images(
+    comment_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
+    use_case: Annotated[ListCommentImagesUseCase, Depends(list_comment_images_use_case)],
+) -> list[CommentImageSchema]:
+    return await use_case.execute(comment_id=comment_id)
+
+
+@router.delete('/image/{image_id}', status_code=status.HTTP_200_OK)
+async def delete_comment_image(
+    image_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
+    use_case: Annotated[DeleteCommentImageUseCase, Depends(delete_comment_image_use_case)],
+) -> dict:
+    try:
+        await use_case.execute(image_id=image_id)
+    except CommentImageNotFoundException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc._detail,
+        )
+    return {'message': 'Изображение успешно удалено'}

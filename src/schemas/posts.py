@@ -98,6 +98,22 @@ class PostUpdateSchema(BaseModel):
         return validate_text(value)
 
 
+class PostImageCreateSchema(BaseModel):
+    post_id: int = Field(description='ID публикации')
+    file_path: str = Field(description='Путь к файлу')
+    original_name: str = Field(description='Оригинальное имя файла')
+
+
+class PostImageSchema(BaseModel):
+    id: int = Field(description='ID изображения')
+    post_id: int = Field(description='ID публикации')
+    file_path: str = Field(description='Путь к файлу')
+    original_name: str = Field(description='Оригинальное имя файла')
+    created_at: datetime = Field(description='Дата создания')
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class PostResponseSchema(
     PostBaseSchema,
     BaseIdSchema,
@@ -122,6 +138,10 @@ class PostResponseSchema(
         default=None,
         description='Категория публикации (опционально)',
         title='Категория',
+    )
+    images: list[PostImageSchema] = Field(
+        default_factory=list,
+        description='Изображения публикации',
     )
     model_config = ConfigDict(from_attributes=True, extra='ignore')
 

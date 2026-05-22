@@ -9,6 +9,7 @@ from src.infrastructure.sqlite.models.base import Base
 if TYPE_CHECKING:
     from src.infrastructure.sqlite.models.post import Post
     from src.infrastructure.sqlite.models.user import User
+    from src.infrastructure.sqlite.models.comment_image import CommentImage
 
 
 class Comment(Base):
@@ -36,4 +37,10 @@ class Comment(Base):
     )
     author: Mapped['User'] = relationship(
         'User', back_populates='comments', foreign_keys=[author_id]
+    )
+    images: Mapped[list['CommentImage']] = relationship(
+        'CommentImage',
+        back_populates='comment',
+        foreign_keys='CommentImage.comment_id',
+        cascade='all, delete-orphan',
     )

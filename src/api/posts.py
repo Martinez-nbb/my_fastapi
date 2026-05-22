@@ -13,7 +13,6 @@ from src.core.exceptions.domain_exceptions import (
     AuthorNotFoundException,
     LocationNotFoundByIdException,
     CategoryNotFoundByIdException,
-    PostHasNoImageException,
     UploadFileIsNotImageException,
     ImageFileReadException,
     ImageFileSaveException,
@@ -26,6 +25,8 @@ from src.domain.post.use_cases.update_post import UpdatePostUseCase
 from src.domain.post.use_cases.delete_post import DeletePostUseCase
 from src.domain.post.use_cases.add_post_image import AddPostImageUseCase
 from src.domain.post.use_cases.get_post_image import GetPostImageUseCase
+from src.domain.post.use_cases.list_post_images import ListPostImagesUseCase
+from src.domain.post.use_cases.delete_post_image import DeletePostImageUseCase
 from src.api.depends import (
     get_post_use_case,
     get_posts_use_case,
@@ -34,11 +35,14 @@ from src.api.depends import (
     delete_post_use_case,
     add_post_image_use_case,
     get_post_image_use_case,
+    list_post_images_use_case,
+    delete_post_image_use_case,
 )
 from src.schemas.posts import (
     PostCreateSchema,
     PostUpdateSchema,
     PostResponseSchema,
+    PostImageSchema,
     PostImageResponse,
 )
 from src.schemas.users import UserResponseSchema
@@ -142,13 +146,13 @@ async def delete_post(
     return {'message': 'Публикация успешно удалена'}
 
 
-@router.post('/image/{post_id}', status_code=status.HTTP_201_CREATED, response_model=PostImageResponse)
+@router.post('/image/{post_id}', status_code=status.HTTP_201_CREATED, response_model=PostImageSchema)
 async def add_post_image(
     post_id: int,
     image: Annotated[UploadFile, FileParam(description='Изображение (JPEG)')],
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: Annotated[AddPostImageUseCase, Depends(add_post_image_use_case)],
-) -> PostImageResponse:
+) -> PostImageSchema:
     try:
         return await use_case.execute(post_id=post_id, image=image)
     except ValueError as exc:
@@ -189,21 +193,41 @@ async def add_post_image(
         )
 
 
-@router.get('/image/{post_id}')
-async def get_post_image(
+@router.get('/{post_id}/images', status_code=status.HTTP_200_OK, response_model=list[PostImageSchema])
+async def list_post_images(
     post_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
+    use_case: Annotated[ListPostImagesUseCase, Depends(list_post_images_use_case)],
+) -> list[PostImageSchema]:
+    return await use_case.execute(post_id=post_id)
+
+
+@router.get('/image/{image_id}')
+async def get_post_image(
+    image_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: Annotated[GetPostImageUseCase, Depends(get_post_image_use_case)],
 ) -> FileResponse:
     try:
-        return await use_case.execute(post_id=post_id)
+        return await use_case.execute(image_id=image_id)
     except PostNotFoundException as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=exc._detail,
         )
-    except PostHasNoImageException as exc:
+
+
+@router.delete('/image/{image_id}', status_code=status.HTTP_200_OK)
+async def delete_post_image(
+    image_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
+    use_case: Annotated[DeletePostImageUseCase, Depends(delete_post_image_use_case)],
+) -> dict:
+    try:
+        await use_case.execute(image_id=image_id)
+    except PostNotFoundException as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail(),
+            detail=exc._detail,
         )
+    return {'message': 'Изображение успешно удалено'}

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from src.schemas.base import (
@@ -52,6 +54,22 @@ class CommentUpdateSchema(BaseModel):
         return validate_text(value)
 
 
+class CommentImageCreateSchema(BaseModel):
+    comment_id: int = Field(description='ID комментария')
+    file_path: str = Field(description='Путь к файлу')
+    original_name: str = Field(description='Оригинальное имя файла')
+
+
+class CommentImageSchema(BaseModel):
+    id: int = Field(description='ID изображения')
+    comment_id: int = Field(description='ID комментария')
+    file_path: str = Field(description='Путь к файлу')
+    original_name: str = Field(description='Оригинальное имя файла')
+    created_at: datetime = Field(description='Дата создания')
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class CommentResponseSchema(
     CommentBaseSchema,
     BaseIdSchema,
@@ -70,5 +88,9 @@ class CommentResponseSchema(
         ...,
         description='ID публикации, к которой относится комментарий',
         title='ID публикации',
+    )
+    images: list[CommentImageSchema] = Field(
+        default_factory=list,
+        description='Изображения комментария',
     )
     model_config = ConfigDict(from_attributes=True, extra='ignore')

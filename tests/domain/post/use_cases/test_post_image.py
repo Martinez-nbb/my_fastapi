@@ -1,12 +1,10 @@
 import pytest
-import os
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 from src.domain.post.use_cases.add_post_image import AddPostImageUseCase
 from src.domain.post.use_cases.get_post_image import GetPostImageUseCase
-from src.core.exceptions.database_exceptions import PostNotFoundException
-from src.core.exceptions.domain_exceptions import PostHasNoImageException, UploadFileIsNotImageException
-from src.schemas.posts import PostImageResponse
+from src.core.exceptions.database_exceptions import PostImageNotFoundException
+from src.core.exceptions.domain_exceptions import UploadFileIsNotImageException
 
 
 class FakeUploadFile:
@@ -14,10 +12,11 @@ class FakeUploadFile:
         self.filename = filename
 
 
-class FakePost:
-    def __init__(self, post_id: int, image: str | None = None):
-        self.id = post_id
-        self.image = image
+class FakePostImage:
+    def __init__(self, image_id: int, post_id: int, file_path: str):
+        self.id = image_id
+        self.post_id = post_id
+        self.file_path = file_path
 
 
 class TestAddPostImageUseCaseValidation:
@@ -66,7 +65,7 @@ class TestAddPostImageUseCaseValidation:
     def test_raises_for_empty_filename(self):
         use_case = AddPostImageUseCase()
         image = FakeUploadFile("")
-        
+
         with pytest.raises(ValueError):
             use_case._validate_image(image)
 
@@ -74,41 +73,28 @@ class TestAddPostImageUseCaseValidation:
 class TestGetPostImageUseCase:
     @pytest.mark.asyncio
     async def test_returns_jpeg_image(self):
-        with patch('src.domain.post.use_cases.get_post_image.PostRepository') as MockRepo:
+        with patch('src.domain.post.use_cases.get_post_image.PostImageRepository') as MockRepo:
             mock_repo = AsyncMock()
-            mock_repo.get.return_value = FakePost(1, "test-uuid")
+            mock_repo.get.return_value = FakePostImage(1, 1, "test-uuid.jpeg")
             MockRepo.return_value = mock_repo
 
             use_case = GetPostImageUseCase()
             use_case._repo = mock_repo
 
             with patch('os.path.exists', return_value=True):
-                result = await use_case.execute(post_id=1)
+                result = await use_case.execute(image_id=1)
 
             assert result.media_type == "image/jpeg"
 
     @pytest.mark.asyncio
-    async def test_raises_when_post_not_found(self):
-        with patch('src.domain.post.use_cases.get_post_image.PostRepository') as MockRepo:
+    async def test_raises_when_image_not_found(self):
+        with patch('src.domain.post.use_cases.get_post_image.PostImageRepository') as MockRepo:
             mock_repo = AsyncMock()
-            mock_repo.get.return_value = None
+            mock_repo.get.side_effect = PostImageNotFoundException()
             MockRepo.return_value = mock_repo
 
             use_case = GetPostImageUseCase()
             use_case._repo = mock_repo
 
-            with pytest.raises(PostNotFoundException):
-                await use_case.execute(post_id=999)
-
-    @pytest.mark.asyncio
-    async def test_raises_when_post_has_no_image(self):
-        with patch('src.domain.post.use_cases.get_post_image.PostRepository') as MockRepo:
-            mock_repo = AsyncMock()
-            mock_repo.get.return_value = FakePost(1, None)
-            MockRepo.return_value = mock_repo
-
-            use_case = GetPostImageUseCase()
-            use_case._repo = mock_repo
-
-            with pytest.raises(PostHasNoImageException):
-                await use_case.execute(post_id=1)
+            with pytest.raises(PostImageNotFoundException):
+                await use_case.execute(image_id=999)

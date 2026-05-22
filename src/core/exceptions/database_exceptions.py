@@ -39,3 +39,11 @@ class CommentNotFoundException(BaseDatabaseException):
 
 class AuthorNotFoundException(BaseDatabaseException):
     pass
+
+
+class PostImageNotFoundException(BaseDatabaseException):
+    pass
+
+
+class CommentImageNotFoundException(BaseDatabaseException):
+    pass

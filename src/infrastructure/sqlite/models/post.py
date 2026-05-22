@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from src.infrastructure.sqlite.models.category import Category
     from src.infrastructure.sqlite.models.location import Location
     from src.infrastructure.sqlite.models.comment import Comment
+    from src.infrastructure.sqlite.models.post_image import PostImage
 
 
 class Post(Base):
@@ -39,7 +40,12 @@ class Post(Base):
         index=True,
         nullable=True,
     )
-    image: Mapped[str | None] = mapped_column(nullable=True, default=None)
+    images: Mapped[list['PostImage']] = relationship(
+        'PostImage',
+        back_populates='post',
+        foreign_keys='PostImage.post_id',
+        cascade='all, delete-orphan',
+    )
 
     author: Mapped['User'] = relationship(
         'User', back_populates='posts', foreign_keys=[author_id]

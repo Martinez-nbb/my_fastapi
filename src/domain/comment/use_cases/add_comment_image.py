@@ -3,10 +3,10 @@ from uuid import uuid4
 
 from fastapi import File
 
-from src.schemas.posts import PostImageSchema, PostImageCreateSchema
+from src.schemas.comments import CommentImageSchema, CommentImageCreateSchema
 from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.post_image import PostImageRepository
-from src.core.exceptions.database_exceptions import PostNotFoundException
+from src.infrastructure.sqlite.repositories.comment_image import CommentImageRepository
+from src.core.exceptions.database_exceptions import CommentNotFoundException
 from src.core.exceptions.domain_exceptions import (
     UploadFileIsNotImageException,
     ImageFileReadException,
@@ -18,13 +18,13 @@ from src.core.logging import get_logger
 logger = get_logger(__name__)
 
 
-class AddPostImageUseCase:
+class AddCommentImageUseCase:
     MAX_FILE_SIZE = 10 * 1024 * 1024
 
     def __init__(self) -> None:
         self.image_folder = "/app/images"
         self._database = database
-        self._repo = PostImageRepository()
+        self._repo = CommentImageRepository()
 
     ALLOWED_EXTENSIONS = {"jpeg", "jpg", "png", "gif", "webp"}
 
@@ -56,8 +56,8 @@ class AddPostImageUseCase:
                 f"Нет доступа к папке: {self.image_folder}"
             )
 
-    async def execute(self, post_id: int, image: File) -> PostImageSchema:
-        logger.info(f"Загрузка изображения для поста: post_id={post_id}, filename={getattr(image, 'filename', 'unknown')}")
+    async def execute(self, comment_id: int, image: File) -> CommentImageSchema:
+        logger.info(f"Загрузка изображения для комментария: comment_id={comment_id}, filename={getattr(image, 'filename', 'unknown')}")
 
         try:
             ext = self._validate_image(image)
@@ -94,24 +94,24 @@ class AddPostImageUseCase:
 
             try:
                 async with self._database.session() as session:
-                    create_data = PostImageCreateSchema(
-                        post_id=post_id,
+                    create_data = CommentImageCreateSchema(
+                        comment_id=comment_id,
                         file_path=f"{new_image_name}.{ext}",
                         original_name=getattr(image, 'filename', 'unknown'),
                     )
-                    post_image = await self._repo.create(session=session, data=create_data)
-                    logger.info(f"Изображение привязано к посту: post_id={post_id}, image_id={post_image.id}")
+                    comment_image = await self._repo.create(session=session, data=create_data)
+                    logger.info(f"Изображение привязано к комментарию: comment_id={comment_id}, image_id={comment_image.id}")
 
-            except PostNotFoundException:
+            except CommentNotFoundException:
                 raise
             except Exception as e:
-                logger.error(f"Ошибка сохранения в БД: post_id={post_id}, error={str(e)}")
+                logger.error(f"Ошибка сохранения в БД: comment_id={comment_id}, error={str(e)}")
                 raise
 
-            return PostImageSchema.model_validate(post_image)
+            return CommentImageSchema.model_validate(comment_image)
 
         except (
-            PostNotFoundException,
+            CommentNotFoundException,
             UploadFileIsNotImageException,
             ImageFileReadException,
             ImageFileSaveException,
@@ -131,5 +131,5 @@ class AddPostImageUseCase:
                     os.remove(new_image_path)
             except:
                 pass
-            logger.error(f"Неожиданная ошибка при загрузке изображения: post_id={post_id}, error={str(e)}")
+            logger.error(f"Неожиданная ошибка при загрузке изображения: comment_id={comment_id}, error={str(e)}")
             raise

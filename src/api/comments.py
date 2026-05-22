@@ -31,13 +31,13 @@ from src.schemas.comments import (
 from src.schemas.users import UserResponseSchema
 from src.services.auth import AuthService
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(AuthService.get_current_user)])
 
 
 @router.get('/list', status_code=status.HTTP_200_OK, response_model=list[CommentResponseSchema])
 async def get_comments_list(
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: GetCommentsUseCase = Depends(get_comments_use_case),
+    use_case: Annotated[GetCommentsUseCase, Depends(get_comments_use_case)],
 ) -> list[CommentResponseSchema]:
     return await use_case.execute()
 
@@ -46,7 +46,7 @@ async def get_comments_list(
 async def get_comments_by_post(
     post_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: GetCommentsByPostUseCase = Depends(get_comments_by_post_use_case),
+    use_case: Annotated[GetCommentsByPostUseCase, Depends(get_comments_by_post_use_case)],
 ) -> list[CommentResponseSchema]:
     return await use_case.execute(post_id=post_id)
 
@@ -55,7 +55,7 @@ async def get_comments_by_post(
 async def get_comment(
     comment_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: GetCommentUseCase = Depends(get_comment_use_case),
+    use_case: Annotated[GetCommentUseCase, Depends(get_comment_use_case)],
 ) -> CommentResponseSchema:
     try:
         return await use_case.execute(comment_id=comment_id)
@@ -69,14 +69,13 @@ async def get_comment(
 @router.post('/create', status_code=status.HTTP_201_CREATED, response_model=CommentResponseSchema)
 async def create_comment(
     comment: CommentCreateSchema,
-    author_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: CreateCommentUseCase = Depends(create_comment_use_case),
+    use_case: Annotated[CreateCommentUseCase, Depends(create_comment_use_case)],
 ) -> CommentResponseSchema:
     try:
         return await use_case.execute(
             data=comment,
-            author_id=author_id,
+            author_id=current_user.id,
         )
     except PostNotFoundByIdException as exc:
         raise HTTPException(
@@ -95,7 +94,7 @@ async def update_comment(
     comment_id: int,
     comment: CommentUpdateSchema,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: UpdateCommentUseCase = Depends(update_comment_use_case),
+    use_case: Annotated[UpdateCommentUseCase, Depends(update_comment_use_case)],
 ) -> CommentResponseSchema:
     try:
         return await use_case.execute(
@@ -113,7 +112,7 @@ async def update_comment(
 async def delete_comment(
     comment_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: DeleteCommentUseCase = Depends(delete_comment_use_case),
+    use_case: Annotated[DeleteCommentUseCase, Depends(delete_comment_use_case)],
 ) -> dict:
     try:
         await use_case.execute(comment_id=comment_id)

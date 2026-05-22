@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request
 from starlette.middleware.cors import CORSMiddleware
 
 from src.core.logging import setup_logging, get_logger
-from src.api.users import user_router
+from src.api.users import user_router, public_user_router
 from src.api.categories import router as categories_router
 from src.api.locations import router as locations_router
 from src.api.posts import router as posts_router
@@ -36,6 +36,11 @@ def create_app() -> FastAPI:
         auth_router,
         prefix='/auth',
         tags=['Auth'],
+    )
+    app.include_router(
+        public_user_router,
+        prefix='/users',
+        tags=['Users (public)'],
     )
     app.include_router(
         user_router,

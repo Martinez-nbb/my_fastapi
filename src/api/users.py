@@ -28,36 +28,14 @@ from src.schemas.users import (
 )
 from src.services.auth import AuthService
 
-user_router = APIRouter()
+user_router = APIRouter(dependencies=[Depends(AuthService.get_current_user)])
+public_user_router = APIRouter()
 
 
-@user_router.get('/', status_code=status.HTTP_200_OK, response_model=list[UserResponseSchema])
-async def get_users(
-    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: GetUsersUseCase = Depends(get_users_use_case),
-) -> list[UserResponseSchema]:
-    return await use_case.execute()
-
-
-@user_router.get('/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponseSchema)
-async def get_user(
-    user_id: int,
-    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: GetUserUseCase = Depends(get_user_use_case),
-) -> UserResponseSchema:
-    try:
-        return await use_case.execute(user_id=user_id)
-    except UserNotFoundByIdException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc.get_detail(),
-        )
-
-
-@user_router.post('/', status_code=status.HTTP_201_CREATED, response_model=UserResponseSchema)
+@public_user_router.post('/', status_code=status.HTTP_201_CREATED, response_model=UserResponseSchema)
 async def create_user(
     data: UserCreateSchema,
-    use_case: CreateUserUseCase = Depends(create_user_use_case),
+    use_case: Annotated[CreateUserUseCase, Depends(create_user_use_case)],
 ) -> UserResponseSchema:
     try:
         return await use_case.execute(data=data)
@@ -68,12 +46,35 @@ async def create_user(
         )
 
 
+@user_router.get('/', status_code=status.HTTP_200_OK, response_model=list[UserResponseSchema])
+async def get_users(
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
+    use_case: Annotated[GetUsersUseCase, Depends(get_users_use_case)],
+) -> list[UserResponseSchema]:
+    return await use_case.execute()
+
+
+@user_router.get('/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponseSchema)
+async def get_user(
+    user_id: int,
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
+    use_case: Annotated[GetUserUseCase, Depends(get_user_use_case)],
+) -> UserResponseSchema:
+    try:
+        return await use_case.execute(user_id=user_id)
+    except UserNotFoundByIdException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc.get_detail(),
+        )
+
+
 @user_router.put('/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponseSchema)
 async def update_user(
     user_id: int,
     data: UserUpdateSchema,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: UpdateUserUseCase = Depends(update_user_use_case),
+    use_case: Annotated[UpdateUserUseCase, Depends(update_user_use_case)],
 ) -> UserResponseSchema:
     try:
         return await use_case.execute(
@@ -101,7 +102,7 @@ async def update_user(
 async def delete_user(
     user_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: DeleteUserUseCase = Depends(delete_user_use_case),
+    use_case: Annotated[DeleteUserUseCase, Depends(delete_user_use_case)],
 ) -> dict:
     try:
         await use_case.execute(user_id=user_id)

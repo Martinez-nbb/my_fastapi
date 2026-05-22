@@ -25,13 +25,13 @@ from src.schemas.categories import (
 from src.schemas.users import UserResponseSchema
 from src.services.auth import AuthService
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(AuthService.get_current_user)])
 
 
 @router.get('/list', status_code=status.HTTP_200_OK, response_model=list[CategoryResponseSchema])
 async def get_categories_list(
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: GetCategoriesUseCase = Depends(get_categories_use_case),
+    use_case: Annotated[GetCategoriesUseCase, Depends(get_categories_use_case)],
 ) -> list[CategoryResponseSchema]:
     return await use_case.execute()
 
@@ -40,7 +40,7 @@ async def get_categories_list(
 async def get_category(
     category_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: GetCategoryUseCase = Depends(get_category_use_case),
+    use_case: Annotated[GetCategoryUseCase, Depends(get_category_use_case)],
 ) -> CategoryResponseSchema:
     try:
         return await use_case.execute(category_id=category_id)
@@ -55,7 +55,7 @@ async def get_category(
 async def create_category(
     category: CategoryCreateSchema,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: CreateCategoryUseCase = Depends(create_category_use_case),
+    use_case: Annotated[CreateCategoryUseCase, Depends(create_category_use_case)],
 ) -> CategoryResponseSchema:
     try:
         return await use_case.execute(data=category)
@@ -71,7 +71,7 @@ async def update_category(
     category_id: int,
     category: CategoryUpdateSchema,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: UpdateCategoryUseCase = Depends(update_category_use_case),
+    use_case: Annotated[UpdateCategoryUseCase, Depends(update_category_use_case)],
 ) -> CategoryResponseSchema:
     try:
         return await use_case.execute(
@@ -89,7 +89,7 @@ async def update_category(
 async def delete_category(
     category_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: DeleteCategoryUseCase = Depends(delete_category_use_case),
+    use_case: Annotated[DeleteCategoryUseCase, Depends(delete_category_use_case)],
 ) -> dict:
     try:
         await use_case.execute(category_id=category_id)

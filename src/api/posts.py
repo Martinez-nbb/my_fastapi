@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends, File as FileParam, UploadFile
 from fastapi.responses import FileResponse
@@ -43,13 +44,15 @@ from src.schemas.posts import (
 from src.schemas.users import UserResponseSchema
 from src.services.auth import AuthService
 
-router = APIRouter()
+logger = logging.getLogger(__name__)
+
+router = APIRouter(dependencies=[Depends(AuthService.get_current_user)])
 
 
 @router.get('/list', status_code=status.HTTP_200_OK, response_model=list[PostResponseSchema])
 async def get_posts_list(
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: GetPostsUseCase = Depends(get_posts_use_case),
+    use_case: Annotated[GetPostsUseCase, Depends(get_posts_use_case)],
 ) -> list[PostResponseSchema]:
     return await use_case.execute()
 
@@ -58,7 +61,7 @@ async def get_posts_list(
 async def get_post(
     post_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: GetPostUseCase = Depends(get_post_use_case),
+    use_case: Annotated[GetPostUseCase, Depends(get_post_use_case)],
 ) -> PostResponseSchema:
     try:
         return await use_case.execute(post_id=post_id)
@@ -73,7 +76,7 @@ async def get_post(
 async def create_post(
     post: PostCreateSchema,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: CreatePostUseCase = Depends(create_post_use_case),
+    use_case: Annotated[CreatePostUseCase, Depends(create_post_use_case)],
 ) -> PostResponseSchema:
     try:
         return await use_case.execute(data=post)
@@ -99,7 +102,7 @@ async def update_post(
     post_id: int,
     post: PostUpdateSchema,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: UpdatePostUseCase = Depends(update_post_use_case),
+    use_case: Annotated[UpdatePostUseCase, Depends(update_post_use_case)],
 ) -> PostResponseSchema:
     try:
         return await use_case.execute(
@@ -127,7 +130,7 @@ async def update_post(
 async def delete_post(
     post_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: DeletePostUseCase = Depends(delete_post_use_case),
+    use_case: Annotated[DeletePostUseCase, Depends(delete_post_use_case)],
 ) -> dict:
     try:
         await use_case.execute(post_id=post_id)
@@ -144,7 +147,7 @@ async def add_post_image(
     post_id: int,
     image: Annotated[UploadFile, FileParam(description='Изображение (JPEG)')],
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: AddPostImageUseCase = Depends(add_post_image_use_case),
+    use_case: Annotated[AddPostImageUseCase, Depends(add_post_image_use_case)],
 ) -> PostImageResponse:
     try:
         return await use_case.execute(post_id=post_id, image=image)
@@ -190,7 +193,7 @@ async def add_post_image(
 async def get_post_image(
     post_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: GetPostImageUseCase = Depends(get_post_image_use_case),
+    use_case: Annotated[GetPostImageUseCase, Depends(get_post_image_use_case)],
 ) -> FileResponse:
     try:
         return await use_case.execute(post_id=post_id)

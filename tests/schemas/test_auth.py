@@ -1,5 +1,6 @@
 import pytest
 from datetime import datetime, timedelta
+from pydantic import ValidationError
 
 from src.schemas.auth import Token, TokenData
 
@@ -26,6 +27,11 @@ class TestTokenSchema:
         assert hasattr(token, 'token_type')
         assert isinstance(token.access_token, str)
 
+    def test_token_missing_access_token(self):
+        """Тест ошибки при отсутствии access_token."""
+        with pytest.raises(ValidationError):
+            Token(token_type="bearer")
+
 
 class TestTokenDataSchema:
     def test_create_token_data(self):
@@ -42,3 +48,9 @@ class TestTokenDataSchema:
 
         assert data.username == "user"
         assert data.exp == exp
+
+    def test_token_data_optional_fields(self):
+        """Тест опциональности полей username и exp."""
+        data = TokenData()
+        assert data.username is None
+        assert data.exp is None

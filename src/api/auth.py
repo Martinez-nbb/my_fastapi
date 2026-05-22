@@ -14,10 +14,9 @@ router = APIRouter()
 @router.post('/token', response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    auth_use_case: Annotated[AuthenticateUserUseCase, Depends(AuthenticateUserUseCase)],
+    create_token_use_case: Annotated[CreateAccessTokenUseCase, Depends(CreateAccessTokenUseCase)],
 ) -> Token:
-    auth_use_case = AuthenticateUserUseCase()
-    create_token_use_case = CreateAccessTokenUseCase()
-
     try:
         user = await auth_use_case.execute(
             username=form_data.username, password=form_data.password

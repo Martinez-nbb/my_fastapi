@@ -24,13 +24,13 @@ from src.schemas.locations import (
 from src.schemas.users import UserResponseSchema
 from src.services.auth import AuthService
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(AuthService.get_current_user)])
 
 
 @router.get('/list', status_code=status.HTTP_200_OK, response_model=list[LocationResponseSchema])
 async def get_locations_list(
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: GetLocationsUseCase = Depends(get_locations_use_case),
+    use_case: Annotated[GetLocationsUseCase, Depends(get_locations_use_case)],
 ) -> list[LocationResponseSchema]:
     return await use_case.execute()
 
@@ -39,7 +39,7 @@ async def get_locations_list(
 async def get_location(
     location_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: GetLocationUseCase = Depends(get_location_use_case),
+    use_case: Annotated[GetLocationUseCase, Depends(get_location_use_case)],
 ) -> LocationResponseSchema:
     try:
         return await use_case.execute(location_id=location_id)
@@ -54,7 +54,7 @@ async def get_location(
 async def create_location(
     location: LocationCreateSchema,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: CreateLocationUseCase = Depends(create_location_use_case),
+    use_case: Annotated[CreateLocationUseCase, Depends(create_location_use_case)],
 ) -> LocationResponseSchema:
     return await use_case.execute(data=location)
 
@@ -64,7 +64,7 @@ async def update_location(
     location_id: int,
     location: LocationUpdateSchema,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: UpdateLocationUseCase = Depends(update_location_use_case),
+    use_case: Annotated[UpdateLocationUseCase, Depends(update_location_use_case)],
 ) -> LocationResponseSchema:
     try:
         return await use_case.execute(
@@ -82,7 +82,7 @@ async def update_location(
 async def delete_location(
     location_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: DeleteLocationUseCase = Depends(delete_location_use_case),
+    use_case: Annotated[DeleteLocationUseCase, Depends(delete_location_use_case)],
 ) -> dict:
     try:
         await use_case.execute(location_id=location_id)

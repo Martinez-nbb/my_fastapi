@@ -126,6 +126,28 @@ class TestUserCreateSchema:
         with pytest.raises(ValidationError):
             UserCreateSchema(**data)
 
+    def test_create_user_with_empty_username(self):
+        """Тест ошибки при пустом имени пользователя."""
+        data = {
+            "username": "",
+            "email": "test@test.com",
+            "password": SecretStr("password123"),
+        }
+
+        with pytest.raises(ValidationError):
+            UserCreateSchema(**data)
+
+    def test_create_user_missing_required_fields(self):
+        """Тест ошибки при отсутствии обязательных полей."""
+        with pytest.raises(ValidationError):
+            UserCreateSchema(username="user")
+
+        with pytest.raises(ValidationError):
+            UserCreateSchema(email="test@test.com")
+
+        with pytest.raises(ValidationError):
+            UserCreateSchema(password=SecretStr("password123"))
+
 
 class TestUserUpdateSchema:
     def test_create_update_schema_with_all_fields(self):

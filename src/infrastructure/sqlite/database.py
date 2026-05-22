@@ -30,7 +30,7 @@ class Database:
             logger.debug("Сессия БД закоммичена")
         except Exception as e:
             session.rollback()
-            logger.error(f"Ошибка в сессии БД: {e}")
+            logger.error(f"Ошибка в сессии БД: {type(e).__name__}: {e}")
             raise
         finally:
             session.close()

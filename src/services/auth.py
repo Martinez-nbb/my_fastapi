@@ -5,7 +5,7 @@ from jose import JWTError, jwt
 from src.core.config import settings
 from src.schemas.users import UserResponseSchema
 from src.resources.auth import oauth2_scheme, optional_oauth2_scheme
-from src.infrastructure.sqlite.database import database, Database
+from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.repositories.user import UserRepository
 from src.core.exceptions.database_exceptions import UserNotFoundException
 from src.core.exceptions.auth_exceptions import CredentialsException
@@ -15,7 +15,7 @@ class AuthService:
     @staticmethod
     async def _resolve_user_from_token(token: str) -> UserResponseSchema:
         _AUTH_EXCEPTION_MESSAGE = 'Невозможно проверить данные авторизации'
-        _database: Database = database
+        _database = database
         _repo: UserRepository = UserRepository()
 
         try:
@@ -31,8 +31,8 @@ class AuthService:
             raise CredentialsException(detail=_AUTH_EXCEPTION_MESSAGE)
 
         try:
-            with _database.session() as session:
-                user = _repo.get_by_username(session=session, username=username)
+            async with _database.session() as session:
+                user = await _repo.get_by_username(session=session, username=username)
                 user_data = {
                     'id': user.id,
                     'username': user.username,

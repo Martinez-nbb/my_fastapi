@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, patch
 from datetime import datetime
 
 from tests.mocks import FakeRow
@@ -11,7 +11,7 @@ class TestAuthAPI:
     @pytest.mark.asyncio
     async def test_register_success(self, async_client, valid_user_payload, mock_repo):
         """Тест успешной регистрации пользователя через API."""
-        mock_repo_instance = MagicMock()
+        mock_repo_instance = AsyncMock()
         mock_repo["user"].return_value = mock_repo_instance
         
         db_user = FakeRow(
@@ -39,7 +39,7 @@ class TestAuthAPI:
         """Тест регистрации с существующим именем пользователя."""
         from src.core.exceptions.domain_exceptions import UserUsernameOrEmailIsNotUniqueException
         
-        mock_repo_instance = MagicMock()
+        mock_repo_instance = AsyncMock()
         mock_repo["user"].return_value = mock_repo_instance
         mock_repo_instance.create.side_effect = UserUsernameOrEmailIsNotUniqueException.from_username("testuser")
 
@@ -52,7 +52,7 @@ class TestAuthAPI:
         """Тест успешного входа в систему."""
         from src.resources.auth import get_password_hash
         
-        mock_repo_instance = MagicMock()
+        mock_repo_instance = AsyncMock()
         mock_repo["auth"].return_value = mock_repo_instance
         
         hashed = get_password_hash(valid_user_payload["password"])
@@ -85,7 +85,7 @@ class TestAuthAPI:
         """Тест входа с неверным паролем."""
         from src.resources.auth import get_password_hash
         
-        mock_repo_instance = MagicMock()
+        mock_repo_instance = AsyncMock()
         mock_repo["auth"].return_value = mock_repo_instance
         
         hashed = get_password_hash("real_password")

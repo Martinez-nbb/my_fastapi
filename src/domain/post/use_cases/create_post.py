@@ -29,9 +29,9 @@ class CreatePostUseCase:
         self._user_repo = UserRepository()
 
     async def execute(self, data: PostCreateSchema) -> PostResponseSchema:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                post = self._repo.create(session=session, data=data)
+                post = await self._repo.create(session=session, data=data)
             except UserNotFoundException:
                 error = AuthorNotFoundException(author_id=data.author_id)
                 logger.error(error.get_detail())

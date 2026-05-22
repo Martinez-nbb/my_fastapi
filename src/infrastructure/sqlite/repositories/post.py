@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Type, cast
 
 from sqlalchemy import CursorResult, insert, select, delete, update
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.exceptions.database_exceptions import (
     PostNotFoundException,
@@ -24,51 +24,55 @@ class PostRepository:
         self._location_model: Type[LocationModel] = LocationModel
         self._category_model: Type[CategoryModel] = CategoryModel
 
-    def get(self, session: Session, post_id: int) -> PostModel:
+    async def get(self, session: AsyncSession, post_id: int) -> PostModel:
         query = select(self._model).where(self._model.id == post_id)
-        post = session.scalar(query)
+        post = await session.scalar(query)
 
         if not post:
             raise PostNotFoundException()
 
         return post
 
-    def get_all(self, session: Session) -> list[PostModel]:
+    async def get_all(self, session: AsyncSession) -> list[PostModel]:
         query = select(self._model)
-        return list(session.scalars(query))
+        result = await session.scalars(query)
+        return list(result)
 
-    def get_by_author(self, session: Session, author_id: int) -> list[PostModel]:
+    async def get_by_author(self, session: AsyncSession, author_id: int) -> list[PostModel]:
         query = select(self._model).where(self._model.author_id == author_id)
-        return list(session.scalars(query))
+        result = await session.scalars(query)
+        return list(result)
 
-    def get_by_category(
+    async def get_by_category(
         self,
-        session: Session,
+        session: AsyncSession,
         category_id: int,
     ) -> list[PostModel]:
         query = select(self._model).where(self._model.category_id == category_id)
-        return list(session.scalars(query))
+        result = await session.scalars(query)
+        return list(result)
 
-    def get_by_location(
+    async def get_by_location(
         self,
-        session: Session,
+        session: AsyncSession,
         location_id: int,
     ) -> list[PostModel]:
         query = select(self._model).where(self._model.location_id == location_id)
-        return list(session.scalars(query))
+        result = await session.scalars(query)
+        return list(result)
 
-    def create(self, session: Session, data: PostCreateSchema) -> PostModel:
-        author = session.get(self._author_model, data.author_id)
+    async def create(self, session: AsyncSession, data: PostCreateSchema) -> PostModel:
+        author = await session.get(self._author_model, data.author_id)
         if not author:
             raise UserNotFoundException()
 
         if data.location_id is not None:
-            location = session.get(self._location_model, data.location_id)
+            location = await session.get(self._location_model, data.location_id)
             if not location:
                 raise LocationNotFoundException()
 
         if data.category_id is not None:
-            category = session.get(self._category_model, data.category_id)
+            category = await session.get(self._category_model, data.category_id)
             if not category:
                 raise CategoryNotFoundException()
 
@@ -86,22 +90,22 @@ class PostRepository:
             )
             .returning(self._model)
         )
-        post = session.scalar(query)
+        post = await session.scalar(query)
 
         return post
 
-    def update(
+    async def update(
         self,
-        session: Session,
+        session: AsyncSession,
         post_id: int,
         data: PostUpdateSchema,
     ) -> PostModel:
-        post = self.get(session=session, post_id=post_id)
+        post = await self.get(session=session, post_id=post_id)
 
         update_data = data.model_dump(exclude_none=True)
 
         if 'author_id' in update_data and update_data['author_id'] != post.author_id:
-            author = session.get(self._author_model, update_data['author_id'])
+            author = await session.get(self._author_model, update_data['author_id'])
             if not author:
                 raise UserNotFoundException()
 
@@ -110,7 +114,7 @@ class PostRepository:
             and update_data['location_id'] is not None
             and update_data['location_id'] != post.location_id
         ):
-            location = session.get(self._location_model, update_data['location_id'])
+            location = await session.get(self._location_model, update_data['location_id'])
             if not location:
                 raise LocationNotFoundException()
 
@@ -119,7 +123,7 @@ class PostRepository:
             and update_data['category_id'] is not None
             and update_data['category_id'] != post.category_id
         ):
-            category = session.get(self._category_model, update_data['category_id'])
+            category = await session.get(self._category_model, update_data['category_id'])
             if not category:
                 raise CategoryNotFoundException()
 
@@ -129,13 +133,13 @@ class PostRepository:
             .values(**update_data)
             .returning(self._model)
         )
-        post = session.scalar(query)
+        post = await session.scalar(query)
 
         return post
 
-    def delete(self, session: Session, post_id: int) -> None:
+    async def delete(self, session: AsyncSession, post_id: int) -> None:
         query = delete(self._model).where(self._model.id == post_id)
-        result = cast(CursorResult, session.execute(query))
+        result = cast(CursorResult, await session.execute(query))
 
         if not result.rowcount:
             raise PostNotFoundException()

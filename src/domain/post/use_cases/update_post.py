@@ -21,9 +21,9 @@ class UpdatePostUseCase:
         post_id: int,
         data: PostUpdateSchema,
     ) -> PostResponseSchema:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                post = self._repo.update(
+                post = await self._repo.update(
                     session=session,
                     post_id=post_id,
                     data=data,

@@ -14,9 +14,9 @@ class DeleteLocationUseCase:
         self._repo = LocationRepository()
 
     async def execute(self, location_id: int) -> None:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                self._repo.delete(session=session, location_id=location_id)
+                await self._repo.delete(session=session, location_id=location_id)
             except LocationNotFoundException:
                 error = LocationNotFoundByIdException(id=location_id)
                 logger.error(error.get_detail())

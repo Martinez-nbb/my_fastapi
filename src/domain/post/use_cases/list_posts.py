@@ -9,8 +9,8 @@ class GetPostsUseCase:
         self._repo = PostRepository()
 
     async def execute(self) -> list[PostResponseSchema]:
-        with self._database.session() as session:
-            posts = self._repo.get_all(session=session)
+        async with self._database.session() as session:
+            posts = await self._repo.get_all(session=session)
             return [
                 PostResponseSchema.model_validate(obj=post)
                 for post in posts

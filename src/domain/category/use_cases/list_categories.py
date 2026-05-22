@@ -9,8 +9,8 @@ class GetCategoriesUseCase:
         self._repo = CategoryRepository()
 
     async def execute(self) -> list[CategoryResponseSchema]:
-        with self._database.session() as session:
-            categories = self._repo.get_all(session=session)
+        async with self._database.session() as session:
+            categories = await self._repo.get_all(session=session)
             return [
                 CategoryResponseSchema.model_validate(obj=cat)
                 for cat in categories

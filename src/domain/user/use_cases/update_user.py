@@ -19,9 +19,9 @@ class UpdateUserUseCase:
         data: UserUpdateSchema,
     ) -> UserResponseSchema:
         logger.info(f"Обновление пользователя id={user_id}, данные: {data.model_dump(exclude_unset=True)}")
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                user = self._repo.update(
+                user = await self._repo.update(
                     session=session,
                     user_id=user_id,
                     data=data,

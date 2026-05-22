@@ -94,8 +94,8 @@ class AddPostImageUseCase:
                 raise ImageFileSaveException(f"Не удалось сохранить файл: {str(e)}")
 
             try:
-                with self._database.session() as session:
-                    post = self._repo.get(session=session, post_id=post_id)
+                async with self._database.session() as session:
+                    post = await self._repo.get(session=session, post_id=post_id)
                     if not post:
                         logger.warning(f"Пост не найден: post_id={post_id}")
                         raise PostNotFoundException(detail=f"Post with id={post_id} not found")

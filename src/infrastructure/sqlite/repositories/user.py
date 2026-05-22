@@ -2,7 +2,7 @@ import bcrypt
 from typing import Type, cast
 
 from sqlalchemy import CursorResult, insert, select, delete, update
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.exceptions.database_exceptions import (
     UserNotFoundException,
@@ -17,39 +17,40 @@ class UserRepository:
     def __init__(self) -> None:
         self._model: Type[UserModel] = UserModel
 
-    def get(self, session: Session, user_id: int) -> UserModel:
+    async def get(self, session: AsyncSession, user_id: int) -> UserModel:
         query = select(self._model).where(self._model.id == user_id)
-        user = session.scalar(query)
+        user = await session.scalar(query)
 
         if not user:
             raise UserNotFoundException()
 
         return user
 
-    def get_by_username(self, session: Session, username: str) -> UserModel:
+    async def get_by_username(self, session: AsyncSession, username: str) -> UserModel:
         query = select(self._model).where(self._model.username == username)
-        user = session.scalar(query)
+        user = await session.scalar(query)
 
         if not user:
             raise UserNotFoundException()
 
         return user
 
-    def get_by_email(self, session: Session, email: str) -> UserModel:
+    async def get_by_email(self, session: AsyncSession, email: str) -> UserModel:
         query = select(self._model).where(self._model.email == email)
-        user = session.scalar(query)
+        user = await session.scalar(query)
 
         if not user:
             raise UserNotFoundException()
 
         return user
 
-    def get_all(self, session: Session) -> list[UserModel]:
+    async def get_all(self, session: AsyncSession) -> list[UserModel]:
         query = select(self._model)
-        return list(session.scalars(query))
+        result = await session.scalars(query)
+        return list(result)
 
-    def create(self, session: Session, data: UserCreateSchema) -> UserModel:
-        existing_user = session.scalar(
+    async def create(self, session: AsyncSession, data: UserCreateSchema) -> UserModel:
+        existing_user = await session.scalar(
             select(self._model).where(
                 (self._model.username == data.username) |
                 (self._model.email == (data.email or ''))
@@ -76,22 +77,22 @@ class UserRepository:
             )
             .returning(self._model)
         )
-        user = session.scalar(query)
+        user = await session.scalar(query)
 
         return user
 
-    def update(
+    async def update(
         self,
-        session: Session,
+        session: AsyncSession,
         user_id: int,
         data: UserUpdateSchema,
     ) -> UserModel:
-        user = self.get(session=session, user_id=user_id)
+        user = await self.get(session=session, user_id=user_id)
 
         update_data = data.model_dump(exclude_none=True)
 
         if 'email' in update_data and update_data['email'] != user.email:
-            existing_email = session.scalar(
+            existing_email = await session.scalar(
                 select(self._model).where(
                     self._model.email == update_data['email'],
                     self._model.id != user_id,
@@ -101,7 +102,7 @@ class UserRepository:
                 raise UserEmailAlreadyExistsException()
 
         if 'username' in update_data and update_data['username'] != user.username:
-            existing_username = session.scalar(
+            existing_username = await session.scalar(
                 select(self._model).where(
                     self._model.username == update_data['username'],
                     self._model.id != user_id,
@@ -116,13 +117,13 @@ class UserRepository:
             .values(**update_data)
             .returning(self._model)
         )
-        user = session.scalar(query)
+        user = await session.scalar(query)
 
         return user
 
-    def delete(self, session: Session, user_id: int) -> None:
+    async def delete(self, session: AsyncSession, user_id: int) -> None:
         query = delete(self._model).where(self._model.id == user_id)
-        result = cast(CursorResult, session.execute(query))
+        result = cast(CursorResult, await session.execute(query))
 
         if not result.rowcount:
             raise UserNotFoundException()

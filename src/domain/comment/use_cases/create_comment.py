@@ -33,9 +33,9 @@ class CreateCommentUseCase:
         data: CommentCreateSchema,
         author_id: int,
     ) -> CommentResponseSchema:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                comment = self._repo.create(
+                comment = await self._repo.create(
                     session=session,
                     data=data,
                     author_id=author_id,

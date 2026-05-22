@@ -15,9 +15,9 @@ class GetCommentUseCase:
         self._repo = CommentRepository()
 
     async def execute(self, comment_id: int) -> CommentResponseSchema:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                comment = self._repo.get(session=session, comment_id=comment_id)
+                comment = await self._repo.get(session=session, comment_id=comment_id)
             except CommentNotFoundException:
                 error = CommentNotFoundByIdException(id=comment_id)
                 logger.error(error.get_detail())

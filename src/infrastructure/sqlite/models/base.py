@@ -1,3 +1,3 @@
-from sqlalchemy.orm import declarative_base
+from src.infrastructure.sqlite.database import Base
 
-Base = declarative_base()
+__all__ = ['Base']

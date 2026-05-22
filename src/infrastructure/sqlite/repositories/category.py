@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Type, cast
 
 from sqlalchemy import CursorResult, insert, select, delete, update
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.exceptions.database_exceptions import (
     CategoryNotFoundException,
@@ -15,29 +15,30 @@ class CategoryRepository:
     def __init__(self) -> None:
         self._model: Type[CategoryModel] = CategoryModel
 
-    def get(self, session: Session, category_id: int) -> CategoryModel:
+    async def get(self, session: AsyncSession, category_id: int) -> CategoryModel:
         query = select(self._model).where(self._model.id == category_id)
-        category = session.scalar(query)
+        category = await session.scalar(query)
 
         if not category:
             raise CategoryNotFoundException()
 
         return category
 
-    def get_by_slug(self, session: Session, slug: str) -> CategoryModel:
+    async def get_by_slug(self, session: AsyncSession, slug: str) -> CategoryModel:
         query = select(self._model).where(self._model.slug == slug)
-        category = session.scalar(query)
+        category = await session.scalar(query)
 
         if not category:
             raise CategoryNotFoundException()
 
         return category
 
-    def get_all(self, session: Session) -> list[CategoryModel]:
+    async def get_all(self, session: AsyncSession) -> list[CategoryModel]:
         query = select(self._model)
-        return list(session.scalars(query))
+        result = await session.scalars(query)
+        return list(result)
 
-    def create(self, session: Session, data: CategoryCreateSchema) -> CategoryModel:
+    async def create(self, session: AsyncSession, data: CategoryCreateSchema) -> CategoryModel:
         query = (
             insert(self._model)
             .values(
@@ -49,17 +50,17 @@ class CategoryRepository:
             )
             .returning(self._model)
         )
-        category = session.scalar(query)
+        category = await session.scalar(query)
 
         return category
 
-    def update(
+    async def update(
         self,
-        session: Session,
+        session: AsyncSession,
         category_id: int,
         data: CategoryUpdateSchema,
     ) -> CategoryModel:
-        category = self.get(session=session, category_id=category_id)
+        category = await self.get(session=session, category_id=category_id)
 
         update_data = data.model_dump(exclude_none=True)
 
@@ -69,16 +70,16 @@ class CategoryRepository:
             .values(**update_data)
             .returning(self._model)
         )
-        category = session.scalar(query)
+        category = await session.scalar(query)
 
         if not category:
             raise CategoryNotFoundException()
 
         return category
 
-    def delete(self, session: Session, category_id: int) -> None:
+    async def delete(self, session: AsyncSession, category_id: int) -> None:
         query = delete(self._model).where(self._model.id == category_id)
-        result = cast(CursorResult, session.execute(query))
+        result = cast(CursorResult, await session.execute(query))
 
         if not result.rowcount:
             raise CategoryNotFoundException()

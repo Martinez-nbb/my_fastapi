@@ -9,8 +9,8 @@ class GetUsersUseCase:
         self._repo = UserRepository()
 
     async def execute(self) -> list[UserResponseSchema]:
-        with self._database.session() as session:
-            users = self._repo.get_all(session=session)
+        async with self._database.session() as session:
+            users = await self._repo.get_all(session=session)
             users_data = [
                 {
                     'id': user.id,

@@ -25,9 +25,9 @@ class CreateUserUseCase:
         hashed_password = get_password_hash(data.password.get_secret_value())
         data.password = SecretStr(hashed_password)
         
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                user = self._repo.create(session=session, data=data)
+                user = await self._repo.create(session=session, data=data)
                 logger.info(f"Пользователь создан: id={user.id}, username={user.username}")
                 user_data = {
                     'id': user.id,

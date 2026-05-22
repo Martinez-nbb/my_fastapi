@@ -17,9 +17,9 @@ class CreateCategoryUseCase:
         self._repo = CategoryRepository()
 
     async def execute(self, data: CategoryCreateSchema) -> CategoryResponseSchema:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                category = self._repo.create(session=session, data=data)
+                category = await self._repo.create(session=session, data=data)
             except IntegrityError:
                 error = CategorySlugAlreadyExistsException(slug=data.slug)
                 logger.error(error.get_detail())

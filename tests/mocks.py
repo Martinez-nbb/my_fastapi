@@ -1,7 +1,7 @@
 import inspect
 import asyncio
-from contextlib import contextmanager
-from typing import Any, Iterator
+from contextlib import asynccontextmanager
+from typing import Any, AsyncIterator
 
 
 class CallRecorder:
@@ -16,7 +16,7 @@ class CallRecorder:
         self.side_effect = side_effect
         self.calls: list[tuple[tuple[Any, ...], dict[str, Any]]] = []
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+    async def __call__(self, *args: Any, **kwargs: Any) -> Any:
         self.calls.append((args, kwargs))
         side_effect = self.side_effect
         if side_effect is not None:
@@ -27,7 +27,7 @@ class CallRecorder:
             if callable(side_effect):
                 result = side_effect(*args, **kwargs)
                 if inspect.iscoroutine(result):
-                    return result
+                    return await result
                 return result
         return self.return_value
 
@@ -56,27 +56,27 @@ class FakeRepo:
 
 
 class FakeSession:
-    """Stand-in for an SQLAlchemy Session."""
+    """Stand-in for an SQLAlchemy AsyncSession."""
 
     def __init__(self) -> None:
         self.commit_calls = 0
         self.rollback_calls = 0
 
-    def commit(self) -> None:
+    async def commit(self) -> None:
         self.commit_calls += 1
 
-    def rollback(self) -> None:
+    async def rollback(self) -> None:
         self.rollback_calls += 1
 
 
 class FakeDatabase:
-    """Provides a context-manager .session() yielding the given FakeSession."""
+    """Provides an async context-manager .session() yielding the given FakeSession."""
 
     def __init__(self, session: FakeSession) -> None:
         self._session = session
 
-    @contextmanager
-    def session(self) -> Iterator[FakeSession]:
+    @asynccontextmanager
+    async def session(self) -> AsyncIterator[FakeSession]:
         yield self._session
 
 

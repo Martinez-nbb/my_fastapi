@@ -21,9 +21,9 @@ class UpdateCommentUseCase:
         comment_id: int,
         data: CommentUpdateSchema,
     ) -> CommentResponseSchema:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                comment = self._repo.update(
+                comment = await self._repo.update(
                     session=session,
                     comment_id=comment_id,
                     data=data,

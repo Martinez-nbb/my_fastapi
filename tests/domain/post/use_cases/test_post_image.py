@@ -1,6 +1,6 @@
 import pytest
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from src.domain.post.use_cases.add_post_image import AddPostImageUseCase
 from src.domain.post.use_cases.get_post_image import GetPostImageUseCase
@@ -75,7 +75,7 @@ class TestGetPostImageUseCase:
     @pytest.mark.asyncio
     async def test_returns_jpeg_image(self):
         with patch('src.domain.post.use_cases.get_post_image.PostRepository') as MockRepo:
-            mock_repo = MagicMock()
+            mock_repo = AsyncMock()
             mock_repo.get.return_value = FakePost(1, "test-uuid")
             MockRepo.return_value = mock_repo
 
@@ -90,7 +90,7 @@ class TestGetPostImageUseCase:
     @pytest.mark.asyncio
     async def test_raises_when_post_not_found(self):
         with patch('src.domain.post.use_cases.get_post_image.PostRepository') as MockRepo:
-            mock_repo = MagicMock()
+            mock_repo = AsyncMock()
             mock_repo.get.return_value = None
             MockRepo.return_value = mock_repo
 
@@ -103,7 +103,7 @@ class TestGetPostImageUseCase:
     @pytest.mark.asyncio
     async def test_raises_when_post_has_no_image(self):
         with patch('src.domain.post.use_cases.get_post_image.PostRepository') as MockRepo:
-            mock_repo = MagicMock()
+            mock_repo = AsyncMock()
             mock_repo.get.return_value = FakePost(1, None)
             MockRepo.return_value = mock_repo
 

@@ -17,9 +17,9 @@ class CreateLocationUseCase:
         self._repo = LocationRepository()
 
     async def execute(self, data: LocationCreateSchema) -> LocationResponseSchema:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                location = self._repo.create(session=session, data=data)
+                location = await self._repo.create(session=session, data=data)
             except IntegrityError as e:
                 logger.error(f"Ошибка IntegrityError при создании location: {e}")
                 raise

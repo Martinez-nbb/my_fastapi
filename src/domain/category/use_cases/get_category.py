@@ -15,9 +15,9 @@ class GetCategoryUseCase:
         self._repo = CategoryRepository()
 
     async def execute(self, category_id: int) -> CategoryResponseSchema:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                category = self._repo.get(session=session, category_id=category_id)
+                category = await self._repo.get(session=session, category_id=category_id)
             except CategoryNotFoundException:
                 error = CategoryNotFoundByIdException(id=category_id)
                 logger.error(error.get_detail())

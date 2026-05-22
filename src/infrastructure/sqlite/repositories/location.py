@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Type, cast
 
 from sqlalchemy import CursorResult, insert, select, delete, update
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.exceptions.database_exceptions import (
     LocationNotFoundException,
@@ -15,20 +15,21 @@ class LocationRepository:
     def __init__(self) -> None:
         self._model: Type[LocationModel] = LocationModel
 
-    def get(self, session: Session, location_id: int) -> LocationModel:
+    async def get(self, session: AsyncSession, location_id: int) -> LocationModel:
         query = select(self._model).where(self._model.id == location_id)
-        location = session.scalar(query)
+        location = await session.scalar(query)
 
         if not location:
             raise LocationNotFoundException()
 
         return location
 
-    def get_all(self, session: Session) -> list[LocationModel]:
+    async def get_all(self, session: AsyncSession) -> list[LocationModel]:
         query = select(self._model)
-        return list(session.scalars(query))
+        result = await session.scalars(query)
+        return list(result)
 
-    def create(self, session: Session, data: LocationCreateSchema) -> LocationModel:
+    async def create(self, session: AsyncSession, data: LocationCreateSchema) -> LocationModel:
         query = (
             insert(self._model)
             .values(
@@ -38,17 +39,17 @@ class LocationRepository:
             )
             .returning(self._model)
         )
-        location = session.scalar(query)
+        location = await session.scalar(query)
 
         return location
 
-    def update(
+    async def update(
         self,
-        session: Session,
+        session: AsyncSession,
         location_id: int,
         data: LocationUpdateSchema,
     ) -> LocationModel:
-        location = self.get(session=session, location_id=location_id)
+        location = await self.get(session=session, location_id=location_id)
 
         update_data = data.model_dump(exclude_none=True)
 
@@ -58,16 +59,16 @@ class LocationRepository:
             .values(**update_data)
             .returning(self._model)
         )
-        location = session.scalar(query)
+        location = await session.scalar(query)
 
         if not location:
             raise LocationNotFoundException()
 
         return location
 
-    def delete(self, session: Session, location_id: int) -> None:
+    async def delete(self, session: AsyncSession, location_id: int) -> None:
         query = delete(self._model).where(self._model.id == location_id)
-        result = cast(CursorResult, session.execute(query))
+        result = cast(CursorResult, await session.execute(query))
 
         if not result.rowcount:
             raise LocationNotFoundException()

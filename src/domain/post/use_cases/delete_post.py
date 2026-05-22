@@ -14,9 +14,9 @@ class DeletePostUseCase:
         self._repo = PostRepository()
 
     async def execute(self, post_id: int) -> None:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                self._repo.delete(session=session, post_id=post_id)
+                await self._repo.delete(session=session, post_id=post_id)
             except PostNotFoundException:
                 error = PostNotFoundByIdException(id=post_id)
                 logger.error(error.get_detail())

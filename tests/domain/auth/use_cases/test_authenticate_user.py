@@ -3,7 +3,7 @@ import pytest
 from src.domain.auth.use_cases.authenticate_user import AuthenticateUserUseCase
 from src.resources.auth import get_password_hash, verify_password
 
-from tests.mocks import CallRecorder, FakeRow
+from tests.mocks import CallRecorder, FakeDatabase, FakeRow, FakeSession
 
 
 class TestAuthenticateUserUseCase:
@@ -11,6 +11,7 @@ class TestAuthenticateUserUseCase:
     async def test_returns_user_when_credentials_are_valid(self):
         """Тест успешной аутентификации с правильными данными."""
         uc = AuthenticateUserUseCase()
+        uc._database = FakeDatabase(FakeSession())
         uc._repo = FakeRow()
 
         hashed = get_password_hash("correct-password")
@@ -38,6 +39,7 @@ class TestAuthenticateUserUseCase:
     async def test_raises_when_user_not_found(self):
         """Тест ошибки при отсутствии пользователя."""
         uc = AuthenticateUserUseCase()
+        uc._database = FakeDatabase(FakeSession())
         uc._repo = FakeRow()
         uc._repo.get_by_username = CallRecorder(side_effect=Exception("User not found"))
 
@@ -48,6 +50,7 @@ class TestAuthenticateUserUseCase:
     async def test_raises_when_password_is_wrong(self):
         """Тест ошибки при неверном пароле."""
         uc = AuthenticateUserUseCase()
+        uc._database = FakeDatabase(FakeSession())
         uc._repo = FakeRow()
 
         hashed = get_password_hash("the-real-password")
@@ -72,6 +75,7 @@ class TestAuthenticateUserUseCase:
     async def test_returns_user_with_all_fields(self):
         """Тест проверки всех полей пользователя."""
         uc = AuthenticateUserUseCase()
+        uc._database = FakeDatabase(FakeSession())
         uc._repo = FakeRow()
 
         hashed = get_password_hash("password123")

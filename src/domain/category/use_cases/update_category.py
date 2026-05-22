@@ -24,9 +24,9 @@ class UpdateCategoryUseCase:
         category_id: int,
         data: CategoryUpdateSchema,
     ) -> CategoryResponseSchema:
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                category = self._repo.update(
+                category = await self._repo.update(
                     session=session,
                     category_id=category_id,
                     data=data,

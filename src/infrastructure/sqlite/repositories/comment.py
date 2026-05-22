@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Type, cast
 
 from sqlalchemy import CursorResult, insert, select, delete, update
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.exceptions.database_exceptions import (
     CommentNotFoundException,
@@ -21,33 +21,36 @@ class CommentRepository:
         self._author_model: Type[UserModel] = UserModel
         self._post_model: Type[PostModel] = PostModel
 
-    def get(self, session: Session, comment_id: int) -> CommentModel:
+    async def get(self, session: AsyncSession, comment_id: int) -> CommentModel:
         query = select(self._model).where(self._model.id == comment_id)
-        comment = session.scalar(query)
+        comment = await session.scalar(query)
 
         if not comment:
             raise CommentNotFoundException()
 
         return comment
 
-    def get_all(self, session: Session) -> list[CommentModel]:
+    async def get_all(self, session: AsyncSession) -> list[CommentModel]:
         query = select(self._model)
-        return list(session.scalars(query))
+        result = await session.scalars(query)
+        return list(result)
 
-    def get_by_post(self, session: Session, post_id: int) -> list[CommentModel]:
+    async def get_by_post(self, session: AsyncSession, post_id: int) -> list[CommentModel]:
         query = select(self._model).where(self._model.post_id == post_id)
-        return list(session.scalars(query))
+        result = await session.scalars(query)
+        return list(result)
 
-    def get_by_author(self, session: Session, author_id: int) -> list[CommentModel]:
+    async def get_by_author(self, session: AsyncSession, author_id: int) -> list[CommentModel]:
         query = select(self._model).where(self._model.author_id == author_id)
-        return list(session.scalars(query))
+        result = await session.scalars(query)
+        return list(result)
 
-    def create(self, session: Session, data: CommentCreateSchema, author_id: int) -> CommentModel:
-        author = session.get(self._author_model, author_id)
+    async def create(self, session: AsyncSession, data: CommentCreateSchema, author_id: int) -> CommentModel:
+        author = await session.get(self._author_model, author_id)
         if not author:
             raise UserNotFoundException()
 
-        post = session.get(self._post_model, data.post_id)
+        post = await session.get(self._post_model, data.post_id)
         if not post:
             raise PostNotFoundException()
 
@@ -62,17 +65,17 @@ class CommentRepository:
             )
             .returning(self._model)
         )
-        comment = session.scalar(query)
+        comment = await session.scalar(query)
 
         return comment
 
-    def update(
+    async def update(
         self,
-        session: Session,
+        session: AsyncSession,
         comment_id: int,
         data: CommentUpdateSchema,
     ) -> CommentModel:
-        comment = self.get(session=session, comment_id=comment_id)
+        comment = await self.get(session=session, comment_id=comment_id)
 
         update_data = data.model_dump(exclude_none=True)
 
@@ -80,7 +83,7 @@ class CommentRepository:
             'author_id' in update_data
             and update_data['author_id'] != comment.author_id
         ):
-            author = session.get(self._author_model, update_data['author_id'])
+            author = await session.get(self._author_model, update_data['author_id'])
             if not author:
                 raise UserNotFoundException()
 
@@ -88,7 +91,7 @@ class CommentRepository:
             'post_id' in update_data
             and update_data['post_id'] != comment.post_id
         ):
-            post = session.get(self._post_model, update_data['post_id'])
+            post = await session.get(self._post_model, update_data['post_id'])
             if not post:
                 raise PostNotFoundException()
 
@@ -98,13 +101,13 @@ class CommentRepository:
             .values(**update_data)
             .returning(self._model)
         )
-        comment = session.scalar(query)
+        comment = await session.scalar(query)
 
         return comment
 
-    def delete(self, session: Session, comment_id: int) -> None:
+    async def delete(self, session: AsyncSession, comment_id: int) -> None:
         query = delete(self._model).where(self._model.id == comment_id)
-        result = cast(CursorResult, session.execute(query))
+        result = cast(CursorResult, await session.execute(query))
 
         if not result.rowcount:
             raise CommentNotFoundException()

@@ -27,9 +27,9 @@ class GetPostImageUseCase:
     async def execute(self, post_id: int) -> FileResponse:
         logger.info(f"Получение изображения поста: post_id={post_id}")
 
-        with self._database.session() as session:
+        async with self._database.session() as session:
             try:
-                post = self._repo.get(session=session, post_id=post_id)
+                post = await self._repo.get(session=session, post_id=post_id)
 
                 if not post:
                     logger.warning(f"Пост не найден: post_id={post_id}")

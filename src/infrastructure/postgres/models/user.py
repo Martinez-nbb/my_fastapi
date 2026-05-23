@@ -3,11 +3,11 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.infrastructure.sqlite.models.base import Base
+from src.infrastructure.postgres.models.base import Base
 
 if TYPE_CHECKING:
-    from src.infrastructure.sqlite.models.post import Post
-    from src.infrastructure.sqlite.models.comment import Comment
+    from src.infrastructure.postgres.models.post import Post
+    from src.infrastructure.postgres.models.comment import Comment
 
 
 class User(Base):

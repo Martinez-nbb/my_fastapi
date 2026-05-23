@@ -7,8 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from alembic import context
 
 from src.core.config import settings
-from src.infrastructure.sqlite.database import Base
-from src.infrastructure.sqlite.models import *  # noqa
+from src.infrastructure.postgres.database import Base
+from src.infrastructure.postgres.models import *  # noqa
 
 config = context.config
 

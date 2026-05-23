@@ -111,7 +111,7 @@ def mock_database():
     """Mocks the database singleton for integration tests."""
     # Patch in the infrastructure module and all domain modules that import it
     targets = [
-        "src.infrastructure.sqlite.database.database",
+        "src.infrastructure.postgres.database.database",
         "src.domain.user.use_cases.create_user.database",
         "src.domain.user.use_cases.get_user.database",
         "src.domain.user.use_cases.get_users.database",

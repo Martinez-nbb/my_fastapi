@@ -4,8 +4,8 @@ from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 
 from src.core.exceptions.domain_exceptions import CategorySlugAlreadyExistsException
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.category import CategoryRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.category import CategoryRepository
 from src.schemas.categories import CategoryCreateSchema, CategoryResponseSchema
 
 logger = logging.getLogger(__name__)

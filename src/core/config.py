@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: SecretStr
     POSTGRES_RECONNECT_INTERVAL_SEC: int
 
+    IMAGE_FOLDER: str = '/app/images'
+    LOG_LEVEL: str = 'INFO'
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
+
     @property
     def postgres_url(self) -> str:
         creds = f'{self.POSTGRES_USER.get_secret_value()}:{self.POSTGRES_PASSWORD.get_secret_value()}'

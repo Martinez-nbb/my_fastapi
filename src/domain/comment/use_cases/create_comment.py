@@ -11,11 +11,11 @@ from src.core.exceptions.domain_exceptions import (
     PostNotFoundByIdException,
     AuthorNotFoundException,
 )
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.models.comment import Comment
-from src.infrastructure.sqlite.repositories.comment import CommentRepository
-from src.infrastructure.sqlite.repositories.post import PostRepository
-from src.infrastructure.sqlite.repositories.user import UserRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.models.comment import Comment
+from src.infrastructure.postgres.repositories.comment import CommentRepository
+from src.infrastructure.postgres.repositories.post import PostRepository
+from src.infrastructure.postgres.repositories.user import UserRepository
 from src.schemas.comments import CommentCreateSchema, CommentResponseSchema
 
 logger = logging.getLogger(__name__)

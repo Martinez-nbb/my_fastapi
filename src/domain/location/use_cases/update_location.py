@@ -3,9 +3,12 @@ import logging
 from sqlalchemy.exc import IntegrityError
 
 from src.core.exceptions.database_exceptions import LocationNotFoundException
-from src.core.exceptions.domain_exceptions import LocationNotFoundByIdException
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.location import LocationRepository
+from src.core.exceptions.domain_exceptions import (
+    LocationAlreadyExistsException,
+    LocationNotFoundByIdException,
+)
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.location import LocationRepository
 from src.schemas.locations import LocationUpdateSchema, LocationResponseSchema
 
 logger = logging.getLogger(__name__)
@@ -34,6 +37,7 @@ class UpdateLocationUseCase:
                 raise error
             except IntegrityError as e:
                 logger.error(f"Ошибка IntegrityError при обновлении location: {e}")
-                raise
+                name = data.name if data.name else "неизвестно"
+                raise LocationAlreadyExistsException(name=name)
 
             return LocationResponseSchema.model_validate(obj=location)

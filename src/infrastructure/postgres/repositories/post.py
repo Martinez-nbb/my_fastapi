@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Type, cast
 
 from sqlalchemy import CursorResult, insert, select, delete, update
@@ -11,10 +11,10 @@ from src.core.exceptions.database_exceptions import (
     LocationNotFoundException,
     CategoryNotFoundException,
 )
-from src.infrastructure.sqlite.models.post import Post as PostModel
-from src.infrastructure.sqlite.models.user import User as UserModel
-from src.infrastructure.sqlite.models.location import Location as LocationModel
-from src.infrastructure.sqlite.models.category import Category as CategoryModel
+from src.infrastructure.postgres.models.post import Post as PostModel
+from src.infrastructure.postgres.models.user import User as UserModel
+from src.infrastructure.postgres.models.location import Location as LocationModel
+from src.infrastructure.postgres.models.category import Category as CategoryModel
 from src.schemas.posts import PostCreateSchema, PostUpdateSchema
 
 

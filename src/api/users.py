@@ -1,10 +1,9 @@
+import logging
 from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends
 
-from src.core.exceptions.database_exceptions import (
-    UserEmailAlreadyExistsException,
-    UserUsernameAlreadyExistsException,
-)
+logger = logging.getLogger(__name__)
+
 from src.core.exceptions.domain_exceptions import (
     UserNotFoundByIdException,
     UserUsernameOrEmailIsNotUniqueException,
@@ -44,6 +43,12 @@ async def create_user(
             status_code=status.HTTP_409_CONFLICT,
             detail=exc.get_detail(),
         )
+    except Exception as exc:
+        logger.error(f"Ошибка при создании пользователя: {str(exc)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера",
+        )
 
 
 @user_router.get('/', status_code=status.HTTP_200_OK, response_model=list[UserResponseSchema])
@@ -51,7 +56,11 @@ async def get_users(
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: Annotated[GetUsersUseCase, Depends(get_users_use_case)],
 ) -> list[UserResponseSchema]:
-    return await use_case.execute()
+    try:
+        return await use_case.execute()
+    except Exception as exc:
+        logger.error(f"Ошибка получения списка пользователей: {str(exc)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @user_router.get('/{user_id}', status_code=status.HTTP_200_OK, response_model=UserResponseSchema)
@@ -66,6 +75,12 @@ async def get_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=exc.get_detail(),
+        )
+    except Exception as exc:
+        logger.error(f"Ошибка при получении пользователя: user_id={user_id}, error={str(exc)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера",
         )
 
 
@@ -86,15 +101,16 @@ async def update_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=exc.get_detail(),
         )
-    except UserEmailAlreadyExistsException:
+    except UserUsernameOrEmailIsNotUniqueException as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f'Пользователь с email "{data.email}" уже существует',
+            detail=exc.get_detail(),
         )
-    except UserUsernameAlreadyExistsException:
+    except Exception as exc:
+        logger.error(f"Ошибка при обновлении пользователя: user_id={user_id}, error={str(exc)}")
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f'Пользователь с именем "{data.username}" уже существует',
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера",
         )
 
 
@@ -110,5 +126,11 @@ async def delete_user(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=exc.get_detail(),
+        )
+    except Exception as exc:
+        logger.error(f"Ошибка при удалении пользователя: user_id={user_id}, error={str(exc)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера",
         )
     return {'message': f'Пользователь с id={user_id} успешно удален'}

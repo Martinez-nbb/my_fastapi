@@ -42,8 +42,12 @@ class AuthorNotFoundException(BaseDatabaseException):
 
 
 class PostImageNotFoundException(BaseDatabaseException):
-    pass
+    def __init__(self, image_id: int | None = None) -> None:
+        detail = f"Изображение поста с id '{image_id}' не найдено" if image_id else "Изображение поста не найдено"
+        super().__init__(detail=detail)
 
 
 class CommentImageNotFoundException(BaseDatabaseException):
-    pass
+    def __init__(self, image_id: int | None = None) -> None:
+        detail = f"Изображение комментария с id '{image_id}' не найдено" if image_id else "Изображение комментария не найдено"
+        super().__init__(detail=detail)

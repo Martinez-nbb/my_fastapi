@@ -1,5 +1,5 @@
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.user import UserRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.user import UserRepository
 from src.schemas.users import UserResponseSchema
 
 

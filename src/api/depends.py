@@ -18,12 +18,15 @@ from src.domain.location.use_cases.delete_location import DeleteLocationUseCase
 
 from src.domain.post.use_cases.get_post import GetPostUseCase
 from src.domain.post.use_cases.list_posts import GetPostsUseCase
+from src.domain.post.use_cases.list_posts_by_user import GetPostsByUserUseCase
 from src.domain.post.use_cases.create_post import CreatePostUseCase
 from src.domain.post.use_cases.update_post import UpdatePostUseCase
 from src.domain.post.use_cases.delete_post import DeletePostUseCase
 from src.domain.post.use_cases.add_post_images import AddPostImagesUseCase
+from src.domain.post.use_cases.delete_post_image import DeletePostImageUseCase
 
 from src.domain.comment.use_cases.add_comment_images import AddCommentImagesUseCase
+from src.domain.comment.use_cases.delete_comment_image import DeleteCommentImageUseCase
 from src.domain.comment.use_cases.get_comment import GetCommentUseCase
 from src.domain.comment.use_cases.list_comments import GetCommentsUseCase, GetCommentsByPostUseCase
 from src.domain.comment.use_cases.create_comment import CreateCommentUseCase
@@ -99,6 +102,10 @@ def get_posts_use_case() -> GetPostsUseCase:
     return GetPostsUseCase()
 
 
+def get_posts_by_user_use_case() -> GetPostsByUserUseCase:
+    return GetPostsByUserUseCase()
+
+
 def create_post_use_case() -> CreatePostUseCase:
     return CreatePostUseCase()
 
@@ -135,8 +142,16 @@ def delete_comment_use_case() -> DeleteCommentUseCase:
     return DeleteCommentUseCase()
 
 
+def delete_comment_image_use_case() -> DeleteCommentImageUseCase:
+    return DeleteCommentImageUseCase()
+
+
 def add_post_images_use_case() -> AddPostImagesUseCase:
     return AddPostImagesUseCase()
+
+
+def delete_post_image_use_case() -> DeletePostImageUseCase:
+    return DeletePostImageUseCase()
 
 
 def add_comment_images_use_case() -> AddCommentImagesUseCase:

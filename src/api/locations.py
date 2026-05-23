@@ -1,8 +1,10 @@
+import logging
 from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends
 
 from src.core.exceptions.domain_exceptions import (
     LocationNotFoundByIdException,
+    LocationAlreadyExistsException,
 )
 from src.domain.location.use_cases.get_location import GetLocationUseCase
 from src.domain.location.use_cases.list_locations import GetLocationsUseCase
@@ -24,6 +26,8 @@ from src.schemas.locations import (
 from src.schemas.users import UserResponseSchema
 from src.services.auth import AuthService
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(dependencies=[Depends(AuthService.get_current_user)])
 
 
@@ -32,7 +36,11 @@ async def get_locations_list(
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: Annotated[GetLocationsUseCase, Depends(get_locations_use_case)],
 ) -> list[LocationResponseSchema]:
-    return await use_case.execute()
+    try:
+        return await use_case.execute()
+    except Exception as exc:
+        logger.error(f"Ошибка получения списка местоположений: {str(exc)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.get('/get/{location_id}', status_code=status.HTTP_200_OK, response_model=LocationResponseSchema)
@@ -48,6 +56,12 @@ async def get_location(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=exc.get_detail(),
         )
+    except Exception as exc:
+        logger.error(f"Ошибка при получении местоположения: location_id={location_id}, error={str(exc)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера",
+        )
 
 
 @router.post('/create', status_code=status.HTTP_201_CREATED, response_model=LocationResponseSchema)
@@ -56,7 +70,16 @@ async def create_location(
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: Annotated[CreateLocationUseCase, Depends(create_location_use_case)],
 ) -> LocationResponseSchema:
-    return await use_case.execute(data=location)
+    try:
+        return await use_case.execute(data=location)
+    except LocationAlreadyExistsException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=exc.get_detail(),
+        )
+    except Exception as exc:
+        logger.error(f"Ошибка создания местоположения: {str(exc)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @router.put('/update/{location_id}', status_code=status.HTTP_200_OK, response_model=LocationResponseSchema)
@@ -76,6 +99,17 @@ async def update_location(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=exc.get_detail(),
         )
+    except LocationAlreadyExistsException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=exc.get_detail(),
+        )
+    except Exception as exc:
+        logger.error(f"Ошибка при обновлении местоположения: location_id={location_id}, error={str(exc)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера",
+        )
 
 
 @router.delete('/delete/{location_id}', status_code=status.HTTP_200_OK)
@@ -90,5 +124,11 @@ async def delete_location(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=exc.get_detail(),
+        )
+    except Exception as exc:
+        logger.error(f"Ошибка при удалении местоположения: location_id={location_id}, error={str(exc)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера",
         )
     return {'message': 'Местоположение успешно удалено'}

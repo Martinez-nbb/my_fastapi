@@ -1,6 +1,11 @@
 import asyncio
 import os
 
+from src.core.exceptions.domain_exceptions import (
+    ImageFolderNotFoundException,
+    ImageFolderNotWritableException,
+)
+
 
 async def async_write_file(path: str, content: bytes) -> None:
     loop = asyncio.get_running_loop()
@@ -42,8 +47,8 @@ async def async_check_folder(path: str) -> None:
 
     def _check():
         if not os.path.exists(path):
-            raise FileNotFoundError(f"Folder not found: {path}")
+            raise ImageFolderNotFoundException(f"Folder not found: {path}")
         if not os.access(path, os.W_OK):
-            raise PermissionError(f"Folder not writable: {path}")
+            raise ImageFolderNotWritableException(f"Folder not writable: {path}")
 
     await loop.run_in_executor(None, _check)

@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
 
 from src.core.logging import setup_logging, get_logger
@@ -19,6 +20,10 @@ async def log_requests(request: Request, call_next):
     logger.info(f"Response: {response.status_code}")
     return response
 
+
+def _error_response(status_code: int, detail: str) -> JSONResponse:
+    return JSONResponse(status_code=status_code, content={"detail": detail})
+
 def create_app() -> FastAPI:
     app = FastAPI(root_path='/api/v1')
 
@@ -31,6 +36,14 @@ def create_app() -> FastAPI:
     )
 
     app.middleware('http')(log_requests)
+
+    @app.exception_handler(Exception)
+    async def unhandled_exception_handler(request: Request, exc: Exception):
+        logger.exception(f"Unhandled exception: {request.method} {request.url}")
+        return _error_response(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера",
+        )
 
     app.include_router(
         auth_router,

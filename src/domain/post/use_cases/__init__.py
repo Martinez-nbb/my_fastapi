@@ -4,7 +4,6 @@ from src.domain.post.use_cases.create_post import CreatePostUseCase
 from src.domain.post.use_cases.update_post import UpdatePostUseCase
 from src.domain.post.use_cases.delete_post import DeletePostUseCase
 from src.domain.post.use_cases.add_post_images import AddPostImagesUseCase
-from src.domain.post.use_cases.list_post_images import ListPostImagesUseCase
 
 __all__ = [
     'GetPostUseCase',
@@ -13,5 +12,4 @@ __all__ = [
     'UpdatePostUseCase',
     'DeletePostUseCase',
     'AddPostImagesUseCase',
-    'ListPostImagesUseCase',
 ]

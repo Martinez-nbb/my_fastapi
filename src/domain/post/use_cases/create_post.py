@@ -13,10 +13,10 @@ from src.core.exceptions.domain_exceptions import (
     CategoryNotFoundByIdException,
     LocationNotFoundByIdException,
 )
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.models.post import Post
-from src.infrastructure.sqlite.repositories.post import PostRepository
-from src.infrastructure.sqlite.repositories.user import UserRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.models.post import Post
+from src.infrastructure.postgres.repositories.post import PostRepository
+from src.infrastructure.postgres.repositories.user import UserRepository
 from src.schemas.posts import PostCreateSchema, PostResponseSchema
 
 logger = logging.getLogger(__name__)

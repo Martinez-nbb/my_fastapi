@@ -51,10 +51,10 @@ class TestAuthAPI:
     async def test_login_success(self, async_client, valid_user_payload, mock_repo):
         """Тест успешного входа в систему."""
         from src.resources.auth import get_password_hash
-        
+
         mock_repo_instance = AsyncMock()
         mock_repo["auth"].return_value = mock_repo_instance
-        
+
         hashed = get_password_hash(valid_user_payload["password"])
         db_user = FakeRow(
             id=1,
@@ -70,15 +70,21 @@ class TestAuthAPI:
         )
         mock_repo_instance.get_by_username.return_value = db_user
 
-        login_data = {
-            "username": valid_user_payload["username"],
-            "password": valid_user_payload["password"]
-        }
-        response = await async_client.post("/auth/token", data=login_data)
+        with patch(
+            "src.domain.auth.use_cases.create_refresh_token.CreateRefreshTokenUseCase.execute",
+            return_value="fake_refresh_token",
+        ):
+            login_data = {
+                "username": valid_user_payload["username"],
+                "password": valid_user_payload["password"],
+            }
+            response = await async_client.post("/auth/token", data=login_data)
 
         assert response.status_code == 200
-        assert "access_token" in response.json()
-        assert response.json()["token_type"] == "bearer"
+        data = response.json()
+        assert "access_token" in data
+        assert data["refresh_token"] == "fake_refresh_token"
+        assert data["token_type"] == "bearer"
 
     @pytest.mark.asyncio
     async def test_login_wrong_password(self, async_client, valid_user_payload, mock_repo):

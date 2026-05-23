@@ -1,5 +1,5 @@
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.location import LocationRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.location import LocationRepository
 from src.schemas.locations import LocationResponseSchema
 
 

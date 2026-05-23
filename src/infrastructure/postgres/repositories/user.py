@@ -1,4 +1,3 @@
-import bcrypt
 from typing import Type, cast
 
 from sqlalchemy import CursorResult, insert, select, delete, update
@@ -9,7 +8,7 @@ from src.core.exceptions.database_exceptions import (
     UserUsernameAlreadyExistsException,
     UserEmailAlreadyExistsException,
 )
-from src.infrastructure.sqlite.models.user import User as UserModel
+from src.infrastructure.postgres.models.user import User as UserModel
 from src.schemas.users import UserCreateSchema, UserUpdateSchema
 
 

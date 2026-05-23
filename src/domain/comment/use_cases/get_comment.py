@@ -2,9 +2,8 @@ import logging
 
 from src.core.exceptions.database_exceptions import CommentNotFoundException
 from src.core.exceptions.domain_exceptions import CommentNotFoundByIdException
-from src.domain.shared.enrich_image import build_media_type
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.comment import CommentRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.comment import CommentRepository
 from src.schemas.comments import CommentResponseSchema
 
 logger = logging.getLogger(__name__)
@@ -25,6 +24,4 @@ class GetCommentUseCase:
                 raise error
 
             schema = CommentResponseSchema.model_validate(obj=comment)
-            for img in schema.images:
-                img.media_type = build_media_type(img.file_path)
             return schema

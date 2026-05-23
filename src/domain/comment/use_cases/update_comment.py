@@ -4,8 +4,8 @@ from sqlalchemy.exc import IntegrityError
 
 from src.core.exceptions.database_exceptions import CommentNotFoundException
 from src.core.exceptions.domain_exceptions import CommentNotFoundByIdException
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.comment import CommentRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.comment import CommentRepository
 from src.schemas.comments import CommentUpdateSchema, CommentResponseSchema
 
 logger = logging.getLogger(__name__)

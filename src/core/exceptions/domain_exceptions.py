@@ -122,6 +122,33 @@ class AuthorNotFoundException(BaseDomainException):
         self.author_id = author_id
 
 
+class MaxImagesExceededException(BaseDomainException):
+    _exception_text_template = "Превышен лимит изображений (максимум {max_images})"
+
+    def __init__(self, max_images: int = 10) -> None:
+        detail = self._exception_text_template.format(max_images=max_images)
+        super().__init__(detail=detail)
+        self.max_images = max_images
+
+
+class PostImageNotFoundByIdException(BaseDomainException):
+    _exception_text_template = "Изображение с id '{id}' не найдено"
+
+    def __init__(self, id: int) -> None:
+        detail = self._exception_text_template.format(id=id)
+        super().__init__(detail=detail)
+        self.image_id = id
+
+
+class CommentImageNotFoundByIdException(BaseDomainException):
+    _exception_text_template = "Изображение комментария с id '{id}' не найдено"
+
+    def __init__(self, id: int) -> None:
+        detail = self._exception_text_template.format(id=id)
+        super().__init__(detail=detail)
+        self.image_id = id
+
+
 class PostHasNoImageException(BaseDomainException):
     _exception_text_template = "Публикация с id '{post_id}' не имеет изображения"
 
@@ -132,7 +159,7 @@ class PostHasNoImageException(BaseDomainException):
 
 
 class UploadFileIsNotImageException(BaseDomainException):
-    _exception_text_template = "Загруженный файл не является изображением JPEG"
+    _exception_text_template = "Загруженный файл не является изображением (допустимые форматы: JPEG, PNG, GIF, WebP)"
 
     def __init__(self) -> None:
         detail = self._exception_text_template
@@ -151,4 +178,35 @@ class ImageFileSaveException(BaseDomainException):
 
 class ImageFolderNotFoundException(BaseDomainException):
     def __init__(self, detail: str = "Папка для изображений не найдена") -> None:
+        super().__init__(detail=detail)
+
+
+class ImageFolderNotWritableException(BaseDomainException):
+    def __init__(self, detail: str = "Папка для изображений не доступна для записи") -> None:
+        super().__init__(detail=detail)
+
+
+class InvalidCredentialsException(BaseDomainException):
+    _exception_text_template = "Неверный пароль"
+
+    def __init__(self) -> None:
+        super().__init__(detail=self._exception_text_template)
+
+
+class LocationAlreadyExistsException(BaseDomainException):
+    _exception_text_template = "Местоположение с именем '{name}' уже существует"
+
+    def __init__(self, name: str) -> None:
+        detail = self._exception_text_template.format(name=name)
+        super().__init__(detail=detail)
+        self.name = name
+
+
+class LocationUpdateFailedException(BaseDomainException):
+    def __init__(self, detail: str = "Ошибка при обновлении местоположения") -> None:
+        super().__init__(detail=detail)
+
+
+class CategoryUpdateFailedException(BaseDomainException):
+    def __init__(self, detail: str = "Ошибка при обновлении категории") -> None:
         super().__init__(detail=detail)

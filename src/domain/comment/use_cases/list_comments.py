@@ -1,6 +1,5 @@
-from src.domain.shared.enrich_image import build_media_type
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.comment import CommentRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.comment import CommentRepository
 from src.schemas.comments import CommentResponseSchema
 
 
@@ -15,8 +14,6 @@ class GetCommentsUseCase:
             result = []
             for comment in comments:
                 schema = CommentResponseSchema.model_validate(obj=comment)
-                for img in schema.images:
-                    img.media_type = build_media_type(img.file_path)
                 result.append(schema)
             return result
 
@@ -32,7 +29,5 @@ class GetCommentsByPostUseCase:
             result = []
             for comment in comments:
                 schema = CommentResponseSchema.model_validate(obj=comment)
-                for img in schema.images:
-                    img.media_type = build_media_type(img.file_path)
                 result.append(schema)
             return result

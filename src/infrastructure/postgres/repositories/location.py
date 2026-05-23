@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Type, cast
 
 from sqlalchemy import CursorResult, insert, select, delete, update
@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.exceptions.database_exceptions import (
     LocationNotFoundException,
 )
-from src.infrastructure.sqlite.models.location import Location as LocationModel
+from src.infrastructure.postgres.models.location import Location as LocationModel
 from src.schemas.locations import LocationCreateSchema, LocationUpdateSchema
 
 

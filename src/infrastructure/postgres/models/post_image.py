@@ -4,10 +4,10 @@ from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.infrastructure.sqlite.models.base import Base
+from src.infrastructure.postgres.models.base import Base
 
 if TYPE_CHECKING:
-    from src.infrastructure.sqlite.models.post import Post
+    from src.infrastructure.postgres.models.post import Post
 
 
 class PostImage(Base):

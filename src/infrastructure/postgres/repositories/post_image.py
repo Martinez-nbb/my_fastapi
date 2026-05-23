@@ -1,15 +1,15 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Type, cast
 
-from sqlalchemy import CursorResult, insert, select, delete
+from sqlalchemy import CursorResult, insert, select, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.exceptions.database_exceptions import (
     PostImageNotFoundException,
     PostNotFoundException,
 )
-from src.infrastructure.sqlite.models.post_image import PostImage as PostImageModel
-from src.infrastructure.sqlite.models.post import Post as PostModel
+from src.infrastructure.postgres.models.post_image import PostImage as PostImageModel
+from src.infrastructure.postgres.models.post import Post as PostModel
 from src.schemas.posts import PostImageCreateSchema
 
 
@@ -22,7 +22,7 @@ class PostImageRepository:
         query = select(self._model).where(self._model.id == image_id)
         image = await session.scalar(query)
         if not image:
-            raise PostImageNotFoundException()
+            raise PostImageNotFoundException(image_id=image_id)
         return image
 
     async def get_by_post(self, session: AsyncSession, post_id: int) -> list[PostImageModel]:
@@ -48,9 +48,14 @@ class PostImageRepository:
         image = await session.scalar(query)
         return image
 
+    async def count_by_post(self, session: AsyncSession, post_id: int) -> int:
+        query = select(func.count()).select_from(self._model).where(self._model.post_id == post_id)
+        result = await session.scalar(query)
+        return result or 0
+
     async def delete(self, session: AsyncSession, image_id: int) -> None:
         image = await self.get(session=session, image_id=image_id)
         query = delete(self._model).where(self._model.id == image_id)
         result = cast(CursorResult, await session.execute(query))
         if not result.rowcount:
-            raise PostImageNotFoundException()
+            raise PostImageNotFoundException(image_id=image_id)

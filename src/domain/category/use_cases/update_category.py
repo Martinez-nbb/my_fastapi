@@ -6,9 +6,10 @@ from src.core.exceptions.database_exceptions import CategoryNotFoundException
 from src.core.exceptions.domain_exceptions import (
     CategoryNotFoundByIdException,
     CategorySlugAlreadyExistsException,
+    CategoryUpdateFailedException,
 )
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.category import CategoryRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.category import CategoryRepository
 from src.schemas.categories import CategoryUpdateSchema, CategoryResponseSchema
 
 logger = logging.getLogger(__name__)
@@ -41,6 +42,6 @@ class UpdateCategoryUseCase:
                     logger.error(error.get_detail())
                     raise error
                 logger.error(f"Ошибка IntegrityError при обновлении категории: {e}")
-                raise
+                raise CategoryUpdateFailedException(detail=str(e))
 
             return CategoryResponseSchema.model_validate(obj=category)

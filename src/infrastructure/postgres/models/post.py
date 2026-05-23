@@ -4,14 +4,14 @@ from typing import TYPE_CHECKING
 from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.infrastructure.sqlite.models.base import Base
+from src.infrastructure.postgres.models.base import Base
 
 if TYPE_CHECKING:
-    from src.infrastructure.sqlite.models.user import User
-    from src.infrastructure.sqlite.models.category import Category
-    from src.infrastructure.sqlite.models.location import Location
-    from src.infrastructure.sqlite.models.comment import Comment
-    from src.infrastructure.sqlite.models.post_image import PostImage
+    from src.infrastructure.postgres.models.user import User
+    from src.infrastructure.postgres.models.category import Category
+    from src.infrastructure.postgres.models.location import Location
+    from src.infrastructure.postgres.models.comment import Comment
+    from src.infrastructure.postgres.models.post_image import PostImage
 
 
 class Post(Base):

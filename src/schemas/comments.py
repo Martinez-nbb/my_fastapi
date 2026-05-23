@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 from src.schemas.base import (
     BaseCreatedAtSchema,
@@ -60,13 +60,27 @@ class CommentImageCreateSchema(BaseModel):
     original_name: str = Field(description='Оригинальное имя файла')
 
 
+_MEDIA_TYPES = {
+    "jpeg": "image/jpeg",
+    "jpg": "image/jpeg",
+    "png": "image/png",
+    "gif": "image/gif",
+    "webp": "image/webp",
+}
+
+
 class CommentImageSchema(BaseModel):
     id: int = Field(description='ID изображения')
     comment_id: int = Field(description='ID комментария')
     file_path: str = Field(description='Путь к файлу')
     original_name: str = Field(description='Оригинальное имя файла')
     created_at: datetime = Field(description='Дата создания')
-    media_type: str = Field(default='image/jpeg', description='MIME-тип')
+
+    @computed_field
+    @property
+    def media_type(self) -> str:
+        ext = self.file_path.rsplit('.', 1)[-1] if '.' in self.file_path else ''
+        return _MEDIA_TYPES.get(ext, "image/jpeg")
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -74,7 +88,11 @@ class CommentImageSchema(BaseModel):
 class CommentImageResponseSchema(BaseModel):
     id: int = Field(description='ID изображения')
     data: str | None = Field(default=None, description='Изображение в base64')
-    media_type: str = Field(default='image/jpeg', description='MIME-тип')
+
+    @computed_field
+    @property
+    def media_type(self) -> str:
+        return "image/jpeg"
 
 
 class CommentResponseSchema(

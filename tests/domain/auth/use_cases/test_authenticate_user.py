@@ -1,6 +1,7 @@
 import pytest
 
 from src.domain.auth.use_cases.authenticate_user import AuthenticateUserUseCase
+from src.core.exceptions.domain_exceptions import InvalidCredentialsException
 from src.resources.auth import get_password_hash, verify_password
 
 from tests.mocks import CallRecorder, FakeDatabase, FakeRow, FakeSession
@@ -68,7 +69,7 @@ class TestAuthenticateUserUseCase:
         )
         uc._repo.get_by_username = CallRecorder(return_value=db_user)
 
-        with pytest.raises(ValueError, match="Неверный пароль"):
+        with pytest.raises(InvalidCredentialsException, match="Неверный пароль"):
             await uc.execute(username="test_user", password="wrong-password")
 
     @pytest.mark.asyncio

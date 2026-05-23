@@ -5,8 +5,8 @@ from jose import JWTError, jwt
 from src.core.config import settings
 from src.schemas.users import UserResponseSchema
 from src.resources.auth import oauth2_scheme, optional_oauth2_scheme
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.user import UserRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.user import UserRepository
 from src.core.exceptions.database_exceptions import UserNotFoundException
 from src.core.exceptions.auth_exceptions import CredentialsException
 

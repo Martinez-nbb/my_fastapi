@@ -8,22 +8,24 @@ from src.schemas.auth import Token, TokenData
 class TestTokenSchema:
     def test_create_token_schema(self):
         """Тест создания токена."""
-        token = Token(access_token="test_token_123", token_type="bearer")
+        token = Token(access_token="test_token_123", refresh_token="refresh_123", token_type="bearer")
 
         assert token.access_token == "test_token_123"
+        assert token.refresh_token == "refresh_123"
         assert token.token_type == "bearer"
 
     def test_token_default_token_type(self):
         """Тест значения по умолчанию для token_type."""
-        token = Token(access_token="token123")
+        token = Token(access_token="token123", refresh_token="refresh_123")
 
         assert token.token_type == "bearer"
 
     def test_token_schema_fields(self):
         """Тест полей токена."""
-        token = Token(access_token="abc123", token_type="bearer")
+        token = Token(access_token="abc123", refresh_token="refresh_123", token_type="bearer")
 
         assert hasattr(token, 'access_token')
+        assert hasattr(token, 'refresh_token')
         assert hasattr(token, 'token_type')
         assert isinstance(token.access_token, str)
 

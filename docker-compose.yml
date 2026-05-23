@@ -22,6 +22,8 @@ services:
     image: application
     volumes:
       - ./src:/app/src
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
       - ./images:/app/images
       - ./logs:/app/logs
     env_file:

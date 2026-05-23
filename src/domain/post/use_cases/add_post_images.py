@@ -1,60 +1,57 @@
 from typing import List
 from uuid import uuid4
 
-from fastapi import File, UploadFile
+from fastapi import UploadFile
 
 from src.schemas.posts import PostImageSchema, PostImageCreateSchema
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.post_image import PostImageRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.post_image import PostImageRepository
+from src.core.config import settings
 from src.core.exceptions.database_exceptions import PostNotFoundException
 from src.core.exceptions.domain_exceptions import (
+    PostNotFoundByIdException,
+    MaxImagesExceededException,
     UploadFileIsNotImageException,
     ImageFileReadException,
     ImageFileSaveException,
     ImageFolderNotFoundException,
+    ImageFolderNotWritableException,
 )
 from src.domain.shared.async_file import (
     async_write_file,
     async_remove_file,
     async_check_folder,
 )
+from src.domain.shared.image_utils import validate_image, MAX_FILE_SIZE
 from src.core.logging import get_logger
 
 logger = get_logger(__name__)
 
 
 class AddPostImagesUseCase:
-    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
-
     def __init__(self) -> None:
-        self.image_folder = "/app/images"
+        self.image_folder = settings.IMAGE_FOLDER
         self._database = database
         self._repo = PostImageRepository()
 
-    ALLOWED_EXTENSIONS = {"jpeg", "jpg", "png", "gif", "webp"}
-
-    def _validate_image(self, image: File) -> str:
-        if not hasattr(image, 'filename') or not image.filename:
-            logger.warning("Отсутствует имя файла")
-            raise ValueError("Filename is required")
-
-        filename = image.filename.lower()
-        ext = filename.rsplit('.', 1)[-1] if '.' in filename else ''
-
-        if ext not in self.ALLOWED_EXTENSIONS:
-            logger.warning(f"Невалидное расширение файла: ext={ext}, filename={filename}")
-            raise UploadFileIsNotImageException()
-
-        return ext
+    MAX_IMAGES_PER_POST = 10
 
     async def execute(self, post_id: int, images: List[UploadFile]) -> List[PostImageSchema]:
         logger.info(f"Загрузка нескольких изображений для поста: post_id={post_id}, count={len(images)}")
 
-        # Validate all images first
+        async with self._database.session() as session:
+            current = await self._repo.count_by_post(session=session, post_id=post_id)
+        if current + len(images) > self.MAX_IMAGES_PER_POST:
+            raise ValueError(
+                f"Превышен лимит изображений для поста: "
+                f"уже {current}, добавляется {len(images)}, "
+                f"максимум {self.MAX_IMAGES_PER_POST}"
+            )
+
         validated_images = []
         for image in images:
             try:
-                ext = self._validate_image(image)
+                ext = validate_image(image)
                 ext = "jpeg" if ext == "jpg" else ext
                 new_image_name = str(uuid4())
                 new_image_path = f"{self.image_folder}/{new_image_name}.{ext}"
@@ -62,12 +59,11 @@ class AddPostImagesUseCase:
             except (ValueError, UploadFileIsNotImageException):
                 raise
 
+        saved_paths = []
         try:
             await async_check_folder(self.image_folder)
 
             results = []
-            saved_paths = []
-            # Process each image
             for image, ext, new_image_name, new_image_path in validated_images:
                 try:
                     content = await image.read()
@@ -75,10 +71,10 @@ class AddPostImagesUseCase:
                         logger.warning("Пустой файл изображения")
                         raise ImageFileReadException("Файл изображения пустой")
 
-                    if len(content) > self.MAX_FILE_SIZE:
-                        logger.warning(f"Файл слишком большой: size={len(content)}, max={self.MAX_FILE_SIZE}")
+                    if len(content) > MAX_FILE_SIZE:
+                        logger.warning(f"Файл слишком большой: size={len(content)}, max={MAX_FILE_SIZE}")
                         raise ImageFileSaveException(
-                            f"Файл слишком большой (максимум {self.MAX_FILE_SIZE // (1024*1024)}MB)"
+                            f"Файл слишком большой (максимум {MAX_FILE_SIZE // (1024*1024)}MB)"
                         )
 
                     await async_write_file(new_image_path, content)
@@ -99,6 +95,8 @@ class AddPostImagesUseCase:
                 except (IOError, OSError) as e:
                     logger.error(f"Ошибка записи файла: path={new_image_path}, error={str(e)}")
                     raise ImageFileSaveException(f"Не удалось сохранить файл: {str(e)}")
+                except PostNotFoundException:
+                    raise PostNotFoundByIdException(id=post_id)
                 except Exception as e:
                     logger.error(f"Ошибка сохранения в БД: post_id={post_id}, error={str(e)}")
                     raise
@@ -106,11 +104,12 @@ class AddPostImagesUseCase:
             return results
 
         except (
-            PostNotFoundException,
+            PostNotFoundByIdException,
             UploadFileIsNotImageException,
             ImageFileReadException,
             ImageFileSaveException,
             ImageFolderNotFoundException,
+            ImageFolderNotWritableException,
         ):
             for path in saved_paths:
                 await async_remove_file(path)

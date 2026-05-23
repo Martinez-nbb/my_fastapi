@@ -1,10 +1,14 @@
 import logging
 
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.user import UserRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.user import UserRepository
 from src.schemas.users import UserResponseSchema
-from src.resources.auth import verify_password
+from src.resources.auth import async_verify_password
 from src.core.exceptions.database_exceptions import UserNotFoundException
+from src.core.exceptions.domain_exceptions import (
+    InvalidCredentialsException,
+    UserNotFoundByUsernameException,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -36,13 +40,14 @@ class AuthenticateUserUseCase:
                     'date_joined': user.date_joined,
                 }
         except UserNotFoundException:
-            logger.error(f"User not found: {username}")
-            raise
+            error = UserNotFoundByUsernameException(username=username)
+            logger.error(error.get_detail())
+            raise error
 
-        if not verify_password(
+        if not await async_verify_password(
             plain_password=password, hashed_password=hashed_password
         ):
             logger.error(f"Wrong password for user: {username}")
-            raise ValueError("Неверный пароль")
+            raise InvalidCredentialsException()
 
         return UserResponseSchema(**user_data)

@@ -6,10 +6,10 @@ from src.core.exceptions.database_exceptions import (
 )
 from src.core.exceptions.domain_exceptions import UserUsernameOrEmailIsNotUniqueException
 from src.core.logging import get_logger
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.user import UserRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.user import UserRepository
 from src.schemas.users import UserCreateSchema, UserResponseSchema
-from src.resources.auth import get_password_hash
+from src.resources.auth import async_get_password_hash
 
 logger = get_logger(__name__)
 
@@ -21,8 +21,7 @@ class CreateUserUseCase:
 
     async def execute(self, data: UserCreateSchema) -> UserResponseSchema:
         logger.info(f"Создание пользователя: username={data.username}, email={data.email}")
-        # Хешируем пароль перед сохранением
-        hashed_password = get_password_hash(data.password.get_secret_value())
+        hashed_password = await async_get_password_hash(data.password.get_secret_value())
         data.password = SecretStr(hashed_password)
         
         async with self._database.session() as session:

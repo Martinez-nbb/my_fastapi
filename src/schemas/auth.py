@@ -3,7 +3,12 @@ from pydantic import BaseModel, Field
 
 class Token(BaseModel):
     access_token: str = Field(description="JWT access token")
+    refresh_token: str = Field(description="Refresh token")
     token_type: str = Field(default="bearer", description="Token type (bearer)")
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str = Field(description="Refresh token")
 
 
 class TokenData(BaseModel):

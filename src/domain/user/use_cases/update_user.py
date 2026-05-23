@@ -1,8 +1,17 @@
-from src.core.exceptions.database_exceptions import UserNotFoundException
-from src.core.exceptions.domain_exceptions import UserNotFoundByIdException
+from sqlalchemy.exc import IntegrityError
+
+from src.core.exceptions.database_exceptions import (
+    UserEmailAlreadyExistsException,
+    UserNotFoundException,
+    UserUsernameAlreadyExistsException,
+)
+from src.core.exceptions.domain_exceptions import (
+    UserNotFoundByIdException,
+    UserUsernameOrEmailIsNotUniqueException,
+)
 from src.core.logging import get_logger
-from src.infrastructure.sqlite.database import database
-from src.infrastructure.sqlite.repositories.user import UserRepository
+from src.infrastructure.postgres.database import database
+from src.infrastructure.postgres.repositories.user import UserRepository
 from src.schemas.users import UserUpdateSchema, UserResponseSchema
 
 logger = get_logger(__name__)
@@ -42,5 +51,20 @@ class UpdateUserUseCase:
                 error = UserNotFoundByIdException(id=user_id)
                 logger.error(error.get_detail())
                 raise error
+            except UserEmailAlreadyExistsException:
+                error = UserUsernameOrEmailIsNotUniqueException.from_email(email=data.email)
+                logger.error(error.get_detail())
+                raise error
+            except UserUsernameAlreadyExistsException:
+                error = UserUsernameOrEmailIsNotUniqueException.from_username(
+                    username=data.username
+                )
+                logger.error(error.get_detail())
+                raise error
+            except IntegrityError as e:
+                logger.error(f"IntegrityError при обновлении пользователя: {e}")
+                raise UserUsernameOrEmailIsNotUniqueException(
+                    detail="Ошибка целостности данных при обновлении пользователя"
+                )
 
         return UserResponseSchema(**user_data)

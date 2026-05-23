@@ -5,8 +5,8 @@ from src.core.logging import setup_logging, get_logger
 from src.api.users import user_router, public_user_router
 from src.api.categories import router as categories_router
 from src.api.locations import router as locations_router
-from src.api.posts import router as posts_router, public_router as public_posts_router
-from src.api.comments import router as comments_router, public_router as public_comments_router
+from src.api.posts import router as posts_router
+from src.api.comments import router as comments_router
 from src.api.auth import router as auth_router
 
 setup_logging()
@@ -63,19 +63,9 @@ def create_app() -> FastAPI:
         tags=['Posts'],
     )
     app.include_router(
-        public_posts_router,
-        prefix='/posts',
-        tags=['Posts (public)'],
-    )
-    app.include_router(
         comments_router,
         prefix='/comments',
         tags=['Comments'],
-    )
-    app.include_router(
-        public_comments_router,
-        prefix='/comments',
-        tags=['Comments (public)'],
     )
 
     _fix_openapi_schema(app)

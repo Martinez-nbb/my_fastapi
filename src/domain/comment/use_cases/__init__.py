@@ -1,6 +1,4 @@
-from src.domain.comment.use_cases.add_comment_image import AddCommentImageUseCase
 from src.domain.comment.use_cases.add_comment_images import AddCommentImagesUseCase
-from src.domain.comment.use_cases.get_comment_image import GetCommentImageUseCase
 from src.domain.comment.use_cases.list_comment_images import ListCommentImagesUseCase
 from src.domain.comment.use_cases.get_comment import GetCommentUseCase
 from src.domain.comment.use_cases.list_comments import (
@@ -18,8 +16,6 @@ __all__ = [
     'CreateCommentUseCase',
     'UpdateCommentUseCase',
     'DeleteCommentUseCase',
-    'AddCommentImageUseCase',
     'AddCommentImagesUseCase',
-    'GetCommentImageUseCase',
     'ListCommentImagesUseCase',
 ]

@@ -110,8 +110,15 @@ class PostImageSchema(BaseModel):
     file_path: str = Field(description='Путь к файлу')
     original_name: str = Field(description='Оригинальное имя файла')
     created_at: datetime = Field(description='Дата создания')
+    media_type: str = Field(default='image/jpeg', description='MIME-тип')
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class PostImageResponseSchema(BaseModel):
+    id: int = Field(description='ID изображения')
+    data: str | None = Field(default=None, description='Изображение в base64')
+    media_type: str = Field(default='image/jpeg', description='MIME-тип')
 
 
 class PostResponseSchema(
@@ -144,7 +151,3 @@ class PostResponseSchema(
         description='Изображения публикации',
     )
     model_config = ConfigDict(from_attributes=True, extra='ignore')
-
-
-class PostImageResponse(BaseModel):
-    image_path: str = Field(description='Путь к загруженному изображению')

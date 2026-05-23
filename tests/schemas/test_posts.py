@@ -6,7 +6,6 @@ from src.schemas.posts import (
     PostResponseSchema,
     PostCreateSchema,
     PostUpdateSchema,
-    PostImageResponse,
 )
 from src.schemas.users import UserResponseSchema
 
@@ -133,14 +132,3 @@ class TestPostUpdateSchema:
         assert schema.title is None
 
 
-class TestPostImageResponse:
-    def test_create_image_response(self):
-        """Тест создания ответа с изображением."""
-        response = PostImageResponse(image_path="test-image.jpg")
-
-        assert response.image_path == "test-image.jpg"
-
-    def test_image_response_requires_path(self):
-        """Тест обязательного поля image_path."""
-        with pytest.raises(ValidationError):
-            PostImageResponse()

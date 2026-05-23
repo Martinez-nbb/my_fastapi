@@ -1,12 +1,16 @@
+import asyncio
 import logging
-from typing import Annotated
-from fastapi import APIRouter, status, HTTPException, Depends, File as FileParam, UploadFile
+from typing import Annotated, List
+from fastapi import APIRouter, status, HTTPException, Depends, File as FileParam, UploadFile, Response
 from fastapi.responses import FileResponse
 
+from src.domain.shared.combine_images import combine_images_vertically
+from src.infrastructure.sqlite.database import database
+from src.infrastructure.sqlite.repositories.post_image import PostImageRepository
+
 from src.core.exceptions.database_exceptions import (
-    LocationNotFoundException,
-    CategoryNotFoundException,
     PostNotFoundException,
+    PostImageNotFoundException,
 )
 from src.core.exceptions.domain_exceptions import (
     PostNotFoundByIdException,
@@ -24,9 +28,9 @@ from src.domain.post.use_cases.create_post import CreatePostUseCase
 from src.domain.post.use_cases.update_post import UpdatePostUseCase
 from src.domain.post.use_cases.delete_post import DeletePostUseCase
 from src.domain.post.use_cases.add_post_image import AddPostImageUseCase
+from src.domain.post.use_cases.add_post_images import AddPostImagesUseCase
 from src.domain.post.use_cases.get_post_image import GetPostImageUseCase
 from src.domain.post.use_cases.list_post_images import ListPostImagesUseCase
-from src.domain.post.use_cases.delete_post_image import DeletePostImageUseCase
 from src.api.depends import (
     get_post_use_case,
     get_posts_use_case,
@@ -34,16 +38,16 @@ from src.api.depends import (
     update_post_use_case,
     delete_post_use_case,
     add_post_image_use_case,
+    add_post_images_use_case,
     get_post_image_use_case,
     list_post_images_use_case,
-    delete_post_image_use_case,
 )
 from src.schemas.posts import (
     PostCreateSchema,
     PostUpdateSchema,
     PostResponseSchema,
     PostImageSchema,
-    PostImageResponse,
+    PostImageResponseSchema,
 )
 from src.schemas.users import UserResponseSchema
 from src.services.auth import AuthService
@@ -51,6 +55,7 @@ from src.services.auth import AuthService
 logger = logging.getLogger(__name__)
 
 router = APIRouter(dependencies=[Depends(AuthService.get_current_user)])
+public_router = APIRouter()
 
 
 @router.get('/list', status_code=status.HTTP_200_OK, response_model=list[PostResponseSchema])
@@ -193,41 +198,99 @@ async def add_post_image(
         )
 
 
-@router.get('/{post_id}/images', status_code=status.HTTP_200_OK, response_model=list[PostImageSchema])
+@router.post('/images/{post_id}', status_code=status.HTTP_201_CREATED, response_model=list[PostImageSchema])
+async def add_post_images(
+    post_id: int,
+    image: Annotated[List[UploadFile], FileParam(description='Изображения (JPEG/PNG)')],
+    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
+    use_case: Annotated[AddPostImagesUseCase, Depends(add_post_images_use_case)],
+) -> list[PostImageSchema]:
+    try:
+        return await use_case.execute(post_id=post_id, images=image)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+    except UploadFileIsNotImageException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=exc.get_detail(),
+        )
+    except PostNotFoundException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=exc._detail,
+        )
+    except ImageFileReadException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+    except ImageFileSaveException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(exc),
+        )
+    except ImageFolderNotFoundException as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(exc),
+        )
+    except Exception as exc:
+        logger.error(f"Необработанная ошибка при загрузке изображений: {str(exc)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Внутренняя ошибка сервера",
+        )
+
+
+@router.get('/{post_id}/images', status_code=status.HTTP_200_OK, response_class=Response)
 async def list_post_images(
     post_id: int,
     current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: Annotated[ListPostImagesUseCase, Depends(list_post_images_use_case)],
-) -> list[PostImageSchema]:
-    return await use_case.execute(post_id=post_id)
+):
+    image_folder = "/app/images"
+    try:
+        async with database.session() as session:
+            images = await PostImageRepository().get_by_post(session=session, post_id=post_id)
+    except Exception as exc:
+        logger.error(f"Ошибка БД при получении изображений: post_id={post_id}, error={str(exc)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+    file_paths = [img.file_path for img in images]
+    if not file_paths:
+        raise HTTPException(status_code=404, detail="No images found")
+
+    try:
+        loop = asyncio.get_running_loop()
+        buf = await loop.run_in_executor(None, combine_images_vertically, file_paths, image_folder)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="No valid images found")
+
+    return Response(content=buf.read(), media_type="image/jpeg")
 
 
-@router.get('/image/{image_id}')
+@public_router.get('/image/{image_id}')
 async def get_post_image(
     image_id: int,
-    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
     use_case: Annotated[GetPostImageUseCase, Depends(get_post_image_use_case)],
-) -> FileResponse:
+):
     try:
         return await use_case.execute(image_id=image_id)
-    except PostNotFoundException as exc:
+    except PostImageNotFoundException as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc._detail,
+            detail=exc.get_detail(),
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
         )
 
 
-@router.delete('/image/{image_id}', status_code=status.HTTP_200_OK)
-async def delete_post_image(
-    image_id: int,
-    current_user: Annotated[UserResponseSchema, Depends(AuthService.get_current_user)],
-    use_case: Annotated[DeletePostImageUseCase, Depends(delete_post_image_use_case)],
-) -> dict:
-    try:
-        await use_case.execute(image_id=image_id)
-    except PostNotFoundException as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=exc._detail,
-        )
-    return {'message': 'Изображение успешно удалено'}
+
+
+
+

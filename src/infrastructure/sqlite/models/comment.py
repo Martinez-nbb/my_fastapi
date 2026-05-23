@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infrastructure.sqlite.models.base import Base
@@ -25,7 +25,7 @@ class Comment(Base):
         index=True,
         nullable=False,
     )
-    text: Mapped[str] = mapped_column(nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
     author_id: Mapped[int] = mapped_column(
         ForeignKey('auth_user.id', ondelete='CASCADE'),
         index=True,

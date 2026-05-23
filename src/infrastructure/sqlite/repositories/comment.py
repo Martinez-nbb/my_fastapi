@@ -3,6 +3,7 @@ from typing import Type, cast
 
 from sqlalchemy import CursorResult, insert, select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from src.core.exceptions.database_exceptions import (
     CommentNotFoundException,
@@ -21,8 +22,18 @@ class CommentRepository:
         self._author_model: Type[UserModel] = UserModel
         self._post_model: Type[PostModel] = PostModel
 
+    def _eager_options(self):
+        return (
+            selectinload(self._model.author),
+            selectinload(self._model.images),
+        )
+
     async def get(self, session: AsyncSession, comment_id: int) -> CommentModel:
-        query = select(self._model).where(self._model.id == comment_id)
+        query = (
+            select(self._model)
+            .options(*self._eager_options())
+            .where(self._model.id == comment_id)
+        )
         comment = await session.scalar(query)
 
         if not comment:
@@ -31,17 +42,25 @@ class CommentRepository:
         return comment
 
     async def get_all(self, session: AsyncSession) -> list[CommentModel]:
-        query = select(self._model)
+        query = select(self._model).options(*self._eager_options())
         result = await session.scalars(query)
         return list(result)
 
     async def get_by_post(self, session: AsyncSession, post_id: int) -> list[CommentModel]:
-        query = select(self._model).where(self._model.post_id == post_id)
+        query = (
+            select(self._model)
+            .options(*self._eager_options())
+            .where(self._model.post_id == post_id)
+        )
         result = await session.scalars(query)
         return list(result)
 
     async def get_by_author(self, session: AsyncSession, author_id: int) -> list[CommentModel]:
-        query = select(self._model).where(self._model.author_id == author_id)
+        query = (
+            select(self._model)
+            .options(*self._eager_options())
+            .where(self._model.author_id == author_id)
+        )
         result = await session.scalars(query)
         return list(result)
 

@@ -5,8 +5,8 @@ from src.core.logging import setup_logging, get_logger
 from src.api.users import user_router, public_user_router
 from src.api.categories import router as categories_router
 from src.api.locations import router as locations_router
-from src.api.posts import router as posts_router
-from src.api.comments import router as comments_router
+from src.api.posts import router as posts_router, public_router as public_posts_router
+from src.api.comments import router as comments_router, public_router as public_comments_router
 from src.api.auth import router as auth_router
 
 setup_logging()
@@ -63,9 +63,55 @@ def create_app() -> FastAPI:
         tags=['Posts'],
     )
     app.include_router(
+        public_posts_router,
+        prefix='/posts',
+        tags=['Posts (public)'],
+    )
+    app.include_router(
         comments_router,
         prefix='/comments',
         tags=['Comments'],
     )
+    app.include_router(
+        public_comments_router,
+        prefix='/comments',
+        tags=['Comments (public)'],
+    )
+
+    _fix_openapi_schema(app)
 
     return app
+
+
+def _fix_openapi_schema(app: FastAPI) -> None:
+    from fastapi.openapi.utils import get_openapi
+
+    def custom_openapi():
+        if app.openapi_schema:
+            return app.openapi_schema
+        schema = get_openapi(
+            title=app.title,
+            version=app.version,
+            openapi_version=app.openapi_version,
+            description=app.description,
+            routes=app.routes,
+        )
+
+        def _fix_items(obj):
+            if isinstance(obj, dict):
+                if obj.get('type') == 'array':
+                    items = obj.get('items', {})
+                    if 'contentMediaType' in items:
+                        items['format'] = 'binary'
+                        del items['contentMediaType']
+                for val in obj.values():
+                    _fix_items(val)
+            elif isinstance(obj, list):
+                for item in obj:
+                    _fix_items(item)
+
+        _fix_items(schema)
+        app.openapi_schema = schema
+        return schema
+
+    app.openapi = custom_openapi

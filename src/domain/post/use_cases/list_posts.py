@@ -1,3 +1,4 @@
+from src.domain.shared.enrich_image import build_media_type
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.repositories.post import PostRepository
 from src.schemas.posts import PostResponseSchema
@@ -11,7 +12,10 @@ class GetPostsUseCase:
     async def execute(self) -> list[PostResponseSchema]:
         async with self._database.session() as session:
             posts = await self._repo.get_all(session=session)
-            return [
-                PostResponseSchema.model_validate(obj=post)
-                for post in posts
-            ]
+            result = []
+            for post in posts:
+                schema = PostResponseSchema.model_validate(obj=post)
+                for img in schema.images:
+                    img.media_type = build_media_type(img.file_path)
+                result.append(schema)
+            return result

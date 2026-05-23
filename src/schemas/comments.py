@@ -66,8 +66,15 @@ class CommentImageSchema(BaseModel):
     file_path: str = Field(description='Путь к файлу')
     original_name: str = Field(description='Оригинальное имя файла')
     created_at: datetime = Field(description='Дата создания')
+    media_type: str = Field(default='image/jpeg', description='MIME-тип')
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CommentImageResponseSchema(BaseModel):
+    id: int = Field(description='ID изображения')
+    data: str | None = Field(default=None, description='Изображение в base64')
+    media_type: str = Field(default='image/jpeg', description='MIME-тип')
 
 
 class CommentResponseSchema(

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.infrastructure.sqlite.models.base import Base
@@ -23,7 +23,7 @@ class Post(Base):
     created_at: Mapped[datetime] = mapped_column(nullable=False)
     is_published: Mapped[bool] = mapped_column(nullable=False, default=True)
     title: Mapped[str] = mapped_column(nullable=False)
-    text: Mapped[str] = mapped_column(nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
     pub_date: Mapped[datetime] = mapped_column(nullable=False)
     author_id: Mapped[int] = mapped_column(
         ForeignKey('auth_user.id', ondelete='CASCADE'),

@@ -53,7 +53,7 @@ cp .env.example .env
 
 2. Отредактируйте `.env`, установив DATABASE_URL для PostgreSQL:
 ```
-DATABASE_URL=postgresql+psycopg2://user:password@db:5432/myfastapi
+DATABASE_URL=postgresql+asyncpg://user:password@db:5432/myfastapi
 ```
 
 3. Запустите через Docker Compose:

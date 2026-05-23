@@ -3,6 +3,7 @@ from typing import Type, cast
 
 from sqlalchemy import CursorResult, insert, select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from src.core.exceptions.database_exceptions import (
     PostNotFoundException,
@@ -24,8 +25,20 @@ class PostRepository:
         self._location_model: Type[LocationModel] = LocationModel
         self._category_model: Type[CategoryModel] = CategoryModel
 
+    def _eager_options(self):
+        return (
+            selectinload(self._model.author),
+            selectinload(self._model.location),
+            selectinload(self._model.category),
+            selectinload(self._model.images),
+        )
+
     async def get(self, session: AsyncSession, post_id: int) -> PostModel:
-        query = select(self._model).where(self._model.id == post_id)
+        query = (
+            select(self._model)
+            .options(*self._eager_options())
+            .where(self._model.id == post_id)
+        )
         post = await session.scalar(query)
 
         if not post:
@@ -34,12 +47,16 @@ class PostRepository:
         return post
 
     async def get_all(self, session: AsyncSession) -> list[PostModel]:
-        query = select(self._model)
+        query = select(self._model).options(*self._eager_options())
         result = await session.scalars(query)
         return list(result)
 
     async def get_by_author(self, session: AsyncSession, author_id: int) -> list[PostModel]:
-        query = select(self._model).where(self._model.author_id == author_id)
+        query = (
+            select(self._model)
+            .options(*self._eager_options())
+            .where(self._model.author_id == author_id)
+        )
         result = await session.scalars(query)
         return list(result)
 
@@ -48,7 +65,11 @@ class PostRepository:
         session: AsyncSession,
         category_id: int,
     ) -> list[PostModel]:
-        query = select(self._model).where(self._model.category_id == category_id)
+        query = (
+            select(self._model)
+            .options(*self._eager_options())
+            .where(self._model.category_id == category_id)
+        )
         result = await session.scalars(query)
         return list(result)
 
@@ -57,7 +78,11 @@ class PostRepository:
         session: AsyncSession,
         location_id: int,
     ) -> list[PostModel]:
-        query = select(self._model).where(self._model.location_id == location_id)
+        query = (
+            select(self._model)
+            .options(*self._eager_options())
+            .where(self._model.location_id == location_id)
+        )
         result = await session.scalars(query)
         return list(result)
 

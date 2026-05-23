@@ -1,7 +1,6 @@
-import os
 from uuid import uuid4
 
-from fastapi import File
+from fastapi import File, UploadFile
 
 from src.schemas.comments import CommentImageSchema, CommentImageCreateSchema
 from src.infrastructure.sqlite.database import database
@@ -12,6 +11,11 @@ from src.core.exceptions.domain_exceptions import (
     ImageFileReadException,
     ImageFileSaveException,
     ImageFolderNotFoundException,
+)
+from src.domain.shared.async_file import (
+    async_write_file,
+    async_remove_file,
+    async_check_folder,
 )
 from src.core.logging import get_logger
 
@@ -42,21 +46,7 @@ class AddCommentImageUseCase:
 
         return ext
 
-    def _check_folder_exists(self) -> None:
-        if not os.path.exists(self.image_folder):
-            logger.error(f"Папка для изображений не существует: {self.image_folder}")
-            raise ImageFolderNotFoundException(
-                f"Папка для изображений не найдена: {self.image_folder}"
-            )
-
-    def _check_folder_writable(self) -> None:
-        if not os.access(self.image_folder, os.W_OK):
-            logger.error(f"Папка недоступна для записи: {self.image_folder}")
-            raise ImageFileSaveException(
-                f"Нет доступа к папке: {self.image_folder}"
-            )
-
-    async def execute(self, comment_id: int, image: File) -> CommentImageSchema:
+    async def execute(self, comment_id: int, image: UploadFile) -> CommentImageSchema:
         logger.info(f"Загрузка изображения для комментария: comment_id={comment_id}, filename={getattr(image, 'filename', 'unknown')}")
 
         try:
@@ -68,11 +58,10 @@ class AddCommentImageUseCase:
             raise
 
         try:
-            self._check_folder_exists()
-            self._check_folder_writable()
+            await async_check_folder(self.image_folder)
 
             try:
-                content = image.file.read()
+                content = await image.read()
                 if not content:
                     logger.warning("Пустой файл изображения")
                     raise ImageFileReadException("Файл изображения пустой")
@@ -83,9 +72,7 @@ class AddCommentImageUseCase:
                         f"Файл слишком большой (максимум {self.MAX_FILE_SIZE // (1024*1024)}MB)"
                     )
 
-                with open(new_image_path, "wb") as buffer:
-                    buffer.write(content)
-
+                await async_write_file(new_image_path, content)
                 logger.info(f"Файл сохранён: path={new_image_path}, size={len(content)}")
 
             except (IOError, OSError) as e:
@@ -117,19 +104,10 @@ class AddCommentImageUseCase:
             ImageFileSaveException,
             ImageFolderNotFoundException,
         ):
-            try:
-                if 'new_image_path' in locals() and os.path.exists(new_image_path):
-                    os.remove(new_image_path)
-                    logger.debug(f"Файл удалён при ошибке: {new_image_path}")
-            except Exception as e:
-                logger.error(f"Не удалось удалить файл: error={str(e)}")
+            await async_remove_file(new_image_path)
             raise
 
         except Exception as e:
-            try:
-                if 'new_image_path' in locals() and os.path.exists(new_image_path):
-                    os.remove(new_image_path)
-            except:
-                pass
+            await async_remove_file(new_image_path)
             logger.error(f"Неожиданная ошибка при загрузке изображения: comment_id={comment_id}, error={str(e)}")
             raise

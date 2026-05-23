@@ -2,6 +2,7 @@ import logging
 
 from src.core.exceptions.database_exceptions import PostNotFoundException
 from src.core.exceptions.domain_exceptions import PostNotFoundByIdException
+from src.domain.shared.enrich_image import build_media_type
 from src.infrastructure.sqlite.database import database
 from src.infrastructure.sqlite.repositories.post import PostRepository
 from src.schemas.posts import PostResponseSchema
@@ -23,4 +24,7 @@ class GetPostUseCase:
                 logger.error(error.get_detail())
                 raise error
 
-            return PostResponseSchema.model_validate(obj=post)
+            schema = PostResponseSchema.model_validate(obj=post)
+            for img in schema.images:
+                img.media_type = build_media_type(img.file_path)
+            return schema
